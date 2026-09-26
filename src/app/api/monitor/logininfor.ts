@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { RequestService } from '../../core/request.service';
-import { AjaxResult, TableDataInfo, PageQuery } from '../../core/models/result';
-import { SysLogininfor } from '../../core/models/monitor';
+import { RequestService } from '@core/request.service';
+import { AjaxResult, TableDataInfo, PageQuery } from '@core/models/result';
+import { SysLogininfor } from '@core/models/monitor';
 
 /** 登录日志接口，对应 ruoyi-vue3/src/api/monitor/logininfor.js */
 @Injectable({ providedIn: 'root' })

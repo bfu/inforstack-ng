@@ -2,7 +2,7 @@ import { Component, computed, inject, input, model, signal } from '@angular/core
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzUploadChangeParam, NzUploadFile, NzUploadModule, NzUploadXHRArgs } from 'ng-zorro-antd/upload';
-import { CommonApi, UploadResult } from '../../../api/common';
+import { CommonApi, UploadResult } from '@api/common';
 
 /**
  * 图片/头像上传组件（单张，卡片式预览）

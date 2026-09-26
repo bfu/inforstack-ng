@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { RequestService } from '../../core/request.service';
-import { AjaxResult, TableDataInfo, PageQuery, TreeSelectNode } from '../../core/models/result';
-import { SysRole, SysUser } from '../../core/models/system';
+import { RequestService } from '@core/request.service';
+import { AjaxResult, TableDataInfo, PageQuery, TreeSelectNode } from '@core/models/result';
+import { SysRole, SysUser } from '@core/models/system';
 
 /** 角色菜单树返回 */
 export interface RoleMenuTreeResult {

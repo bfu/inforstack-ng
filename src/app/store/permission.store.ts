@@ -1,15 +1,15 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { Route, Router } from '@angular/router';
 import { Observable, map } from 'rxjs';
-import { MenuApi } from '../api/menu';
-import { RouterVo } from '../core/models/system';
-import { Layout } from '../layout/layout';
-import { InnerLink } from '../layout/components/inner-link/inner-link';
-import { resolveMenuIcon } from '../layout/icon-map';
-import { dynamicRoutes } from '../pages/dynamic-routes';
-import { resolveComponent } from '../pages/component-map';
+import { MenuApi } from '@api/menu';
+import { RouterVo } from '@core/models/system';
+import { Layout } from '@layout/layout';
+import { InnerLink } from '@layout/components/inner-link/inner-link';
+import { resolveMenuIcon } from '@layout/icon-map';
+import { dynamicRoutes } from '@pages/dynamic-routes';
+import { resolveComponent } from '@pages/component-map';
 import { UserStore } from './user.store';
-import { isExternal } from '../core/utils/validate';
+import { isExternal } from '@core/utils/validate';
 
 /** 侧边菜单节点（由后端 /getRouters 菜单树转换而来） */
 export interface MenuNode {

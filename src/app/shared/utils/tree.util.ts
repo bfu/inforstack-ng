@@ -1,5 +1,5 @@
 import { NzTreeNodeOptions } from 'ng-zorro-antd/tree';
-import { TreeSelectNode } from '../../core/models/result';
+import { TreeSelectNode } from '@core/models/result';
 
 /** 后端下拉树节点 → ng-zorro 树节点 */
 export function toTreeNodes(nodes: TreeSelectNode[]): NzTreeNodeOptions[] {

@@ -13,15 +13,15 @@ import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzRadioModule } from 'ng-zorro-antd/radio';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzTableModule, NzTableQueryParams } from 'ng-zorro-antd/table';
-import { PostApi } from '../../../api/system/post';
-import { DownloadService } from '../../../core/download.service';
-import { PageQuery } from '../../../core/models/result';
-import { SysPost } from '../../../core/models/system';
-import { parseTime } from '../../../core/utils/ruoyi';
-import { DictStore } from '../../../store/dict.store';
-import { DictTag } from '../../../shared/components/dict-tag/dict-tag';
-import { HasPermiDirective } from '../../../shared/directives/has-permi.directive';
-import { TableSelection } from '../../../shared/utils/table-selection';
+import { PostApi } from '@api/system/post';
+import { DownloadService } from '@core/download.service';
+import { PageQuery } from '@core/models/result';
+import { SysPost } from '@core/models/system';
+import { parseTime } from '@core/utils/ruoyi';
+import { DictStore } from '@store/dict.store';
+import { DictTag } from '@shared/components/dict-tag/dict-tag';
+import { HasPermiDirective } from '@shared/directives/has-permi.directive';
+import { TableSelection } from '@shared/utils/table-selection';
 
 /** 岗位管理，对应 ruoyi-vue3/src/views/system/post/index.vue */
 @Component({

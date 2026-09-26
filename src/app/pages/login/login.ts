@@ -6,10 +6,10 @@ import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { LoginApi } from '../../api/login';
-import { UserStore } from '../../store/user.store';
-import { environment } from '../../../environments/environment';
-import { cache } from '../../core/utils/cache';
+import { LoginApi } from '@api/login';
+import { UserStore } from '@store/user.store';
+import { environment } from '@env/environment';
+import { cache } from '@core/utils/cache';
 
 const REMEMBER_KEY = 'login-username';
 

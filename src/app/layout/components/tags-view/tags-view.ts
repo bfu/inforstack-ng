@@ -6,8 +6,8 @@ import { NzDropdownModule } from 'ng-zorro-antd/dropdown';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { RuoYiReuseStrategy } from '../../../core/reuse-strategy';
-import { TagsViewStore, VisitedView } from '../../../store/tags-view.store';
+import { RuoYiReuseStrategy } from '@core/reuse-strategy';
+import { TagsViewStore, VisitedView } from '@store/tags-view.store';
 
 /**
  * 多页签栏

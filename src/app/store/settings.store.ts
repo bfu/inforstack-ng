@@ -1,7 +1,7 @@
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { cache } from '../core/utils/cache';
-import { environment } from '../../environments/environment';
+import { cache } from '@core/utils/cache';
+import { environment } from '@env/environment';
 
 export type SideTheme = 'theme-dark' | 'theme-light';
 

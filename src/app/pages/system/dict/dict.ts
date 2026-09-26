@@ -13,15 +13,15 @@ import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzRadioModule } from 'ng-zorro-antd/radio';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzTableModule, NzTableQueryParams } from 'ng-zorro-antd/table';
-import { DictDataApi } from '../../../api/system/dict/data';
-import { DictTypeApi } from '../../../api/system/dict/type';
-import { DownloadService } from '../../../core/download.service';
-import { PageQuery } from '../../../core/models/result';
-import { SysDictData, SysDictType } from '../../../core/models/system';
-import { parseTime } from '../../../core/utils/ruoyi';
-import { DictStore } from '../../../store/dict.store';
-import { DictTag } from '../../../shared/components/dict-tag/dict-tag';
-import { HasPermiDirective } from '../../../shared/directives/has-permi.directive';
+import { DictDataApi } from '@api/system/dict/data';
+import { DictTypeApi } from '@api/system/dict/type';
+import { DownloadService } from '@core/download.service';
+import { PageQuery } from '@core/models/result';
+import { SysDictData, SysDictType } from '@core/models/system';
+import { parseTime } from '@core/utils/ruoyi';
+import { DictStore } from '@store/dict.store';
+import { DictTag } from '@shared/components/dict-tag/dict-tag';
+import { HasPermiDirective } from '@shared/directives/has-permi.directive';
 
 /** 字典数据回显样式选项（对应后端 listClass） */
 const LIST_CLASS_OPTIONS = [

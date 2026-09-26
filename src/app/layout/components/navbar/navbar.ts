@@ -8,11 +8,11 @@ import { NzDropdownModule } from 'ng-zorro-antd/dropdown';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzModalService } from 'ng-zorro-antd/modal';
-import { RuoYiReuseStrategy } from '../../../core/reuse-strategy';
-import { AppStore } from '../../../store/app.store';
-import { SettingsStore } from '../../../store/settings.store';
-import { TagsViewStore } from '../../../store/tags-view.store';
-import { UserStore } from '../../../store/user.store';
+import { RuoYiReuseStrategy } from '@core/reuse-strategy';
+import { AppStore } from '@store/app.store';
+import { SettingsStore } from '@store/settings.store';
+import { TagsViewStore } from '@store/tags-view.store';
+import { UserStore } from '@store/user.store';
 
 /**
  * 顶栏：折叠按钮、面包屑、全屏、用户下拉

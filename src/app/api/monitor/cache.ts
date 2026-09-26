@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { RequestService } from '../../core/request.service';
-import { AjaxResult } from '../../core/models/result';
-import { CacheInfo, SysCache } from '../../core/models/monitor';
+import { RequestService } from '@core/request.service';
+import { AjaxResult } from '@core/models/result';
+import { CacheInfo, SysCache } from '@core/models/monitor';
 
 /**
  * 缓存监控接口，对应 ruoyi-vue3/src/api/monitor/cache.js

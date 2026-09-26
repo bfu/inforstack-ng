@@ -18,16 +18,16 @@ import { NzSwitchModule } from 'ng-zorro-antd/switch';
 import { NzTableModule, NzTableQueryParams } from 'ng-zorro-antd/table';
 import { NzTooltipModule } from 'ng-zorro-antd/tooltip';
 import { NzFormatEmitEvent, NzTreeModule, NzTreeNodeOptions } from 'ng-zorro-antd/tree';
-import { RoleApi } from '../../../api/system/role';
-import { SysMenuApi } from '../../../api/system/menu';
-import { DownloadService } from '../../../core/download.service';
-import { PageQuery } from '../../../core/models/result';
-import { SysRole } from '../../../core/models/system';
-import { parseTime } from '../../../core/utils/ruoyi';
-import { DictStore } from '../../../store/dict.store';
-import { HasPermiDirective } from '../../../shared/directives/has-permi.directive';
-import { toTreeNodes } from '../../../shared/utils/tree.util';
-import { TableSelection } from '../../../shared/utils/table-selection';
+import { RoleApi } from '@api/system/role';
+import { SysMenuApi } from '@api/system/menu';
+import { DownloadService } from '@core/download.service';
+import { PageQuery } from '@core/models/result';
+import { SysRole } from '@core/models/system';
+import { parseTime } from '@core/utils/ruoyi';
+import { DictStore } from '@store/dict.store';
+import { HasPermiDirective } from '@shared/directives/has-permi.directive';
+import { toTreeNodes } from '@shared/utils/tree.util';
+import { TableSelection } from '@shared/utils/table-selection';
 
 /** 角色管理，对应 ruoyi-vue3/src/views/system/role/index.vue */
 @Component({

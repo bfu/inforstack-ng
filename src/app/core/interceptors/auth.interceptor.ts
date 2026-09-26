@@ -1,8 +1,8 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { throwError } from 'rxjs';
-import { NO_REPEAT_SUBMIT, SKIP_TOKEN } from '../http-context';
-import { cache } from '../utils/cache';
-import { getToken } from '../utils/auth';
+import { NO_REPEAT_SUBMIT, SKIP_TOKEN } from '@core/http-context';
+import { cache } from '@core/utils/cache';
+import { getToken } from '@core/utils/auth';
 
 /**
  * 请求拦截器：注入 Token + 防重复提交

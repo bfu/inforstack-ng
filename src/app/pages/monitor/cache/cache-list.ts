@@ -8,8 +8,8 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzTableModule } from 'ng-zorro-antd/table';
-import { CacheApi } from '../../../api/monitor/cache';
-import { SysCache } from '../../../core/models/monitor';
+import { CacheApi } from '@api/monitor/cache';
+import { SysCache } from '@core/models/monitor';
 
 /**
  * 缓存列表，对应 ruoyi-vue3/src/views/monitor/cache/list.vue

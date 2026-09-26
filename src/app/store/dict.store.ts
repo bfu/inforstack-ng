@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { Observable, catchError, map, of, shareReplay, tap, throwError } from 'rxjs';
-import { DictDataApi } from '../api/system/dict/data';
+import { DictDataApi } from '@api/system/dict/data';
 
 export interface DictItem {
   label: string;

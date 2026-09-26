@@ -3,9 +3,9 @@ import type { EChartsOption } from 'echarts';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
 import { NzGridModule } from 'ng-zorro-antd/grid';
-import { CacheApi } from '../../../api/monitor/cache';
-import { CacheInfo } from '../../../core/models/monitor';
-import { Echart } from '../../../shared/components/echart/echart';
+import { CacheApi } from '@api/monitor/cache';
+import { CacheInfo } from '@core/models/monitor';
+import { Echart } from '@shared/components/echart/echart';
 
 /** 基本信息展示行 */
 interface InfoRow {

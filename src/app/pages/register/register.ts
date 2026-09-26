@@ -11,8 +11,8 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzModalService } from 'ng-zorro-antd/modal';
-import { LoginApi } from '../../api/login';
-import { environment } from '../../../environments/environment';
+import { LoginApi } from '@api/login';
+import { environment } from '@env/environment';
 
 /** 两次密码一致性校验 */
 function equalToPassword(group: AbstractControl): ValidationErrors | null {

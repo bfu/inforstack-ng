@@ -15,12 +15,12 @@ import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTreeSelectModule } from 'ng-zorro-antd/tree-select';
 import { NzTreeNodeOptions } from 'ng-zorro-antd/tree';
-import { DeptApi } from '../../../api/system/dept';
-import { SysDept } from '../../../core/models/system';
-import { DictStore } from '../../../store/dict.store';
-import { DictTag } from '../../../shared/components/dict-tag/dict-tag';
-import { HasPermiDirective } from '../../../shared/directives/has-permi.directive';
-import { TableSelection } from '../../../shared/utils/table-selection';
+import { DeptApi } from '@api/system/dept';
+import { SysDept } from '@core/models/system';
+import { DictStore } from '@store/dict.store';
+import { DictTag } from '@shared/components/dict-tag/dict-tag';
+import { HasPermiDirective } from '@shared/directives/has-permi.directive';
+import { TableSelection } from '@shared/utils/table-selection';
 
 interface DeptRow extends SysDept {
   level: number;

@@ -1,6 +1,6 @@
 import { Directive, Input, effect, inject, signal } from '@angular/core';
 import { TemplateRef, ViewContainerRef } from '@angular/core';
-import { UserStore } from '../../store/user.store';
+import { UserStore } from '@store/user.store';
 
 /**
  * 权限指令：按用户权限控制元素渲染

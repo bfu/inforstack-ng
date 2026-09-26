@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { RequestService } from '../core/request.service';
-import { AjaxResult } from '../core/models/result';
-import { SysUser } from '../core/models/system';
+import { RequestService } from '@core/request.service';
+import { AjaxResult } from '@core/models/result';
+import { SysUser } from '@core/models/system';
 
 /** 登录参数 */
 export interface LoginBody {

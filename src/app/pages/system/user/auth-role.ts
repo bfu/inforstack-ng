@@ -7,10 +7,10 @@ import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzTableModule } from 'ng-zorro-antd/table';
-import { UserApi } from '../../../api/system/user';
-import { SysRole, SysUser } from '../../../core/models/system';
-import { parseTime } from '../../../core/utils/ruoyi';
-import { TableSelection } from '../../../shared/utils/table-selection';
+import { UserApi } from '@api/system/user';
+import { SysRole, SysUser } from '@core/models/system';
+import { parseTime } from '@core/utils/ruoyi';
+import { TableSelection } from '@shared/utils/table-selection';
 
 /** 分配角色，对应 ruoyi-vue3/src/views/system/user/authRole.vue */
 @Component({

@@ -10,11 +10,11 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzTableModule, NzTableQueryParams } from 'ng-zorro-antd/table';
-import { OnlineApi } from '../../../api/monitor/online';
-import { SysUserOnline } from '../../../core/models/monitor';
-import { parseTime } from '../../../core/utils/ruoyi';
-import { HasPermiDirective } from '../../../shared/directives/has-permi.directive';
-import { TableSelection } from '../../../shared/utils/table-selection';
+import { OnlineApi } from '@api/monitor/online';
+import { SysUserOnline } from '@core/models/monitor';
+import { parseTime } from '@core/utils/ruoyi';
+import { HasPermiDirective } from '@shared/directives/has-permi.directive';
+import { TableSelection } from '@shared/utils/table-selection';
 
 /**
  * 在线用户，对应 ruoyi-vue3/src/views/monitor/online/index.vue

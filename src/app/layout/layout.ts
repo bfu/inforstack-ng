@@ -1,7 +1,7 @@
 import { Component, HostListener, inject } from '@angular/core';
-import { AppStore } from '../store/app.store';
-import { SettingsStore } from '../store/settings.store';
-import { environment } from '../../environments/environment';
+import { AppStore } from '@store/app.store';
+import { SettingsStore } from '@store/settings.store';
+import { environment } from '@env/environment';
 import { AppMain } from './components/app-main/app-main';
 import { Navbar } from './components/navbar/navbar';
 import { SettingsPanel } from './components/settings/settings';

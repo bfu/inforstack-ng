@@ -1,9 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { RequestService } from '../../core/request.service';
-import { AjaxResult, TableDataInfo, PageQuery, TreeSelectNode } from '../../core/models/result';
-import { SysDept, SysPost, SysRole, SysUser } from '../../core/models/system';
-import { parseStrEmpty } from '../../core/utils/ruoyi';
+import { RequestService } from '@core/request.service';
+import { AjaxResult, TableDataInfo, PageQuery, TreeSelectNode } from '@core/models/result';
+import { SysDept, SysPost, SysRole, SysUser } from '@core/models/system';
+import { parseStrEmpty } from '@core/utils/ruoyi';
 
 /** 用户详情（新增/编辑弹窗的表单数据源） */
 export interface UserDetailResult {

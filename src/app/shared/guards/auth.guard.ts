@@ -2,9 +2,9 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { catchError, map, of, switchMap } from 'rxjs';
-import { getToken } from '../../core/utils/auth';
-import { PermissionStore } from '../../store/permission.store';
-import { UserStore } from '../../store/user.store';
+import { getToken } from '@core/utils/auth';
+import { PermissionStore } from '@store/permission.store';
+import { UserStore } from '@store/user.store';
 
 /**
  * 登录与动态路由守卫

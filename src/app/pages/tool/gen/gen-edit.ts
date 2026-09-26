@@ -15,12 +15,12 @@ import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzTreeNodeOptions } from 'ng-zorro-antd/tree';
 import { NzTreeSelectModule } from 'ng-zorro-antd/tree-select';
-import { DictTypeApi } from '../../../api/system/dict/type';
-import { SysMenuApi } from '../../../api/system/menu';
-import { GenApi } from '../../../api/tool/gen';
-import { SysDictType, SysMenu } from '../../../core/models/system';
-import { DEFAULT_TPL_WEB_TYPE, GenTable, GenTableColumn } from '../../../core/models/tool';
-import { handleTree } from '../../../core/utils/ruoyi';
+import { DictTypeApi } from '@api/system/dict/type';
+import { SysMenuApi } from '@api/system/menu';
+import { GenApi } from '@api/tool/gen';
+import { SysDictType, SysMenu } from '@core/models/system';
+import { DEFAULT_TPL_WEB_TYPE, GenTable, GenTableColumn } from '@core/models/tool';
+import { handleTree } from '@core/utils/ruoyi';
 
 type ColumnFlag = 'isInsert' | 'isEdit' | 'isList' | 'isQuery' | 'isRequired';
 

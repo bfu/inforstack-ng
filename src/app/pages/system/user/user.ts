@@ -19,15 +19,15 @@ import { NzTooltipModule } from 'ng-zorro-antd/tooltip';
 import { NzUploadModule, NzUploadXHRArgs } from 'ng-zorro-antd/upload';
 import { NzFormatEmitEvent, NzTreeModule, NzTreeNodeOptions } from 'ng-zorro-antd/tree';
 import { NzTreeSelectModule } from 'ng-zorro-antd/tree-select';
-import { UserApi } from '../../../api/system/user';
-import { DownloadService } from '../../../core/download.service';
-import { PageQuery, TreeSelectNode } from '../../../core/models/result';
-import { SysPost, SysRole, SysUser } from '../../../core/models/system';
-import { addDateRange, parseTime } from '../../../core/utils/ruoyi';
-import { DictStore } from '../../../store/dict.store';
-import { HasPermiDirective } from '../../../shared/directives/has-permi.directive';
-import { toTreeNodes } from '../../../shared/utils/tree.util';
-import { TableSelection } from '../../../shared/utils/table-selection';
+import { UserApi } from '@api/system/user';
+import { DownloadService } from '@core/download.service';
+import { PageQuery, TreeSelectNode } from '@core/models/result';
+import { SysPost, SysRole, SysUser } from '@core/models/system';
+import { addDateRange, parseTime } from '@core/utils/ruoyi';
+import { DictStore } from '@store/dict.store';
+import { HasPermiDirective } from '@shared/directives/has-permi.directive';
+import { toTreeNodes } from '@shared/utils/tree.util';
+import { TableSelection } from '@shared/utils/table-selection';
 
 /** 用户管理，对应 ruoyi-vue3/src/views/system/user/index.vue */
 @Component({

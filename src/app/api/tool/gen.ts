@@ -1,9 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { RequestService } from '../../core/request.service';
-import { AjaxResult, PageQuery, TableDataInfo } from '../../core/models/result';
-import { GenDetail, GenPreview, GenTable } from '../../core/models/tool';
-import { tansParams } from '../../core/utils/ruoyi';
+import { RequestService } from '@core/request.service';
+import { AjaxResult, PageQuery, TableDataInfo } from '@core/models/result';
+import { GenDetail, GenPreview, GenTable } from '@core/models/tool';
+import { tansParams } from '@core/utils/ruoyi';
 
 /** 代码生成接口，对应 ruoyi-vue3/src/api/tool/gen.js */
 @Injectable({ providedIn: 'root' })

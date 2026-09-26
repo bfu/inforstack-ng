@@ -1,7 +1,7 @@
 import { HttpClient, HttpContext, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, timeout } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { environment } from '@env/environment';
 import { NO_REPEAT_SUBMIT, REQUEST_TIMEOUT, RESPONSE_BLOB, SKIP_TOKEN } from './http-context';
 import { tansParams } from './utils/ruoyi';
 

@@ -3,12 +3,12 @@ import { NgTemplateOutlet } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
-import { AppStore } from '../../../store/app.store';
-import { MenuNode, PermissionStore } from '../../../store/permission.store';
-import { DEFAULT_MENU_ICON } from '../../icon-map';
-import { SettingsStore } from '../../../store/settings.store';
-import { environment } from '../../../../environments/environment';
-import { isExternal } from '../../../core/utils/validate';
+import { AppStore } from '@store/app.store';
+import { MenuNode, PermissionStore } from '@store/permission.store';
+import { DEFAULT_MENU_ICON } from '@layout/icon-map';
+import { SettingsStore } from '@store/settings.store';
+import { environment } from '@env/environment';
+import { isExternal } from '@core/utils/validate';
 
 /** 内联菜单每层缩进，与 ng-zorro nzInlineIndent 默认值保持一致 */
 const INLINE_INDENT = 24;

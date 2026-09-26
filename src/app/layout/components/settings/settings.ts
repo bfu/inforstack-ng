@@ -7,7 +7,7 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzSwitchModule } from 'ng-zorro-antd/switch';
 import { NzTooltipModule } from 'ng-zorro-antd/tooltip';
-import { LayoutSetting, SettingsStore, SideTheme } from '../../../store/settings.store';
+import { LayoutSetting, SettingsStore, SideTheme } from '@store/settings.store';
 
 /** 可选主题色 */
 const PRESET_COLORS = ['#409EFF', '#337ECC', '#1890FF', '#13C2C2', '#52C41A', '#FAAD14', '#F5222D', '#722ED1'];

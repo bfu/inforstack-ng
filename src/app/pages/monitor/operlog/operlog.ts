@@ -14,15 +14,15 @@ import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzTableModule, NzTableQueryParams } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
-import { OperlogApi } from '../../../api/monitor/operlog';
-import { DownloadService } from '../../../core/download.service';
-import { PageQuery } from '../../../core/models/result';
-import { SysOperLog } from '../../../core/models/monitor';
-import { addDateRange, parseTime, selectDictLabel } from '../../../core/utils/ruoyi';
-import { DictStore } from '../../../store/dict.store';
-import { DictTag } from '../../../shared/components/dict-tag/dict-tag';
-import { HasPermiDirective } from '../../../shared/directives/has-permi.directive';
-import { TableSelection } from '../../../shared/utils/table-selection';
+import { OperlogApi } from '@api/monitor/operlog';
+import { DownloadService } from '@core/download.service';
+import { PageQuery } from '@core/models/result';
+import { SysOperLog } from '@core/models/monitor';
+import { addDateRange, parseTime, selectDictLabel } from '@core/utils/ruoyi';
+import { DictStore } from '@store/dict.store';
+import { DictTag } from '@shared/components/dict-tag/dict-tag';
+import { HasPermiDirective } from '@shared/directives/has-permi.directive';
+import { TableSelection } from '@shared/utils/table-selection';
 
 /** 操作日志，对应 ruoyi-vue3/src/views/monitor/operlog/index.vue */
 @Component({

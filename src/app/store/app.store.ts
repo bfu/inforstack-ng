@@ -1,5 +1,5 @@
 import { Injectable, computed, signal } from '@angular/core';
-import { cache } from '../core/utils/cache';
+import { cache } from '@core/utils/cache';
 
 export type DeviceType = 'desktop' | 'mobile';
 

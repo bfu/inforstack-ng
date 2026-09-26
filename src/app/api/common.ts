@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { RequestService } from '../core/request.service';
+import { RequestService } from '@core/request.service';
 
 /** 单文件上传结果 */
 export interface UploadResult {

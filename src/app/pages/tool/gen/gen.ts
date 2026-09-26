@@ -13,16 +13,16 @@ import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTableModule, NzTableQueryParams } from 'ng-zorro-antd/table';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
-import { GenApi } from '../../../api/tool/gen';
-import { DownloadService } from '../../../core/download.service';
-import { PageQuery } from '../../../core/models/result';
-import { DEFAULT_TPL_WEB_TYPE, GenPreview, GenTable } from '../../../core/models/tool';
-import { addDateRange, parseTime } from '../../../core/utils/ruoyi';
+import { GenApi } from '@api/tool/gen';
+import { DownloadService } from '@core/download.service';
+import { PageQuery } from '@core/models/result';
+import { DEFAULT_TPL_WEB_TYPE, GenPreview, GenTable } from '@core/models/tool';
+import { addDateRange, parseTime } from '@core/utils/ruoyi';
 import {
   HasPermiDirective,
   HasRoleDirective,
-} from '../../../shared/directives/has-permi.directive';
-import { TableSelection } from '../../../shared/utils/table-selection';
+} from '@shared/directives/has-permi.directive';
+import { TableSelection } from '@shared/utils/table-selection';
 
 interface PreviewFile {
   /** 文件名，如 domain.java */

@@ -3,7 +3,7 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzUploadChangeParam, NzUploadFile, NzUploadModule, NzUploadXHRArgs } from 'ng-zorro-antd/upload';
-import { CommonApi, UploadResult } from '../../../api/common';
+import { CommonApi, UploadResult } from '@api/common';
 
 /**
  * 通用文件上传组件

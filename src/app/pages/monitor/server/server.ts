@@ -3,8 +3,8 @@ import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzTableModule } from 'ng-zorro-antd/table';
-import { ServerApi } from '../../../api/monitor/server';
-import { ServerInfo } from '../../../core/models/monitor';
+import { ServerApi } from '@api/monitor/server';
+import { ServerInfo } from '@core/models/monitor';
 
 /** 内存 / JVM 对照行 */
 interface MemRow {

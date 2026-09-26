@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { RequestService } from '../../core/request.service';
-import { AjaxResult, TableDataInfo } from '../../core/models/result';
-import { SysUserOnline } from '../../core/models/monitor';
+import { RequestService } from '@core/request.service';
+import { AjaxResult, TableDataInfo } from '@core/models/result';
+import { SysUserOnline } from '@core/models/monitor';
 
 /**
  * 在线用户接口，对应 ruoyi-vue3/src/api/monitor/online.js

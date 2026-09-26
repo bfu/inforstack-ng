@@ -3,8 +3,8 @@ import { RouterLink } from '@angular/router';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzTagModule } from 'ng-zorro-antd/tag';
-import { UserStore } from '../../store/user.store';
-import { parseTime } from '../../core/utils/ruoyi';
+import { UserStore } from '@store/user.store';
+import { parseTime } from '@core/utils/ruoyi';
 
 interface QuickEntry {
   title: string;

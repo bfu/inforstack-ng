@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { RequestService } from '../../core/request.service';
-import { AjaxResult, PageQuery, TreeSelectNode } from '../../core/models/result';
-import { SysMenu } from '../../core/models/system';
+import { RequestService } from '@core/request.service';
+import { AjaxResult, PageQuery, TreeSelectNode } from '@core/models/result';
+import { SysMenu } from '@core/models/system';
 
 /** 菜单树（含已勾选节点）返回 */
 export interface MenuTreeResult {

@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { RequestService } from '../../core/request.service';
-import { AjaxResult, TableDataInfo, PageQuery } from '../../core/models/result';
-import { SysJobLog } from '../../core/models/monitor';
+import { RequestService } from '@core/request.service';
+import { AjaxResult, TableDataInfo, PageQuery } from '@core/models/result';
+import { SysJobLog } from '@core/models/monitor';
 
 /** 定时任务调度日志接口，对应 ruoyi-vue3/src/api/monitor/jobLog.js */
 @Injectable({ providedIn: 'root' })

@@ -1,12 +1,12 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Observable, tap } from 'rxjs';
-import { LoginApi, LoginBody, LoginResult, UserInfoResult } from '../api/login';
-import { environment } from '../../environments/environment';
-import { SysUser } from '../core/models/system';
-import { cache } from '../core/utils/cache';
-import { getToken, removeToken, setToken } from '../core/utils/auth';
-import { isEmpty, isHttp } from '../core/utils/validate';
+import { LoginApi, LoginBody, LoginResult, UserInfoResult } from '@api/login';
+import { environment } from '@env/environment';
+import { SysUser } from '@core/models/system';
+import { cache } from '@core/utils/cache';
+import { getToken, removeToken, setToken } from '@core/utils/auth';
+import { isEmpty, isHttp } from '@core/utils/validate';
 
 /**
  * 用户状态存储（signals 版）

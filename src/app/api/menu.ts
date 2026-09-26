@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { RequestService } from '../core/request.service';
-import { RouterVo } from '../core/models/system';
+import { RequestService } from '@core/request.service';
+import { RouterVo } from '@core/models/system';
 
 export interface RoutersResult {
   code: number;

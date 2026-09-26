@@ -1,8 +1,8 @@
 import { Component, DestroyRef, OnInit, computed, inject, input } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NzTagModule } from 'ng-zorro-antd/tag';
-import { DictStore } from '../../../store/dict.store';
-import { selectDictLabels } from '../../../core/utils/ruoyi';
+import { DictStore } from '@store/dict.store';
+import { selectDictLabels } from '@core/utils/ruoyi';
 
 /** 后端 listClass → ng-zorro 标签颜色 */
 const TAG_COLOR: Record<string, string> = {

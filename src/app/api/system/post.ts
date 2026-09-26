@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { RequestService } from '../../core/request.service';
-import { AjaxResult, TableDataInfo, PageQuery } from '../../core/models/result';
-import { SysPost } from '../../core/models/system';
+import { RequestService } from '@core/request.service';
+import { AjaxResult, TableDataInfo, PageQuery } from '@core/models/result';
+import { SysPost } from '@core/models/system';
 
 /** 岗位接口，对应 ruoyi-vue3/src/api/system/post.js */
 @Injectable({ providedIn: 'root' })

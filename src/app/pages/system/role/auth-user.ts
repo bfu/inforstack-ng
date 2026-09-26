@@ -11,9 +11,9 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { NzTableModule, NzTableQueryParams } from 'ng-zorro-antd/table';
-import { RoleApi } from '../../../api/system/role';
-import { PageQuery } from '../../../core/models/result';
-import { SysRole, SysUser } from '../../../core/models/system';
+import { RoleApi } from '@api/system/role';
+import { PageQuery } from '@core/models/result';
+import { SysRole, SysUser } from '@core/models/system';
 
 /** 分配用户，对应 ruoyi-vue3/src/views/system/role/authUser.vue */
 @Component({

@@ -1,7 +1,7 @@
 import { DestroyRef, Pipe, PipeTransform, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { DictStore } from '../../store/dict.store';
-import { selectDictLabels } from '../../core/utils/ruoyi';
+import { DictStore } from '@store/dict.store';
+import { selectDictLabels } from '@core/utils/ruoyi';
 
 /**
  * 字典标签翻译管道

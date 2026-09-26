@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { RequestService } from '../../core/request.service';
-import { AjaxResult, PageQuery, TreeSelectNode } from '../../core/models/result';
-import { SysDept } from '../../core/models/system';
+import { RequestService } from '@core/request.service';
+import { AjaxResult, PageQuery, TreeSelectNode } from '@core/models/result';
+import { SysDept } from '@core/models/system';
 
 /** 部门接口，对应 ruoyi-vue3/src/api/system/dept.js */
 @Injectable({ providedIn: 'root' })

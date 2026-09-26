@@ -17,14 +17,14 @@ import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTooltipModule } from 'ng-zorro-antd/tooltip';
 import { NzTreeSelectModule } from 'ng-zorro-antd/tree-select';
 import { NzTreeNodeOptions } from 'ng-zorro-antd/tree';
-import { SysMenuApi } from '../../../api/system/menu';
-import { SysMenu } from '../../../core/models/system';
-import { DictStore } from '../../../store/dict.store';
-import { DictTag } from '../../../shared/components/dict-tag/dict-tag';
-import { HasPermiDirective } from '../../../shared/directives/has-permi.directive';
-import { toTreeNodes } from '../../../shared/utils/tree.util';
-import { MENU_ICON_NAMES, resolveMenuIcon } from '../../../layout/icon-map';
-import { TableSelection } from '../../../shared/utils/table-selection';
+import { SysMenuApi } from '@api/system/menu';
+import { SysMenu } from '@core/models/system';
+import { DictStore } from '@store/dict.store';
+import { DictTag } from '@shared/components/dict-tag/dict-tag';
+import { HasPermiDirective } from '@shared/directives/has-permi.directive';
+import { toTreeNodes } from '@shared/utils/tree.util';
+import { MENU_ICON_NAMES, resolveMenuIcon } from '@layout/icon-map';
+import { TableSelection } from '@shared/utils/table-selection';
 
 interface MenuRow extends SysMenu {
   level: number;

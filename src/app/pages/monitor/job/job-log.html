@@ -1,0 +1,139 @@
+<div class="job-log-page">
+  <nz-card [nzBordered]="false" class="search-card">
+    <form nz-form nzLayout="inline" [formGroup]="searchForm">
+      <nz-form-item>
+        <nz-form-control>
+          <input nz-input formControlName="jobName" placeholder="任务名称" class="field-md" />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <nz-select formControlName="jobGroup" nzPlaceHolder="请选择任务组名" nzAllowClear class="field-md">
+            @for (item of jobGroupOptions(); track item.value) {
+              <nz-option [nzValue]="item.value" [nzLabel]="item.label"></nz-option>
+            }
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <nz-select formControlName="status" nzPlaceHolder="请选择执行状态" nzAllowClear class="field-md">
+            @for (item of statusOptions(); track item.value) {
+              <nz-option [nzValue]="item.value" [nzLabel]="item.label"></nz-option>
+            }
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <nz-range-picker [(ngModel)]="dateRange" [ngModelOptions]="{ standalone: true }" class="field-lg"></nz-range-picker>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <button nz-button nzType="primary" (click)="getList()"><nz-icon nzType="search" />搜索</button>
+          <button nz-button class="gap-left" (click)="resetQuery()"><nz-icon nzType="reload" />重置</button>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </nz-card>
+
+  <nz-card [nzBordered]="false" class="table-card">
+    <div class="toolbar">
+      <button nz-button nzDanger *appHasPermi="['monitor:job:remove']" [disabled]="!selection.multiple()" (click)="delete()">
+        <nz-icon nzType="delete" />删除
+      </button>
+      <button nz-button nzDanger *appHasPermi="['monitor:job:remove']" class="gap-left" (click)="clean()">
+        <nz-icon nzType="delete" />清空
+      </button>
+      <button nz-button *appHasPermi="['monitor:job:export']" class="gap-left" (click)="export()">
+        <nz-icon nzType="download" />导出
+      </button>
+      <button nz-button class="gap-left" (click)="close()"><nz-icon nzType="close" />关闭</button>
+    </div>
+
+    <nz-table
+      nzSize="middle"
+      [nzData]="rows()"
+      [nzLoading]="loading()"
+      [nzTotal]="total()"
+      [nzPageIndex]="pageNum"
+      [nzPageSize]="pageSize"
+      [nzFrontPagination]="false"
+      [nzShowSizeChanger]="true"
+      [nzShowTotal]="totalTpl"
+      (nzQueryParams)="onQueryParams($event)"
+    >
+      <thead>
+        <tr>
+          <th nzWidth="50px">
+            <label nz-checkbox [ngModel]="selection.allChecked()" [nzIndeterminate]="selection.indeterminate()" (ngModelChange)="selection.onAllChecked($event, rows())"></label>
+          </th>
+          <th nzWidth="80px">日志编号</th>
+          <th nzWidth="130px">任务名称</th>
+          <th nzWidth="100px">任务组名</th>
+          <th nzWidth="180px">调用目标字符串</th>
+          <th>日志信息</th>
+          <th nzWidth="90px">执行状态</th>
+          <th nzWidth="160px">执行时间</th>
+          <th nzWidth="80px" nzRight>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track row.jobLogId) {
+          <tr>
+            <td>
+              <label nz-checkbox [ngModel]="selection.isChecked(row)" (ngModelChange)="selection.onItemChecked(row.jobLogId, $event)"></label>
+            </td>
+            <td>{{ row.jobLogId }}</td>
+            <td>{{ row.jobName }}</td>
+            <td><app-dict-tag [value]="row.jobGroup" dictType="sys_job_group" /></td>
+            <td nzEllipsis>{{ row.invokeTarget }}</td>
+            <td nzEllipsis>{{ row.jobMessage }}</td>
+            <td><app-dict-tag [value]="row.status" dictType="sys_common_status" /></td>
+            <td>{{ row.createTime }}</td>
+            <td nzRight>
+              <a *appHasPermi="['monitor:job:query']" (click)="openDetail(row)"><nz-icon nzType="eye" />详细</a>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+  </nz-card>
+</div>
+
+<ng-template #totalTpl let-total>共 {{ total }} 条</ng-template>
+
+<nz-modal
+  [nzVisible]="detailVisible()"
+  (nzVisibleChange)="detailVisible.set($event)"
+  nzTitle="调度日志详细"
+  nzWidth="780px"
+  [nzFooter]="null"
+>
+  <ng-container *nzModalContent>
+    @if (detailRow(); as row) {
+      <nz-descriptions nzBordered [nzColumn]="2" nzSize="middle" class="detail-desc">
+        <nz-descriptions-item nzTitle="日志编号">{{ row.jobLogId }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="执行状态">
+          <nz-tag [nzColor]="row.status === '0' ? 'green' : 'red'">{{ row.status === '0' ? '正常' : '失败' }}</nz-tag>
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="开始时间">{{ row.startTime }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="结束时间">{{ row.endTime }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="执行时间">{{ row.createTime }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="消耗时间">{{ detailCostTime() }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="任务名称">{{ row.jobName }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="任务分组">
+          <app-dict-tag [value]="row.jobGroup" dictType="sys_job_group" />
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="日志信息" [nzSpan]="2">{{ row.jobMessage }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="调用目标方法" [nzSpan]="2">{{ row.invokeTarget }}</nz-descriptions-item>
+        @if (row.status === '1') {
+          <nz-descriptions-item nzTitle="异常信息" [nzSpan]="2">
+            <pre class="json-block">{{ row.exceptionInfo }}</pre>
+          </nz-descriptions-item>
+        }
+      </nz-descriptions>
+    }
+  </ng-container>
+</nz-modal>

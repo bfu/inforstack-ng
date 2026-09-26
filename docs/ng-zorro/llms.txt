@@ -1,0 +1,353 @@
+﻿# ng-zorro-antd 离线文档索引（llms.txt）
+
+前端子工程 `inforstack-ng` 使用 Angular 22 + NG-ZORRO 22（`ng-zorro-antd` ^22.1.1）。
+本目录保存 NG-ZORRO 官方文档的离线副本，供 AI 工具与开发同学**离线**按需查阅。
+
+## 文件
+
+| 文件 | 说明 |
+| ---- | ---- |
+| `llms.txt` | 本索引：77 个组件 + 各章节在全文中的起始行号，用于快速定位 |
+| `llms-full.txt` | NG-ZORRO 官方文档聚合全文（约 580KB） |
+
+## 使用约定（重要）
+
+1. **禁止整文件读入上下文**。`llms-full.txt` 约 580KB，只能按行区间局部读取。
+2. 正确流程：先在本文的组件清单里查到目标组件「起始行」→ 从该行开始读取片段（组件正文在下一个组件的 `title:` 之前结束）→ 按文档中的 API 表与示例写代码。
+3. 每个组件章节开头都有 frontmatter 块，可用 `^title: <组件名>$` 精确定位：
+
+```powershell
+Select-String -Path inforstack-ng\docs\ng-zorro\llms-full.txt -Pattern '^title: Table$'
+```
+
+4. 若文档重新生成导致行号漂移，以 `^title: <组件名>$` 定位结果为准。
+5. 不要凭记忆写 NG-ZORRO 的 API（输入属性、服务方法签名、枚举取值），一律以本文档为准。
+
+## 组件清单
+
+「起始行」= 该组件 frontmatter 首行在 `llms-full.txt` 中的行号。
+
+| 组件 | 分类 | 描述 | 起始行 |
+| ---- | ---- | ---- | ------ |
+| Affix | Other | Make an element stick to viewport. | 1832 |
+| Alert | Feedback | Alert component for feedback. | 1865 |
+| Anchor | Navigation | Hyperlinks to scroll on one page. | 1907 |
+| AutoComplete | Data Entry | AutoComplete function of input field. | 1947 |
+| Avatar | Data Display | Used to represent users or things, supporting the display of images, icons, or characters. | 2016 |
+| Badge | Data Display | Small numerical value or status descriptor for UI elements. | 2053 |
+| Breadcrumb | Navigation | Displays the current location within a hierarchy. And allow going back to states higher up in the hierarchy. | 2095 |
+| Button | General | To trigger an operation. | 2216 |
+| Calendar | Data Display | Container for displaying data in calendar form. | 2264 |
+| Card | Data Display | Simple rectangular container. | 2328 |
+| Carousel | Data Display | A carousel component. Scales with its container. | 2384 |
+| Cascader | Data Entry | Cascade selection box. | 2436 |
+| Checkbox | Data Entry | Collect user's choices. | 2570 |
+| CheckList | Featured Components |  | 2631 |
+| Code Editor | Data Entry | Code Editor based on monaco-editor. | 2678 |
+| Collapse | Data Display | A content area which can be collapsed and expanded. | 2770 |
+| ColorPicker | Data Entry | Used for color selection. | 2811 |
+| Comment | Data Display | A comment displays user feedback and discussion to website content. | 2877 |
+| Cron Expression | Data Entry |  | 2913 |
+| DatePicker | Data Entry | To select or input a date. | 2966 |
+| Descriptions | Data Display | Display multiple read-only fields in a group. | 3083 |
+| Divider | Layout | A divider line separates different content. | 3119 |
+| Drawer |  | A panel that slides out from the edge of the screen. | 3149 |
+| Dropdown | Navigation | A dropdown list. | 3272 |
+| Empty | Data Display | Empty state placeholder. | 3342 |
+| Flex | Layout |  | 3396 |
+| FloatButton | General | A button that floats at the top of the page. | 3433 |
+| Form | Data Entry | High-performance form component with data domain management. Includes data entry, validation, and corresponding styles. | 3499 |
+| Graph | Data Display | Render graph. | 3624 |
+| Grid | Layout |  | 3802 |
+| HashCode | Featured Components | Display the hash value of blockchain data. | 3915 |
+| Icon | General | Semantic vector graphics. | 3944 |
+| Image | Data Display | Preview-able image. | 4148 |
+| Image | Data Display | Experimental image component. | 4226 |
+| Input | Data Entry | Through mouse or keyboard input content, it is the most basic form field wrapper. | 4307 |
+| InputNumber | Data Entry | Enter a number within certain range with the mouse or keyboard. | 4448 |
+| Layout | Layout | Handling the overall layout of a page. | 4523 |
+| List | Data Display | Basic list display, which can carry text, lists, pictures, paragraphs. | 4627 |
+| Mention | Data Entry | Used to mention someone or something in an input. | 4730 |
+| Menu | Navigation | A versatile menu for navigation. | 4821 |
+| Message | Feedback | Display global messages as feedback in response to user operations. | 4938 |
+| Modal |  | Display a modal dialog box, providing a title, content area, and action buttons. | 5013 |
+| Notification | Feedback | Prompt notification message globally. | 5221 |
+| PageHeader | Navigation | A header with common actions and design elements built in. | 5304 |
+| Pagination | Navigation | A long list can be divided into several pages by `Pagination`, and only one page will be loaded at a time. | 5348 |
+| Pipes | General | Common Pipe Collections. | 5391 |
+| Popconfirm | Feedback | Pop up a bubble confirmation box for an action. | 5441 |
+| Popover | Data Display | The floating card popped by clicking or hovering. | 5507 |
+| Progress | Feedback | Display the current progress of an operation. | 5559 |
+| QRCode | Data Display | Convert text into QR codes, and support custom color and logo. | 5614 |
+| Radio | Data Entry | Used to select a single state from multiple options. | 5670 |
+| Rate | Data Entry | Used for rating operation on something. | 5721 |
+| Resizable | Layout | Resize element. | 5763 |
+| Result | Feedback | Used to feed back the results of a series of operational tasks. | 5871 |
+| Segmented | Data Display | Display multiple options and allow users to select a single option. | 5910 |
+| Select | Data Entry | A dropdown menu for displaying choices. | 5950 |
+| Skeleton | Feedback | Provide a placeholder while you wait for content to load or visualize content that doesn't exist yet. | 6057 |
+| Slider | Data Entry | A Slider component for displaying current value and intervals in range. | 6137 |
+| Space | Layout | Set components spacing. | 6174 |
+| Spin | Feedback | Used for the loading status of a page or a block. | 6231 |
+| Splitter | Layout | Splits the area into multiple horizontal or vertical sides. | 6258 |
+| Statistic | Data Display | Display statistic number. | 6298 |
+| Steps | Navigation | A navigation bar that guides users through the steps of a task. | 6351 |
+| Switch | Data Entry | Used to toggle between two states. | 6406 |
+| Table | Data Display | A table displays rows of data. | 6444 |
+| Tabs | Navigation | Tabs make it easy to switch between different views. | 6703 |
+| Tag | Data Display | Used for marking and categorization. | 6822 |
+| Timeline | Data Display | Vertical display timeline. | 6851 |
+| TimePicker | Data Entry | To select/input a time. | 6899 |
+| Tooltip | Data Display | Simple text popup box. | 6971 |
+| Transfer | Data Entry | Double column transfer choice box. | 7031 |
+| Tree | Data Display | Multiple-level structure list. | 7122 |
+| TreeSelect | Data Entry | Tree selection control. | 7278 |
+| TreeView | Data Display | Tree view component with better performance and customizability. | 7357 |
+| Typography | General | Basic text writing, including headings, body text, lists, and more. | 7563 |
+| Upload | Data Entry | Used to select and upload files or drag and drop files. | 7603 |
+| Watermark | Other |  | 7705 |
+
+## 非组件章节（安装 / 全局配置 / 主题 / 国际化 / CLI 等）
+
+| 章节 | 起始行 |
+| ---- | ------ |
+| Features | 102 |
+| Environment Support | 111 |
+| Version | 121 |
+| Angular Support | 125 |
+| Design Specification | 129 |
+| Installation | 133 |
+| Companies using ng-zorro-antd | 151 |
+| Contributing | 174 |
+| Need Help? | 182 |
+| Built-in Adapters | 198 |
+| Custom Adapter | 248 |
+| Use the Adapter in Application Code | 459 |
+| Notes | 480 |
+| Set the default direction | 496 |
+| Set in the template | 504 |
+| Set in the service | 518 |
+| References | 537 |
+| How to use | 553 |
+| Conflict resolve | 607 |
+| Playground | 742 |
+| First Local Development | 748 |
+| Customized Build | 803 |
+| Other | 888 |
+| How to Use? | 903 |
+| Overwrite inside Component | 986 |
+| Dynamically Change Configurations | 1038 |
+| Priority of Global Configurations | 1057 |
+| Check all Available Globally Configurable Parameters | 1071 |
+| Code of Conduct | 1084 |
+| Open Development | 1088 |
+| Bugs | 1092 |
+| Propose a Change | 1098 |
+| Your First Pull Request | 1102 |
+| Contribute | 1115 |
+| How to Submit a Pull Request | 1128 |
+| Development Workflow | 1140 |
+| Default i18n Language | 1163 |
+| Work with Angular localize | 1185 |
+| Service | 1210 |
+| How to override internationalization configuration | 1299 |
+| What is LLMs.txt? | 1330 |
+| Available Resources | 1334 |
+| Usage with AI Tools | 1353 |
+| Initialize A Project | 1378 |
+| Component Generation | 1396 |
+| Use Pre-defined Themes | 1427 |
+| Customize Pre-defined Theme | 1496 |
+| Theme Dynamic Switching | 1626 |
+| When To Use | 1839 |
+| API | 1845 |
+| When To Use | 1872 |
+| API | 1877 |
+| When To Use | 1914 |
+| API | 1918 |
+| When To Use | 1954 |
+| API | 1958 |
+| FAQ | 2006 |
+| API | 2023 |
+| When To Use | 2060 |
+| API | 2065 |
+| When To Use | 2102 |
+| API | 2109 |
+| When To Use | 2223 |
+| API | 2242 |
+| When To Use | 2272 |
+| API | 2276 |
+| FAQ | 2319 |
+| When To Use | 2336 |
+| API | 2340 |
+| When To Use | 2391 |
+| API | 2397 |
+| When To Use | 2443 |
+| API | 2449 |
+| FAQ | 2554 |
+| When To Use | 2577 |
+| API | 2582 |
+| Methods | 2607 |
+| Interfaces | 2616 |
+| When To Use | 2640 |
+| API | 2644 |
+| When To Use | 2686 |
+| API | 2696 |
+| When To Use | 2778 |
+| API | 2783 |
+| When To Use | 2819 |
+| API | 2823 |
+| FAQ | 2865 |
+| When To Use | 2885 |
+| API | 2889 |
+| When To Use | 2922 |
+| API | 2926 |
+| Note | 2947 |
+| When To Use | 2973 |
+| API | 2977 |
+| FAQ | 3069 |
+| When To Use | 3091 |
+| API | 3095 |
+| When To Use | 3126 |
+| API | 3131 |
+| When To Use | 3159 |
+| API | 3166 |
+| When To Use | 3279 |
+| API | 3283 |
+| FAQ | 3332 |
+| When To Use | 3350 |
+| API | 3354 |
+| When To Use | 3405 |
+| API | 3417 |
+| When To Use | 3441 |
+| API | 3446 |
+| When To Use | 3507 |
+| Form | 3517 |
+| API | 3548 |
+| When To Use | 3632 |
+| API | 3650 |
+| More | 3794 |
+| Design concept | 3811 |
+| Outline | 3866 |
+| API | 3881 |
+| When To Use | 3923 |
+| API | 3928 |
+| List of icons | 3952 |
+| API | 3956 |
+| FAQ | 4114 |
+| When To Use | 4155 |
+| API | 4160 |
+| Related type definition | 4183 |
+| When To Use | 4234 |
+| API | 4243 |
+| Note | 4263 |
+| When To Use | 4315 |
+| API | 4320 |
+| Q&A | 4422 |
+| When To Use | 4456 |
+| API | 4460 |
+| FAQ | 4514 |
+| Specification | 4531 |
+| Visualization rules | 4549 |
+| Component Overview | 4569 |
+| API | 4579 |
+| When To Use | 4635 |
+| API | 4639 |
+| When To Use | 4737 |
+| API | 4741 |
+| FAQ | 4811 |
+| When To Use | 4829 |
+| API | 4837 |
+| When To Use | 4945 |
+| API | 4951 |
+| When To Use | 5019 |
+| API | 5030 |
+| When To Use | 5228 |
+| API | 5238 |
+| When To Use | 5312 |
+| API | 5316 |
+| When To Use | 5356 |
+| API | 5361 |
+| When To Use | 5399 |
+| API | 5403 |
+| When To Use | 5448 |
+| API | 5454 |
+| Note | 5493 |
+| FAQ | 5497 |
+| When To Use | 5514 |
+| API | 5520 |
+| Note | 5545 |
+| FAQ | 5549 |
+| When To Use | 5566 |
+| API | 5573 |
+| When To Use | 5622 |
+| API | 5626 |
+| Note | 5647 |
+| When To Use | 5677 |
+| API | 5682 |
+| Methods | 5707 |
+| When To Use | 5728 |
+| API | 5733 |
+| When To Use | 5771 |
+| API | 5785 |
+| When To Use | 5879 |
+| API | 5883 |
+| When To Use | 5917 |
+| API | 5922 |
+| When To Use | 5957 |
+| API | 5963 |
+| Methods | 6038 |
+| FAQ | 6047 |
+| When To Use | 6065 |
+| API | 6072 |
+| When To Use | 6144 |
+| API | 6148 |
+| When To Use | 6182 |
+| API | 6192 |
+| When To Use | 6238 |
+| API | 6242 |
+| When To Use | 6266 |
+| API | 6272 |
+| When To Use | 6305 |
+| API | 6310 |
+| When To Use | 6359 |
+| API | 6363 |
+| When To Use | 6413 |
+| API | 6418 |
+| When To Use | 6452 |
+| How To Use | 6457 |
+| API | 6500 |
+| Note | 6679 |
+| When To Use | 6711 |
+| API | 6719 |
+| When To Use | 6829 |
+| API | 6835 |
+| When To Use | 6858 |
+| API | 6863 |
+| When To Use | 6906 |
+| API | 6910 |
+| FAQ | 6957 |
+| When To Use | 6978 |
+| API | 6983 |
+| Exclude body element's scroll event need to refresh the position of CDK | 7013 |
+| Note | 7017 |
+| FAQ | 7021 |
+| When To Use | 7039 |
+| API | 7048 |
+| When To Use | 7129 |
+| API | 7133 |
+| Note | 7255 |
+| When To Use | 7285 |
+| API | 7290 |
+| FAQ | 7347 |
+| When To Use | 7365 |
+| API | 7371 |
+| Classes | 7475 |
+| utils | 7539 |
+| When To Use | 7571 |
+| API | 7576 |
+| When To Use | 7610 |
+| API | 7618 |
+| When To Use | 7714 |
+| API | 7719 |
+| FAQ | 7745 |

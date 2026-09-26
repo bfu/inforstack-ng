@@ -1,0 +1,196 @@
+<div class="dept-page">
+  <nz-card [nzBordered]="false" class="search-card">
+    <form nz-form nzLayout="inline" [formGroup]="searchForm">
+      <nz-form-item>
+        <nz-form-control>
+          <input nz-input formControlName="deptName" placeholder="部门名称" class="field-md" />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <nz-select formControlName="status" nzPlaceHolder="部门状态" nzAllowClear class="field-md">
+            @for (item of statusOptions(); track item.value) {
+              <nz-option [nzValue]="item.value" [nzLabel]="item.label"></nz-option>
+            }
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <button nz-button nzType="primary" (click)="getList()"><nz-icon nzType="search" />搜索</button>
+          <button nz-button class="gap-left" (click)="resetQuery()"><nz-icon nzType="reload" />重置</button>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </nz-card>
+
+  <nz-card [nzBordered]="false" class="table-card">
+    <div class="toolbar">
+      <button nz-button nzType="primary" *appHasPermi="['system:dept:add']" (click)="openAdd()">
+        <nz-icon nzType="plus" />新增
+      </button>
+      <button
+        nz-button
+        *appHasPermi="['system:dept:edit']"
+        [disabled]="!selection.single()"
+        class="gap-left"
+        (click)="openEdit(selectedRows()[0])"
+      >
+        <nz-icon nzType="edit" />修改
+      </button>
+      <button
+        nz-button
+        nzDanger
+        *appHasPermi="['system:dept:remove']"
+        [disabled]="!selection.multiple()"
+        class="gap-left"
+        (click)="delete()"
+      >
+        <nz-icon nzType="delete" />删除
+      </button>
+      <button nz-button class="gap-left" (click)="toggleExpandAll()">
+        <nz-icon [nzType]="allExpanded() ? 'up' : 'down'" />{{ allExpanded() ? '折叠' : '展开' }}
+      </button>
+    </div>
+
+    <nz-table nzSize="middle" [nzData]="flatRows()" [nzLoading]="loading()" [nzFrontPagination]="false">
+      <thead>
+        <tr>
+          <th nzWidth="50px"></th>
+          <th nzWidth="220px">部门名称</th>
+          <th nzWidth="90px">排序</th>
+          <th nzWidth="100px">负责人</th>
+          <th nzWidth="130px">联系电话</th>
+          <th nzWidth="180px">邮箱</th>
+          <th nzWidth="90px">状态</th>
+          <th nzWidth="160px">创建时间</th>
+          <th nzWidth="180px" nzRight>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of flatRows(); track row.deptId) {
+          <tr>
+            <td>
+              <label
+                nz-checkbox
+                [ngModel]="selection.hasKey(row.deptId)"
+                (ngModelChange)="selection.onItemChecked(row.deptId, $event)"
+              ></label>
+            </td>
+            <td [style.paddingLeft.px]="12 + row.level * 20">
+              @if (row.children?.length) {
+                <span class="expand-btn" (click)="toggleRow(row)">
+                  <nz-icon [nzType]="expandedIds().has(row.deptId!) ? 'caret-down' : 'caret-right'" />
+                </span>
+              } @else {
+                <span class="expand-placeholder"></span>
+              }
+              {{ row.deptName }}
+            </td>
+            <td>{{ row.orderNum }}</td>
+            <td>{{ row.leader }}</td>
+            <td>{{ row.phone }}</td>
+            <td>{{ row.email }}</td>
+            <td><app-dict-tag [value]="row.status" dictType="sys_normal_disable" /></td>
+            <td>{{ row.createTime }}</td>
+            <td nzRight>
+              <a *appHasPermi="['system:dept:edit']" class="gap-left" (click)="openEdit(row)">
+                <nz-icon nzType="edit" />修改
+              </a>
+              <a *appHasPermi="['system:dept:add']" class="gap-left" (click)="openAdd(row.deptId)">
+                <nz-icon nzType="plus" />新增
+              </a>
+              <a *appHasPermi="['system:dept:remove']" class="gap-left" (click)="delete(row)">
+                <nz-icon nzType="delete" />删除
+              </a>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+  </nz-card>
+</div>
+
+<nz-modal
+  [nzVisible]="dialogVisible()"
+  (nzVisibleChange)="dialogVisible.set($event)"
+  (nzOnCancel)="dialogVisible.set(false)"
+  [nzTitle]="dialogTitle()"
+  nzWidth="700px"
+  nzOkText="确定"
+  nzCancelText="取消"
+  [nzOkLoading]="submitting()"
+  (nzOnOk)="submitForm()"
+>
+  <ng-container *nzModalContent>
+    <form nz-form [formGroup]="form" nzLayout="vertical">
+      <div nz-row [nzGutter]="16">
+        <div nz-col [nzSpan]="24">
+          <nz-form-item>
+            <nz-form-label nzFor="parentId">上级部门</nz-form-label>
+            <nz-form-control>
+              <nz-tree-select
+                formControlName="parentId"
+                [nzNodes]="parentOptions()"
+                nzPlaceHolder="请选择上级部门"
+                nzShowSearch
+              ></nz-tree-select>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="deptName" nzRequired>部门名称</nz-form-label>
+            <nz-form-control nzErrorTip="请输入部门名称">
+              <input nz-input formControlName="deptName" placeholder="请输入部门名称" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="orderNum" nzRequired>显示排序</nz-form-label>
+            <nz-form-control nzErrorTip="请输入显示排序">
+              <nz-input-number formControlName="orderNum" [nzMin]="0" [nzMax]="999" class="full-width"></nz-input-number>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="leader">负责人</nz-form-label>
+            <nz-form-control>
+              <input nz-input formControlName="leader" placeholder="请输入负责人" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="phone">联系电话</nz-form-label>
+            <nz-form-control nzErrorTip="请输入正确的手机号码">
+              <input nz-input formControlName="phone" maxlength="11" placeholder="请输入联系电话" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="email">邮箱</nz-form-label>
+            <nz-form-control nzErrorTip="请输入正确的邮箱地址">
+              <input nz-input formControlName="email" maxlength="50" placeholder="请输入邮箱" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="status">部门状态</nz-form-label>
+            <nz-form-control>
+              <nz-radio-group formControlName="status">
+                @for (item of statusOptions(); track item.value) {
+                  <label nz-radio [nzValue]="item.value">{{ item.label }}</label>
+                }
+              </nz-radio-group>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+    </form>
+  </ng-container>
+</nz-modal>

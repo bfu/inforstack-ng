@@ -1,0 +1,13 @@
+<nz-upload
+  [nzFileList]="fileList()"
+  [nzMultiple]="multiple()"
+  [nzAccept]="accept()"
+  [nzLimit]="limit()"
+  [nzBeforeUpload]="beforeUpload"
+  [nzCustomRequest]="customRequest"
+  (nzChange)="onChange($event)"
+>
+  <button nz-button [disabled]="uploadDisabled()">
+    <nz-icon nzType="upload" />选择文件
+  </button>
+</nz-upload>

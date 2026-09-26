@@ -1,0 +1,186 @@
+<div class="post-page">
+  <nz-card [nzBordered]="false" class="search-card">
+    <form nz-form nzLayout="inline" [formGroup]="searchForm">
+      <nz-form-item>
+        <nz-form-control>
+          <input nz-input formControlName="postCode" placeholder="岗位编码" class="field-md" />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <input nz-input formControlName="postName" placeholder="岗位名称" class="field-md" />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <nz-select formControlName="status" nzPlaceHolder="岗位状态" nzAllowClear class="field-md">
+            @for (item of statusOptions(); track item.value) {
+              <nz-option [nzValue]="item.value" [nzLabel]="item.label"></nz-option>
+            }
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <button nz-button nzType="primary" (click)="getList()"><nz-icon nzType="search" />搜索</button>
+          <button nz-button class="gap-left" (click)="resetQuery()"><nz-icon nzType="reload" />重置</button>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </nz-card>
+
+  <nz-card [nzBordered]="false" class="table-card">
+    <div class="toolbar">
+      <button nz-button nzType="primary" *appHasPermi="['system:post:add']" (click)="openAdd()">
+        <nz-icon nzType="plus" />新增
+      </button>
+      <button
+        nz-button
+        *appHasPermi="['system:post:edit']"
+        [disabled]="!selection.single()"
+        class="gap-left"
+        (click)="openEdit(selectedRows()[0])"
+      >
+        <nz-icon nzType="edit" />修改
+      </button>
+      <button
+        nz-button
+        nzDanger
+        *appHasPermi="['system:post:remove']"
+        [disabled]="!selection.multiple()"
+        class="gap-left"
+        (click)="delete()"
+      >
+        <nz-icon nzType="delete" />删除
+      </button>
+      <button nz-button *appHasPermi="['system:post:export']" class="gap-left" (click)="export()">
+        <nz-icon nzType="download" />导出
+      </button>
+    </div>
+
+    <nz-table
+      nzSize="middle"
+      [nzData]="rows()"
+      [nzLoading]="loading()"
+      [nzTotal]="total()"
+      [nzPageIndex]="pageNum"
+      [nzPageSize]="pageSize"
+      [nzFrontPagination]="false"
+      [nzShowSizeChanger]="true"
+      [nzShowTotal]="totalTpl"
+      (nzQueryParams)="onQueryParams($event)"
+    >
+      <thead>
+        <tr>
+          <th nzWidth="50px">
+            <label
+              nz-checkbox
+              [ngModel]="selection.allChecked()"
+              [nzIndeterminate]="selection.indeterminate()"
+              (ngModelChange)="selection.onAllChecked($event, rows())"
+            ></label>
+          </th>
+          <th nzWidth="90px">岗位编号</th>
+          <th nzWidth="150px">岗位编码</th>
+          <th nzWidth="150px">岗位名称</th>
+          <th nzWidth="90px">岗位排序</th>
+          <th nzWidth="90px">状态</th>
+          <th nzWidth="180px">创建时间</th>
+          <th nzWidth="140px" nzRight>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track row.postId) {
+          <tr>
+            <td>
+              <label
+                nz-checkbox
+                [ngModel]="selection.isChecked(row)"
+                (ngModelChange)="selection.onItemChecked(row.postId, $event)"
+              ></label>
+            </td>
+            <td>{{ row.postId }}</td>
+            <td>{{ row.postCode }}</td>
+            <td>{{ row.postName }}</td>
+            <td>{{ row.postSort }}</td>
+            <td><app-dict-tag [value]="row.status" dictType="sys_normal_disable" /></td>
+            <td>{{ row.createTime }}</td>
+            <td nzRight>
+              <a *appHasPermi="['system:post:edit']" class="gap-left" (click)="openEdit(row)">
+                <nz-icon nzType="edit" />修改
+              </a>
+              <a *appHasPermi="['system:post:remove']" class="gap-left" (click)="delete(row)">
+                <nz-icon nzType="delete" />删除
+              </a>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+  </nz-card>
+</div>
+
+<ng-template #totalTpl let-total>共 {{ total }} 条</ng-template>
+
+<nz-modal
+  [nzVisible]="dialogVisible()"
+  (nzVisibleChange)="dialogVisible.set($event)"
+  (nzOnCancel)="dialogVisible.set(false)"
+  [nzTitle]="dialogTitle()"
+  nzWidth="640px"
+  nzOkText="确定"
+  nzCancelText="取消"
+  [nzOkLoading]="submitting()"
+  (nzOnOk)="submitForm()"
+>
+  <ng-container *nzModalContent>
+    <form nz-form [formGroup]="form" nzLayout="vertical">
+      <div nz-row [nzGutter]="16">
+        <div nz-col [nzSpan]="24">
+          <nz-form-item>
+            <nz-form-label nzFor="postName" nzRequired>岗位名称</nz-form-label>
+            <nz-form-control nzErrorTip="请输入岗位名称">
+              <input nz-input formControlName="postName" placeholder="请输入岗位名称" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="postCode" nzRequired>岗位编码</nz-form-label>
+            <nz-form-control nzErrorTip="请输入岗位编码">
+              <input nz-input formControlName="postCode" placeholder="请输入岗位编码" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="postSort" nzRequired>岗位顺序</nz-form-label>
+            <nz-form-control nzErrorTip="请输入岗位顺序">
+              <nz-input-number formControlName="postSort" [nzMin]="0" [nzMax]="999" class="full-width"></nz-input-number>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="status">岗位状态</nz-form-label>
+            <nz-form-control>
+              <nz-radio-group formControlName="status">
+                @for (item of statusOptions(); track item.value) {
+                  <label nz-radio [nzValue]="item.value">{{ item.label }}</label>
+                }
+              </nz-radio-group>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="24">
+          <nz-form-item>
+            <nz-form-label nzFor="remark">备注</nz-form-label>
+            <nz-form-control>
+              <textarea nz-input formControlName="remark" rows="2" placeholder="请输入备注"></textarea>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+    </form>
+  </ng-container>
+</nz-modal>

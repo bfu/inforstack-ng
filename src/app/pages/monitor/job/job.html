@@ -1,0 +1,262 @@
+<div class="job-page">
+  <nz-card [nzBordered]="false" class="search-card">
+    <form nz-form nzLayout="inline" [formGroup]="searchForm">
+      <nz-form-item>
+        <nz-form-control>
+          <input nz-input formControlName="jobName" placeholder="任务名称" class="field-md" />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <nz-select formControlName="jobGroup" nzPlaceHolder="请选择任务组名" nzAllowClear class="field-md">
+            @for (item of jobGroupOptions(); track item.value) {
+              <nz-option [nzValue]="item.value" [nzLabel]="item.label"></nz-option>
+            }
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <nz-select formControlName="status" nzPlaceHolder="请选择任务状态" nzAllowClear class="field-md">
+            @for (item of jobStatusOptions(); track item.value) {
+              <nz-option [nzValue]="item.value" [nzLabel]="item.label"></nz-option>
+            }
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <button nz-button nzType="primary" (click)="getList()"><nz-icon nzType="search" />搜索</button>
+          <button nz-button class="gap-left" (click)="resetQuery()"><nz-icon nzType="reload" />重置</button>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </nz-card>
+
+  <nz-card [nzBordered]="false" class="table-card">
+    <div class="toolbar">
+      <button nz-button nzType="primary" *appHasPermi="['monitor:job:add']" (click)="openAdd()">
+        <nz-icon nzType="plus" />新增
+      </button>
+      <button
+        nz-button
+        *appHasPermi="['monitor:job:edit']"
+        [disabled]="!selection.single()"
+        class="gap-left"
+        (click)="openEdit(selectedRows()[0])"
+      >
+        <nz-icon nzType="edit" />修改
+      </button>
+      <button nz-button nzDanger *appHasPermi="['monitor:job:remove']" [disabled]="!selection.multiple()" class="gap-left" (click)="delete()">
+        <nz-icon nzType="delete" />删除
+      </button>
+      <button nz-button *appHasPermi="['monitor:job:export']" class="gap-left" (click)="export()">
+        <nz-icon nzType="download" />导出
+      </button>
+      <button nz-button *appHasPermi="['monitor:job:query']" class="gap-left" (click)="openJobLog()">
+        <nz-icon nzType="profile" />日志
+      </button>
+    </div>
+
+    <nz-table
+      nzSize="middle"
+      [nzData]="rows()"
+      [nzLoading]="loading()"
+      [nzTotal]="total()"
+      [nzPageIndex]="pageNum"
+      [nzPageSize]="pageSize"
+      [nzFrontPagination]="false"
+      [nzShowSizeChanger]="true"
+      [nzShowTotal]="totalTpl"
+      (nzQueryParams)="onQueryParams($event)"
+    >
+      <thead>
+        <tr>
+          <th nzWidth="50px">
+            <label nz-checkbox [ngModel]="selection.allChecked()" [nzIndeterminate]="selection.indeterminate()" (ngModelChange)="selection.onAllChecked($event, rows())"></label>
+          </th>
+          <th nzWidth="80px">任务编号</th>
+          <th nzWidth="140px">任务名称</th>
+          <th nzWidth="100px">任务组名</th>
+          <th nzWidth="200px">调用目标字符串</th>
+          <th nzWidth="140px">cron执行表达式</th>
+          <th nzWidth="90px">状态</th>
+          <th nzWidth="200px" nzRight>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track row.jobId) {
+          <tr>
+            <td>
+              <label nz-checkbox [ngModel]="selection.isChecked(row)" (ngModelChange)="selection.onItemChecked(row.jobId, $event)"></label>
+            </td>
+            <td>{{ row.jobId }}</td>
+            <td>
+              <a class="link-type" (click)="openView(row)">{{ row.jobName }}</a>
+            </td>
+            <td><app-dict-tag [value]="row.jobGroup" dictType="sys_job_group" /></td>
+            <td nzEllipsis>{{ row.invokeTarget }}</td>
+            <td nzEllipsis>{{ row.cronExpression }}</td>
+            <td>
+              <nz-switch [ngModel]="row.status === '0'" (ngModelChange)="statusChange(row, $event)"></nz-switch>
+            </td>
+            <td nzRight>
+              <a *appHasPermi="['monitor:job:edit']" nz-tooltip="修改" (click)="openEdit(row)">
+                <nz-icon nzType="edit" />
+              </a>
+              <a *appHasPermi="['monitor:job:remove']" nz-tooltip="删除" class="gap-left" (click)="delete(row)">
+                <nz-icon nzType="delete" />
+              </a>
+              <a *appHasPermi="['monitor:job:changeStatus']" nz-tooltip="执行一次" class="gap-left" (click)="run(row)">
+                <nz-icon nzType="caret-right" />
+              </a>
+              <a *appHasPermi="['monitor:job:query']" nz-tooltip="调度日志" class="gap-left" (click)="openJobLog(row)">
+                <nz-icon nzType="profile" />
+              </a>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+  </nz-card>
+</div>
+
+<ng-template #totalTpl let-total>共 {{ total }} 条</ng-template>
+
+<nz-modal
+  [nzVisible]="dialogVisible()"
+  (nzVisibleChange)="dialogVisible.set($event)"
+  (nzOnCancel)="dialogVisible.set(false)"
+  [nzTitle]="dialogTitle()"
+  nzWidth="820px"
+  nzOkText="确定"
+  nzCancelText="取消"
+  [nzOkLoading]="submitting()"
+  (nzOnOk)="submitForm()"
+>
+  <ng-container *nzModalContent>
+    <form nz-form [formGroup]="form" nzLayout="vertical">
+      <div nz-row [nzGutter]="16">
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="jobName" nzRequired>任务名称</nz-form-label>
+            <nz-form-control nzErrorTip="任务名称不能为空">
+              <input nz-input formControlName="jobName" placeholder="请输入任务名称" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="jobGroup">任务分组</nz-form-label>
+            <nz-form-control>
+              <nz-select formControlName="jobGroup" nzPlaceHolder="请选择">
+                @for (item of jobGroupOptions(); track item.value) {
+                  <nz-option [nzValue]="item.value" [nzLabel]="item.label"></nz-option>
+                }
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="24">
+          <nz-form-item>
+            <nz-form-label nzFor="invokeTarget" nzRequired>
+              调用方法
+              <span
+                nz-icon
+                nzType="question-circle"
+                nz-tooltip="Bean调用示例：ryTask.ryParams('ry')；Class类调用示例：com.ruoyi.quartz.task.RyTask.ryParams('ry')"
+                class="label-tip"
+              ></span>
+            </nz-form-label>
+            <nz-form-control nzErrorTip="调用目标字符串不能为空">
+              <input nz-input formControlName="invokeTarget" placeholder="请输入调用目标字符串" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="24">
+          <nz-form-item>
+            <nz-form-label nzFor="cronExpression" nzRequired>cron表达式</nz-form-label>
+            <nz-form-control nzErrorTip="cron执行表达式不能为空">
+              <input nz-input formControlName="cronExpression" placeholder="请输入cron执行表达式" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        @if (isEdit()) {
+          <div nz-col [nzSpan]="24">
+            <nz-form-item>
+              <nz-form-label nzFor="status">状态</nz-form-label>
+              <nz-form-control>
+                <nz-radio-group formControlName="status">
+                  @for (item of jobStatusOptions(); track item.value) {
+                    <label nz-radio [nzValue]="item.value">{{ item.label }}</label>
+                  }
+                </nz-radio-group>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        }
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="misfirePolicy">执行策略</nz-form-label>
+            <nz-form-control>
+              <nz-radio-group formControlName="misfirePolicy" nzButtonStyle="solid">
+                @for (item of misfireOptions; track item.value) {
+                  <label nz-radio-button [nzValue]="item.value">{{ item.label }}</label>
+                }
+              </nz-radio-group>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="concurrent">是否并发</nz-form-label>
+            <nz-form-control>
+              <nz-radio-group formControlName="concurrent" nzButtonStyle="solid">
+                @for (item of concurrentOptions; track item.value) {
+                  <label nz-radio-button [nzValue]="item.value">{{ item.label }}</label>
+                }
+              </nz-radio-group>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+    </form>
+  </ng-container>
+</nz-modal>
+
+<nz-modal
+  [nzVisible]="detailVisible()"
+  (nzVisibleChange)="detailVisible.set($event)"
+  nzTitle="任务详细"
+  nzWidth="780px"
+  [nzFooter]="null"
+>
+  <ng-container *nzModalContent>
+    @if (detailRow(); as row) {
+      <nz-descriptions nzBordered [nzColumn]="2" nzSize="middle" class="detail-desc">
+        <nz-descriptions-item nzTitle="任务编号">{{ row.jobId }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="任务名称">{{ row.jobName }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="任务分组">
+          <app-dict-tag [value]="row.jobGroup" dictType="sys_job_group" />
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="任务状态">
+          <nz-tag [nzColor]="row.status === '0' ? 'green' : 'orange'">{{ row.status === '0' ? '正常' : '暂停' }}</nz-tag>
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="cron执行表达式">{{ row.cronExpression }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="下次执行时间">{{ row.nextValidTime ? parseTimeView(row.nextValidTime) : '' }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="执行策略">{{ detailMisfireText() }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="是否并发">
+          <nz-tag [nzColor]="row.concurrent === '0' ? 'green' : 'red'">{{ row.concurrent === '0' ? '允许' : '禁止' }}</nz-tag>
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="调用目标方法" [nzSpan]="2">{{ row.invokeTarget }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="创建者">{{ row.createBy }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="创建时间">{{ row.createTime }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="更新者">{{ row.updateBy }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="更新时间">{{ row.updateTime }}</nz-descriptions-item>
+        @if (row.remark) {
+          <nz-descriptions-item nzTitle="备注" [nzSpan]="2">{{ row.remark }}</nz-descriptions-item>
+        }
+      </nz-descriptions>
+    }
+  </ng-container>
+</nz-modal>

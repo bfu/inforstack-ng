@@ -1,0 +1,110 @@
+<div class="logininfor-page">
+  <nz-card [nzBordered]="false" class="search-card">
+    <form nz-form nzLayout="inline" [formGroup]="searchForm">
+      <nz-form-item>
+        <nz-form-control>
+          <input nz-input formControlName="ipaddr" placeholder="登录地址" class="field-md" />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <input nz-input formControlName="userName" placeholder="用户名称" class="field-md" />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <nz-select formControlName="status" nzPlaceHolder="登录状态" nzAllowClear class="field-md">
+            @for (item of statusOptions(); track item.value) {
+              <nz-option [nzValue]="item.value" [nzLabel]="item.label"></nz-option>
+            }
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <nz-range-picker [(ngModel)]="dateRange" [ngModelOptions]="{ standalone: true }" class="field-lg"></nz-range-picker>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <button nz-button nzType="primary" (click)="getList()"><nz-icon nzType="search" />搜索</button>
+          <button nz-button class="gap-left" (click)="resetQuery()"><nz-icon nzType="reload" />重置</button>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </nz-card>
+
+  <nz-card [nzBordered]="false" class="table-card">
+    <div class="toolbar">
+      <button nz-button nzDanger *appHasPermi="['monitor:logininfor:remove']" [disabled]="!selection.multiple()" (click)="delete()">
+        <nz-icon nzType="delete" />删除
+      </button>
+      <button nz-button nzDanger *appHasPermi="['monitor:logininfor:remove']" class="gap-left" (click)="clean()">
+        <nz-icon nzType="delete" />清空
+      </button>
+      <button
+        nz-button
+        nzType="primary"
+        *appHasPermi="['monitor:logininfor:unlock']"
+        [disabled]="!selection.single()"
+        class="gap-left"
+        (click)="unlock()"
+      >
+        <nz-icon nzType="unlock" />解锁
+      </button>
+      <button nz-button *appHasPermi="['monitor:logininfor:export']" class="gap-left" (click)="export()">
+        <nz-icon nzType="download" />导出
+      </button>
+    </div>
+
+    <nz-table
+      nzSize="middle"
+      [nzData]="rows()"
+      [nzLoading]="loading()"
+      [nzTotal]="total()"
+      [nzPageIndex]="pageNum"
+      [nzPageSize]="pageSize"
+      [nzFrontPagination]="false"
+      [nzShowSizeChanger]="true"
+      [nzShowTotal]="totalTpl"
+      (nzQueryParams)="onQueryParams($event)"
+    >
+      <thead>
+        <tr>
+          <th nzWidth="50px">
+            <label nz-checkbox [ngModel]="selection.allChecked()" [nzIndeterminate]="selection.indeterminate()" (ngModelChange)="selection.onAllChecked($event, rows())"></label>
+          </th>
+          <th nzWidth="80px">访问编号</th>
+          <th nzWidth="110px">用户名称</th>
+          <th nzWidth="120px">地址</th>
+          <th nzWidth="120px">登录地点</th>
+          <th nzWidth="110px">操作系统</th>
+          <th nzWidth="110px">浏览器</th>
+          <th nzWidth="90px">登录状态</th>
+          <th>描述</th>
+          <th nzWidth="160px" nzRight>访问时间</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track row.infoId) {
+          <tr>
+            <td>
+              <label nz-checkbox [ngModel]="selection.isChecked(row)" (ngModelChange)="selection.onItemChecked(row.infoId, $event)"></label>
+            </td>
+            <td>{{ row.infoId }}</td>
+            <td>{{ row.userName }}</td>
+            <td>{{ row.ipaddr }}</td>
+            <td>{{ row.loginLocation }}</td>
+            <td>{{ row.os }}</td>
+            <td>{{ row.browser }}</td>
+            <td><app-dict-tag [value]="row.status" dictType="sys_common_status" /></td>
+            <td>{{ row.msg }}</td>
+            <td nzRight>{{ row.loginTime }}</td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+  </nz-card>
+</div>
+
+<ng-template #totalTpl let-total>共 {{ total }} 条</ng-template>

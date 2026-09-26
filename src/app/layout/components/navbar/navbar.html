@@ -1,0 +1,37 @@
+<div class="navbar">
+  <div class="hamburger-container" (click)="app.toggleSideBar()">
+    <nz-icon [nzType]="app.sidebarOpened() ? 'menu-fold' : 'menu-unfold'" />
+  </div>
+
+  <nz-breadcrumb class="breadcrumb-container">
+    @for (title of breadcrumbs(); track title) {
+      <nz-breadcrumb-item>{{ title }}</nz-breadcrumb-item>
+    }
+  </nz-breadcrumb>
+
+  <div class="right-menu">
+    <div class="right-menu-item hover-effect" title="全屏" (click)="toggleFullscreen()">
+      <nz-icon nzType="fullscreen" />
+    </div>
+
+    @if (settings.showSettings()) {
+      <div class="right-menu-item hover-effect" title="布局设置" (click)="settings.openPanel()">
+        <nz-icon nzType="setting" />
+      </div>
+    }
+
+    <a class="avatar-container right-menu-item hover-effect" nz-dropdown [nzDropdownMenu]="userMenu">
+      <nz-avatar [nzSrc]="store.avatar()" [nzText]="initial()" class="user-avatar" />
+      <span class="user-nickname">{{ store.nickName() || store.name() }}</span>
+    </a>
+
+    <nz-dropdown-menu #userMenu="nzDropdownMenu">
+      <ul nz-menu>
+        @if (settings.showSettings()) {
+          <li nz-menu-item>布局设置</li>
+        }
+        <li nz-menu-item nzDanger (click)="logout()">退出登录</li>
+      </ul>
+    </nz-dropdown-menu>
+  </div>
+</div>

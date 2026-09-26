@@ -1,0 +1,77 @@
+<div class="register-page">
+  <div class="register-card">
+    <h3 class="title">{{ title }}</h3>
+    <form nz-form [formGroup]="form" (ngSubmit)="submit()">
+      <nz-form-item>
+        <nz-form-control nzErrorTip="用户账号长度必须介于 2 和 20 之间">
+          <nz-input-group nzPrefixIcon="user">
+            <input type="text" nz-input formControlName="username" placeholder="账号" autocomplete="off" />
+          </nz-input-group>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-control nzErrorTip="密码长度必须介于 5 和 20 之间">
+          <nz-input-group nzPrefixIcon="lock">
+            <input
+              type="password"
+              nz-input
+              formControlName="password"
+              placeholder="密码"
+              autocomplete="off"
+            />
+          </nz-input-group>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-control nzErrorTip="请再次输入您的密码">
+          <nz-input-group nzPrefixIcon="lock">
+            <input
+              type="password"
+              nz-input
+              formControlName="confirmPassword"
+              placeholder="确认密码"
+              autocomplete="off"
+              (keyup.enter)="submit()"
+            />
+          </nz-input-group>
+        </nz-form-control>
+      </nz-form-item>
+
+      @if (captchaEnabled()) {
+        <nz-form-item>
+          <nz-form-control nzErrorTip="请输入验证码">
+            <div class="code-row">
+              <nz-input-group nzPrefixIcon="safety-certificate" class="code-input">
+                <input
+                  type="text"
+                  nz-input
+                  formControlName="code"
+                  placeholder="验证码"
+                  autocomplete="off"
+                  (keyup.enter)="submit()"
+                />
+              </nz-input-group>
+              <img class="code-img" [src]="codeUrl()" alt="验证码" title="点击刷新" (click)="getCode()" />
+            </div>
+          </nz-form-control>
+        </nz-form-item>
+      }
+
+      <nz-form-item>
+        <button nz-button nzType="primary" nzSize="large" nzBlock type="submit" [nzLoading]="loading()">
+          {{ loading() ? '注 册 中...' : '注 册' }}
+        </button>
+      </nz-form-item>
+
+      <div class="login-link">
+        <a routerLink="/login">使用已有账户登录</a>
+      </div>
+    </form>
+  </div>
+
+  <div class="register-footer">
+    <span>{{ footerContent }}</span>
+  </div>
+</div>

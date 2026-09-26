@@ -1,0 +1,448 @@
+<div class="gen-edit-page">
+  <nz-card [nzBordered]="false" [nzLoading]="loading()">
+    <nz-tabs [nzSelectedIndex]="activeTab()" (nzSelectedIndexChange)="activeTab.set($event)">
+      <!-- 基本信息 -->
+      <nz-tab nzTitle="基本信息">
+        <form nz-form nzLayout="horizontal" [formGroup]="basicForm">
+          <div nz-row [nzGutter]="16">
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label [nzSpan]="7" nzFor="tableName" nzRequired>表名称</nz-form-label>
+                <nz-form-control [nzSpan]="17" nzErrorTip="请输入表名称">
+                  <input nz-input formControlName="tableName" placeholder="请输入仓库名称" />
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label [nzSpan]="7" nzFor="tableComment" nzRequired>表描述</nz-form-label>
+                <nz-form-control [nzSpan]="17" nzErrorTip="请输入表描述">
+                  <input nz-input formControlName="tableComment" placeholder="请输入" />
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label [nzSpan]="7" nzFor="className" nzRequired>实体类名称</nz-form-label>
+                <nz-form-control [nzSpan]="17" nzErrorTip="请输入实体类名称">
+                  <input nz-input formControlName="className" placeholder="请输入" />
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label [nzSpan]="7" nzFor="functionAuthor" nzRequired>作者</nz-form-label>
+                <nz-form-control [nzSpan]="17" nzErrorTip="请输入作者">
+                  <input nz-input formControlName="functionAuthor" placeholder="请输入" />
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+            <div nz-col [nzSpan]="24">
+              <nz-form-item>
+                <nz-form-label [nzSpan]="3" nzFor="remark">备注</nz-form-label>
+                <nz-form-control [nzSpan]="21">
+                  <textarea nz-input formControlName="remark" rows="3"></textarea>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+          </div>
+        </form>
+      </nz-tab>
+
+      <!-- 字段信息 -->
+      <nz-tab nzTitle="字段信息">
+        <nz-table
+          nzSize="middle"
+          [nzData]="columns()"
+          [nzScroll]="{ x: '1900px' }"
+          [nzShowPagination]="false"
+        >
+          <thead>
+            <tr>
+              <th nzWidth="60px">序号</th>
+              <th nzWidth="140px">字段列名</th>
+              <th nzWidth="160px">字段描述</th>
+              <th nzWidth="130px">物理类型</th>
+              <th nzWidth="130px">Java类型</th>
+              <th nzWidth="140px">java属性</th>
+              <th nzWidth="70px">插入</th>
+              <th nzWidth="70px">编辑</th>
+              <th nzWidth="70px">列表</th>
+              <th nzWidth="70px">查询</th>
+              <th nzWidth="120px">查询方式</th>
+              <th nzWidth="70px">必填</th>
+              <th nzWidth="130px">显示类型</th>
+              <th nzWidth="180px">字典类型</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (col of columns(); track $index; let i = $index) {
+              <tr>
+                <td>{{ i + 1 }}</td>
+                <td>{{ col.columnName }}</td>
+                <td><input nz-input [(ngModel)]="col.columnComment" /></td>
+                <td>{{ col.columnType }}</td>
+                <td>
+                  <nz-select [(ngModel)]="col.javaType">
+                    @for (type of javaTypes; track type) {
+                      <nz-option [nzValue]="type" [nzLabel]="type"></nz-option>
+                    }
+                  </nz-select>
+                </td>
+                <td><input nz-input [(ngModel)]="col.javaField" /></td>
+                <td>
+                  <label
+                    nz-checkbox
+                    [ngModel]="isFlagOn(col, 'isInsert')"
+                    (ngModelChange)="setFlag(col, 'isInsert', $event)"
+                  ></label>
+                </td>
+                <td>
+                  <label
+                    nz-checkbox
+                    [ngModel]="isFlagOn(col, 'isEdit')"
+                    (ngModelChange)="setFlag(col, 'isEdit', $event)"
+                  ></label>
+                </td>
+                <td>
+                  <label
+                    nz-checkbox
+                    [ngModel]="isFlagOn(col, 'isList')"
+                    (ngModelChange)="setFlag(col, 'isList', $event)"
+                  ></label>
+                </td>
+                <td>
+                  <label
+                    nz-checkbox
+                    [ngModel]="isFlagOn(col, 'isQuery')"
+                    (ngModelChange)="setFlag(col, 'isQuery', $event)"
+                  ></label>
+                </td>
+                <td>
+                  <nz-select [(ngModel)]="col.queryType">
+                    @for (item of queryTypes; track item.value) {
+                      <nz-option [nzValue]="item.value" [nzLabel]="item.label"></nz-option>
+                    }
+                  </nz-select>
+                </td>
+                <td>
+                  <label
+                    nz-checkbox
+                    [ngModel]="isFlagOn(col, 'isRequired')"
+                    (ngModelChange)="setFlag(col, 'isRequired', $event)"
+                  ></label>
+                </td>
+                <td>
+                  <nz-select [(ngModel)]="col.htmlType">
+                    @for (item of htmlTypes; track item.value) {
+                      <nz-option [nzValue]="item.value" [nzLabel]="item.label"></nz-option>
+                    }
+                  </nz-select>
+                </td>
+                <td>
+                  <nz-select
+                    [(ngModel)]="col.dictType"
+                    nzAllowClear
+                    nzShowSearch
+                    nzPlaceHolder="请选择"
+                  >
+                    @for (dict of dictOptions(); track dict.dictType) {
+                      <nz-option
+                        [nzValue]="dict.dictType ?? ''"
+                        [nzLabel]="dict.dictName ?? ''"
+                      ></nz-option>
+                    }
+                  </nz-select>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </nz-table>
+      </nz-tab>
+
+      <!-- 生成信息 -->
+      <nz-tab nzTitle="生成信息">
+        <form nz-form nzLayout="horizontal" [formGroup]="genForm">
+          <div nz-row [nzGutter]="16">
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label [nzSpan]="7" nzFor="tplCategory" nzRequired>生成模板</nz-form-label>
+                <nz-form-control [nzSpan]="17" nzErrorTip="请选择生成模板">
+                  <nz-select formControlName="tplCategory">
+                    <nz-option nzValue="crud" nzLabel="单表（增删改查）"></nz-option>
+                    <nz-option nzValue="tree" nzLabel="树表（增删改查）"></nz-option>
+                    <nz-option nzValue="sub" nzLabel="主子表（增删改查）"></nz-option>
+                  </nz-select>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label [nzSpan]="7" nzFor="tplWebType">前端类型</nz-form-label>
+                <nz-form-control [nzSpan]="17">
+                  <nz-select formControlName="tplWebType">
+                    @for (item of tplWebTypes; track item.value) {
+                      <nz-option [nzValue]="item.value" [nzLabel]="item.label"></nz-option>
+                    }
+                  </nz-select>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label
+                  [nzSpan]="7"
+                  nzFor="packageName"
+                  nzRequired
+                  nzTooltipTitle="生成在哪个java包下，例如 com.ruoyi.system"
+                  >生成包路径</nz-form-label
+                >
+                <nz-form-control [nzSpan]="17" nzErrorTip="请输入生成包路径">
+                  <input nz-input formControlName="packageName" />
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label
+                  [nzSpan]="7"
+                  nzFor="moduleName"
+                  nzRequired
+                  nzTooltipTitle="可理解为子系统名，例如 system"
+                  >生成模块名</nz-form-label
+                >
+                <nz-form-control [nzSpan]="17" nzErrorTip="请输入生成模块名">
+                  <input nz-input formControlName="moduleName" />
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label
+                  [nzSpan]="7"
+                  nzFor="businessName"
+                  nzRequired
+                  nzTooltipTitle="可理解为功能英文名，例如 user"
+                  >生成业务名</nz-form-label
+                >
+                <nz-form-control [nzSpan]="17" nzErrorTip="请输入生成业务名">
+                  <input nz-input formControlName="businessName" />
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label
+                  [nzSpan]="7"
+                  nzFor="functionName"
+                  nzRequired
+                  nzTooltipTitle="用作类描述，例如 用户"
+                  >生成功能名</nz-form-label
+                >
+                <nz-form-control [nzSpan]="17" nzErrorTip="请输入生成功能名">
+                  <input nz-input formControlName="functionName" />
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label
+                  [nzSpan]="7"
+                  nzFor="formColNum"
+                  nzTooltipTitle="选择表单的栅格布局方式"
+                  >表单布局</nz-form-label
+                >
+                <nz-form-control [nzSpan]="17">
+                  <nz-select formControlName="formColNum">
+                    @for (item of formColOptions; track item.value) {
+                      <nz-option [nzValue]="item.value" [nzLabel]="item.label"></nz-option>
+                    }
+                  </nz-select>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label [nzSpan]="7">扩展功能</nz-form-label>
+                <nz-form-control [nzSpan]="17">
+                  <label nz-checkbox formControlName="view">生成详情页</label>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label
+                  [nzSpan]="7"
+                  nzFor="genType"
+                  nzTooltipTitle="默认为zip压缩包下载，也可以自定义生成路径"
+                  >生成代码方式</nz-form-label
+                >
+                <nz-form-control [nzSpan]="17">
+                  <nz-radio-group formControlName="genType">
+                    <label nz-radio nzValue="0">zip压缩包</label>
+                    <label nz-radio nzValue="1">自定义路径</label>
+                  </nz-radio-group>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label
+                  [nzSpan]="7"
+                  nzFor="parentMenuId"
+                  nzTooltipTitle="分配到指定菜单下，例如 系统管理"
+                  >上级菜单</nz-form-label
+                >
+                <nz-form-control [nzSpan]="17">
+                  <nz-tree-select
+                    formControlName="parentMenuId"
+                    [nzNodes]="menuOptions()"
+                    nzPlaceHolder="请选择系统菜单"
+                    nzShowSearch
+                  ></nz-tree-select>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+            @if (genType() === '1') {
+              <div nz-col [nzSpan]="24">
+                <nz-form-item>
+                  <nz-form-label
+                    [nzSpan]="3"
+                    nzFor="genPath"
+                    nzTooltipTitle="填写磁盘绝对路径，若不填写，则生成到当前Web项目下"
+                    >自定义路径</nz-form-label
+                  >
+                  <nz-form-control [nzSpan]="21">
+                    <div class="gen-path">
+                      <input nz-input formControlName="genPath" />
+                      <button nz-button nzType="primary" (click)="resetGenPath()">
+                        恢复默认的生成基础路径
+                      </button>
+                    </div>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            }
+          </div>
+
+          @if (tplCategory() === 'tree') {
+            <h4 class="form-header">其他信息</h4>
+            <div nz-row [nzGutter]="16">
+              <div nz-col [nzSpan]="12">
+                <nz-form-item>
+                  <nz-form-label
+                    [nzSpan]="7"
+                    nzFor="treeCode"
+                    nzTooltipTitle="树显示的编码字段名， 如：dept_id"
+                    >树编码字段</nz-form-label
+                  >
+                  <nz-form-control [nzSpan]="17">
+                    <nz-select formControlName="treeCode" nzPlaceHolder="请选择">
+                      @for (col of columns(); track $index) {
+                        <nz-option
+                          [nzValue]="col.columnName ?? ''"
+                          [nzLabel]="columnLabel(col)"
+                        ></nz-option>
+                      }
+                    </nz-select>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+              <div nz-col [nzSpan]="12">
+                <nz-form-item>
+                  <nz-form-label
+                    [nzSpan]="7"
+                    nzFor="treeParentCode"
+                    nzTooltipTitle="树显示的父编码字段名， 如：parent_Id"
+                    >树父编码字段</nz-form-label
+                  >
+                  <nz-form-control [nzSpan]="17">
+                    <nz-select formControlName="treeParentCode" nzPlaceHolder="请选择">
+                      @for (col of columns(); track $index) {
+                        <nz-option
+                          [nzValue]="col.columnName ?? ''"
+                          [nzLabel]="columnLabel(col)"
+                        ></nz-option>
+                      }
+                    </nz-select>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+              <div nz-col [nzSpan]="12">
+                <nz-form-item>
+                  <nz-form-label
+                    [nzSpan]="7"
+                    nzFor="treeName"
+                    nzTooltipTitle="树节点的显示名称字段名， 如：dept_name"
+                    >树名称字段</nz-form-label
+                  >
+                  <nz-form-control [nzSpan]="17">
+                    <nz-select formControlName="treeName" nzPlaceHolder="请选择">
+                      @for (col of columns(); track $index) {
+                        <nz-option
+                          [nzValue]="col.columnName ?? ''"
+                          [nzLabel]="columnLabel(col)"
+                        ></nz-option>
+                      }
+                    </nz-select>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+          }
+
+          @if (tplCategory() === 'sub') {
+            <h4 class="form-header">关联信息</h4>
+            <div nz-row [nzGutter]="16">
+              <div nz-col [nzSpan]="12">
+                <nz-form-item>
+                  <nz-form-label
+                    [nzSpan]="7"
+                    nzFor="subTableName"
+                    nzTooltipTitle="关联子表的表名， 如：sys_user"
+                    >关联子表的表名</nz-form-label
+                  >
+                  <nz-form-control [nzSpan]="17">
+                    <nz-select formControlName="subTableName" nzPlaceHolder="请选择">
+                      @for (table of tables(); track table.tableId) {
+                        <nz-option
+                          [nzValue]="table.tableName ?? ''"
+                          [nzLabel]="table.tableName + '：' + table.tableComment"
+                        ></nz-option>
+                      }
+                    </nz-select>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+              <div nz-col [nzSpan]="12">
+                <nz-form-item>
+                  <nz-form-label
+                    [nzSpan]="7"
+                    nzFor="subTableFkName"
+                    nzTooltipTitle="子表关联的外键名， 如：user_id"
+                    >子表关联的外键名</nz-form-label
+                  >
+                  <nz-form-control [nzSpan]="17">
+                    <nz-select formControlName="subTableFkName" nzPlaceHolder="请选择">
+                      @for (col of subColumns(); track $index) {
+                        <nz-option
+                          [nzValue]="col.columnName ?? ''"
+                          [nzLabel]="columnLabel(col)"
+                        ></nz-option>
+                      }
+                    </nz-select>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+          }
+        </form>
+      </nz-tab>
+    </nz-tabs>
+
+    <div class="footer">
+      <button nz-button nzType="primary" [nzLoading]="submitting()" (click)="submit()">提交</button>
+      <button nz-button class="gap-left" (click)="close()">返回</button>
+    </div>
+  </nz-card>
+</div>

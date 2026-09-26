@@ -1,0 +1,45 @@
+.sidebar-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--sidebar-bg);
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  height: 50px;
+  padding: 0 16px;
+  overflow: hidden;
+  background: var(--sidebar-logo-bg);
+  transition: all 0.3s;
+
+  .logo-mark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    flex: 0 0 28px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #409eff, #337ecc);
+    color: #fff;
+    font-weight: 700;
+    font-size: 15px;
+  }
+
+  h1 {
+    margin: 0 0 0 12px;
+    color: var(--sidebar-text, #fff);
+    font-size: 15px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+}
+
+.sidebar-menu {
+  flex: 1;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border-right: 0;
+}

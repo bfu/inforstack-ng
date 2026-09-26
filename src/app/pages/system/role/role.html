@@ -1,0 +1,280 @@
+<div class="role-page">
+  <nz-card [nzBordered]="false" class="search-card">
+    <!-- ng-zorro 日期选择器内部自身使用 ngModel，若放在 formGroup 作用域内，
+         会因 @Host() 注入在组件边界被截断而触发 NG01354，故 formGroup 只包裹响应式控件；
+         ngNoForm 用于避免整张 form 被 NgForm 接管 -->
+    <form nz-form nzLayout="inline" ngNoForm>
+      <ng-container [formGroup]="searchForm">
+        <nz-form-item>
+          <nz-form-control>
+            <input nz-input formControlName="roleName" placeholder="角色名称" class="field-md" />
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-control>
+            <input nz-input formControlName="roleKey" placeholder="权限字符" class="field-md" />
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-control>
+            <nz-select formControlName="status" nzPlaceHolder="角色状态" nzAllowClear class="field-md">
+              @for (item of statusOptions(); track item.value) {
+                <nz-option [nzValue]="item.value" [nzLabel]="item.label"></nz-option>
+              }
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+      </ng-container>
+      <nz-form-item>
+        <nz-form-control>
+          <nz-range-picker [(ngModel)]="dateRange" [ngModelOptions]="{ standalone: true }" class="field-lg"></nz-range-picker>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <button nz-button nzType="primary" class="gap-left" (click)="getList()">
+            <nz-icon nzType="search" />搜索
+          </button>
+          <button nz-button class="gap-left" (click)="resetQuery()">
+            <nz-icon nzType="reload" />重置
+          </button>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </nz-card>
+
+  <nz-card [nzBordered]="false" class="table-card">
+    <div class="toolbar">
+      <button nz-button nzType="primary" *appHasPermi="['system:role:add']" (click)="openAdd()">
+        <nz-icon nzType="plus" />新增
+      </button>
+      <button
+        nz-button
+        *appHasPermi="['system:role:edit']"
+        [disabled]="!selection.single()"
+        class="gap-left"
+        (click)="openEdit(selectedRows()[0])"
+      >
+        <nz-icon nzType="edit" />修改
+      </button>
+      <button
+        nz-button
+        nzDanger
+        *appHasPermi="['system:role:remove']"
+        [disabled]="!selection.multiple()"
+        class="gap-left"
+        (click)="delete()"
+      >
+        <nz-icon nzType="delete" />删除
+      </button>
+      <button nz-button *appHasPermi="['system:role:export']" class="gap-left" (click)="export()">
+        <nz-icon nzType="download" />导出
+      </button>
+    </div>
+
+    <nz-table
+      nzSize="middle"
+      [nzData]="rows()"
+      [nzLoading]="loading()"
+      [nzTotal]="total()"
+      [nzPageIndex]="pageNum"
+      [nzPageSize]="pageSize"
+      [nzFrontPagination]="false"
+      [nzShowSizeChanger]="true"
+      [nzShowTotal]="totalTpl"
+      (nzQueryParams)="onQueryParams($event)"
+    >
+      <thead>
+        <tr>
+          <th nzWidth="50px">
+            <label
+              nz-checkbox
+              [ngModel]="selection.allChecked()"
+              [nzIndeterminate]="selection.indeterminate()"
+              (ngModelChange)="selection.onAllChecked($event, rows())"
+            ></label>
+          </th>
+          <th nzWidth="90px">角色编号</th>
+          <th nzWidth="150px">角色名称</th>
+          <th nzWidth="150px">权限字符</th>
+          <th nzWidth="90px">显示顺序</th>
+          <th nzWidth="80px">状态</th>
+          <th nzWidth="160px">创建时间</th>
+          <th nzWidth="220px" nzRight>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track row.roleId) {
+          <tr>
+            <td>
+              <label
+                nz-checkbox
+                [ngModel]="selection.isChecked(row)"
+                (ngModelChange)="selection.onItemChecked(row.roleId, $event)"
+              ></label>
+            </td>
+            <td>{{ row.roleId }}</td>
+            <td>{{ row.roleName }}</td>
+            <td>{{ row.roleKey }}</td>
+            <td>{{ row.roleSort }}</td>
+            <td>
+              <nz-switch [ngModel]="row.status === '0'" (ngModelChange)="statusChange(row)"></nz-switch>
+            </td>
+            <td>{{ row.createTime }}</td>
+            <td nzRight>
+              @if (row.roleId !== 1) {
+                <a *appHasPermi="['system:role:edit']" class="gap-left" (click)="openEdit(row)">
+                  <nz-icon nzType="edit" />修改
+                </a>
+                <a *appHasPermi="['system:role:remove']" class="gap-left" (click)="delete(row)">
+                  <nz-icon nzType="delete" />删除
+                </a>
+                <a
+                  *appHasPermi="['system:role:edit']"
+                  class="gap-left"
+                  nz-tooltip
+                  nzTooltipTitle="数据权限"
+                  (click)="openDataScope(row)"
+                >
+                  <nz-icon nzType="safety-certificate" />
+                </a>
+                <a
+                  *appHasPermi="['system:role:edit']"
+                  class="gap-left"
+                  nz-tooltip
+                  nzTooltipTitle="分配用户"
+                  (click)="authUser(row)"
+                >
+                  <nz-icon nzType="user-add" />
+                </a>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+  </nz-card>
+</div>
+
+<ng-template #totalTpl let-total>共 {{ total }} 条</ng-template>
+
+<nz-modal
+  [nzVisible]="dialogVisible()"
+  (nzVisibleChange)="dialogVisible.set($event)"
+  (nzOnCancel)="dialogVisible.set(false)"
+  [nzTitle]="dialogTitle()"
+  nzWidth="700px"
+  nzOkText="确定"
+  nzCancelText="取消"
+  [nzOkLoading]="submitting()"
+  (nzOnOk)="submitForm()"
+>
+  <ng-container *nzModalContent>
+    <form nz-form [formGroup]="form" nzLayout="vertical">
+      <div nz-row [nzGutter]="16">
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="roleName" nzRequired>角色名称</nz-form-label>
+            <nz-form-control nzErrorTip="请输入角色名称">
+              <input nz-input formControlName="roleName" placeholder="请输入角色名称" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="roleKey" nzRequired>权限字符</nz-form-label>
+            <nz-form-control nzErrorTip="请输入权限字符">
+              <input nz-input formControlName="roleKey" placeholder="请输入权限字符" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="roleSort" nzRequired>角色顺序</nz-form-label>
+            <nz-form-control nzErrorTip="请输入角色顺序">
+              <nz-input-number formControlName="roleSort" [nzMin]="0" [nzMax]="999" class="full-width"></nz-input-number>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="status">状态</nz-form-label>
+            <nz-form-control>
+              <nz-radio-group formControlName="status">
+                @for (item of statusOptions(); track item.value) {
+                  <label nz-radio [nzValue]="item.value">{{ item.label }}</label>
+                }
+              </nz-radio-group>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="24">
+          <nz-form-item>
+            <nz-form-label nzFor="menuIds">菜单权限</nz-form-label>
+            <nz-form-control>
+              <div class="tree-box">
+                <nz-tree
+                  [nzData]="menuNodes()"
+                  [nzCheckable]="true"
+                  [nzCheckedKeys]="checkedMenuKeys()"
+                  (nzCheckBoxChange)="onMenuCheck($any($event))"
+                  nzDefaultExpandAll
+                  nzBlockNode
+                ></nz-tree>
+              </div>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="24">
+          <nz-form-item>
+            <nz-form-label nzFor="remark">备注</nz-form-label>
+            <nz-form-control>
+              <textarea nz-input formControlName="remark" rows="2" placeholder="请输入备注"></textarea>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+    </form>
+  </ng-container>
+</nz-modal>
+
+<nz-modal
+  [nzVisible]="scopeVisible()"
+  (nzVisibleChange)="scopeVisible.set($event)"
+  (nzOnCancel)="scopeVisible.set(false)"
+  nzTitle="分配数据权限"
+  nzWidth="600px"
+  nzOkText="确定"
+  nzCancelText="取消"
+  [nzOkLoading]="scopeSubmitting()"
+  (nzOnOk)="submitDataScope()"
+>
+  <ng-container *nzModalContent>
+    <div class="scope-form">
+      <div class="scope-row">
+        <span class="scope-label">数据范围</span>
+        <nz-select
+          [ngModel]="scopeDataScope()"
+          (ngModelChange)="scopeDataScope.set($event)"
+          class="scope-control"
+        >
+          @for (item of dataScopeOptions(); track item.value) {
+            <nz-option [nzValue]="item.value" [nzLabel]="item.label"></nz-option>
+          }
+        </nz-select>
+      </div>
+      @if (scopeDataScope() === '2') {
+        <div class="tree-box">
+          <nz-tree
+            [nzData]="deptNodes()"
+            [nzCheckable]="true"
+            [nzCheckedKeys]="checkedDeptKeys()"
+            (nzCheckBoxChange)="onDeptCheck($any($event))"
+            nzDefaultExpandAll
+            nzBlockNode
+          ></nz-tree>
+        </div>
+      }
+    </div>
+  </ng-container>
+</nz-modal>

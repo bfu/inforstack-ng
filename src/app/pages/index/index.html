@@ -1,0 +1,44 @@
+<div class="index-page">
+  <div class="welcome-card">
+    <div class="welcome-main">
+      <h2>欢迎您，{{ store.nickName() || store.name() }}</h2>
+      <p class="welcome-sub">{{ today }} · 祝您工作愉快</p>
+    </div>
+    <div class="welcome-meta">
+      <nz-tag nzColor="blue">账号：{{ store.name() }}</nz-tag>
+      <nz-tag nzColor="green">角色：{{ roleText() }}</nz-tag>
+    </div>
+  </div>
+
+  <nz-card nzTitle="快捷入口" [nzBordered]="false" class="quick-card">
+    <div class="quick-grid">
+      @for (item of quickEntries; track item.path) {
+        <a class="quick-item" [routerLink]="item.path">
+          <nz-icon [nzType]="item.icon" class="quick-icon" />
+          <span>{{ item.title }}</span>
+        </a>
+      }
+    </div>
+  </nz-card>
+
+  <nz-card nzTitle="系统信息" [nzBordered]="false" class="info-card">
+    <div class="info-grid">
+      <div class="info-item">
+        <span class="info-label">前端框架</span>
+        <span class="info-value">Angular 22 + ng-zorro-antd</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">后端接口</span>
+        <span class="info-value">RuoYi Spring Boot</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">当前用户</span>
+        <span class="info-value">{{ store.name() || '未登录' }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">权限数量</span>
+        <span class="info-value">{{ store.permissions().length }} 项</span>
+      </div>
+    </div>
+  </nz-card>
+</div>

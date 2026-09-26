@@ -1,0 +1,43 @@
+<div class="auth-role-page">
+  <nz-card [nzBordered]="false" nzTitle="分配角色">
+    <nz-descriptions nzBordered [nzColumn]="2" class="gap-bottom">
+      <nz-descriptions-item nzTitle="用户昵称">{{ user().nickName }}</nz-descriptions-item>
+      <nz-descriptions-item nzTitle="登录账号">{{ user().userName }}</nz-descriptions-item>
+    </nz-descriptions>
+
+    <nz-table nzSize="middle" [nzData]="roles()" [nzLoading]="loading()" [nzFrontPagination]="false">
+      <thead>
+        <tr>
+          <th nzWidth="60px">选择</th>
+          <th nzWidth="100px">角色编号</th>
+          <th nzWidth="160px">角色名称</th>
+          <th nzWidth="160px">权限字符</th>
+          <th nzWidth="180px">创建时间</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (role of roles(); track role.roleId) {
+          <tr>
+            <td>
+              <label
+                nz-checkbox
+                [nzDisabled]="role.status === '1'"
+                [ngModel]="selection.isChecked(role)"
+                (ngModelChange)="selection.onItemChecked(role.roleId, $event)"
+              ></label>
+            </td>
+            <td>{{ role.roleId }}</td>
+            <td>{{ role.roleName }}</td>
+            <td>{{ role.roleKey }}</td>
+            <td>{{ role.createTime }}</td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+
+    <div class="footer-bar">
+      <button nz-button nzType="primary" [nzLoading]="submitting()" (click)="submit()">保存</button>
+      <button nz-button class="gap-left" (click)="close()">关闭</button>
+    </div>
+  </nz-card>
+</div>

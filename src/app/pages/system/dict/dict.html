@@ -1,0 +1,370 @@
+<div class="dict-page">
+  <div class="dict-layout">
+    <nz-card [nzBordered]="false" class="type-card" nzTitle="字典类型">
+      <form nz-form nzLayout="vertical" [formGroup]="typeSearch" class="search-form">
+        <div nz-row [nzGutter]="8">
+          <div nz-col [nzSpan]="12">
+            <nz-form-item>
+              <nz-form-control>
+                <input nz-input formControlName="dictName" placeholder="字典名称" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="12">
+            <nz-form-item>
+              <nz-form-control>
+                <input nz-input formControlName="dictType" placeholder="字典类型" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="12">
+            <nz-form-item>
+              <nz-form-control>
+                <nz-select formControlName="status" nzPlaceHolder="字典状态" nzAllowClear>
+                  @for (item of statusOptions(); track item.value) {
+                    <nz-option [nzValue]="item.value" [nzLabel]="item.label"></nz-option>
+                  }
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="12">
+            <nz-form-item>
+              <nz-form-control>
+                <button nz-button nzType="primary" (click)="getTypeList()"><nz-icon nzType="search" />搜索</button>
+                <button nz-button class="gap-left" (click)="resetTypeQuery()"><nz-icon nzType="reload" />重置</button>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+      </form>
+
+      <div class="toolbar">
+        <button nz-button nzType="primary" *appHasPermi="['system:dict:add']" (click)="openTypeAdd()">
+          <nz-icon nzType="plus" />新增
+        </button>
+        <button
+          nz-button
+          *appHasPermi="['system:dict:edit']"
+          [disabled]="!typeSingle()"
+          class="gap-left"
+          (click)="openTypeEdit(typeRows()[0])"
+        >
+          <nz-icon nzType="edit" />修改
+        </button>
+        <button
+          nz-button
+          nzDanger
+          *appHasPermi="['system:dict:remove']"
+          [disabled]="!typeMultiple()"
+          class="gap-left"
+          (click)="deleteType()"
+        >
+          <nz-icon nzType="delete" />删除
+        </button>
+        <button nz-button *appHasPermi="['system:dict:export']" class="gap-left" (click)="exportType()">
+          <nz-icon nzType="download" />导出
+        </button>
+        <button nz-button *appHasPermi="['system:dict:remove']" class="gap-left" (click)="refreshCache()">
+          <nz-icon nzType="sync" />清除缓存
+        </button>
+      </div>
+
+      <nz-table
+        nzSize="middle"
+        [nzData]="types()"
+        [nzLoading]="typeLoading()"
+        [nzTotal]="typeTotal()"
+        [nzPageIndex]="typePageNum"
+        [nzPageSize]="typePageSize"
+        [nzFrontPagination]="false"
+        [nzShowSizeChanger]="true"
+        (nzQueryParams)="onTypeParams($event)"
+      >
+        <thead>
+          <tr>
+            <th nzWidth="50px"></th>
+            <th>字典名称</th>
+            <th>字典类型</th>
+            <th nzWidth="80px">状态</th>
+            <th nzWidth="120px">操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of types(); track row.dictId) {
+            <tr [class.row-active]="currentType() === row.dictType" (click)="selectType(row)">
+              <td>
+                <label
+                  nz-checkbox
+                  [ngModel]="typeChecked().has(row.dictId!)"
+                  (ngModelChange)="onTypeChecked(row.dictId, $event)"
+                  (click)="$event.stopPropagation()"
+                ></label>
+              </td>
+              <td>{{ row.dictName }}</td>
+              <td><a (click)="selectType(row); $event.stopPropagation()">{{ row.dictType }}</a></td>
+              <td><app-dict-tag [value]="row.status" dictType="sys_normal_disable" /></td>
+              <td>
+                <a *appHasPermi="['system:dict:edit']" (click)="openTypeEdit(row); $event.stopPropagation()">修改</a>
+                <a *appHasPermi="['system:dict:remove']" class="gap-left" (click)="deleteType(row); $event.stopPropagation()">
+                  删除
+                </a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </nz-table>
+    </nz-card>
+
+    <nz-card [nzBordered]="false" class="data-card" [nzTitle]="dataCardTitle()">
+      <form nz-form nzLayout="inline" [formGroup]="dataSearch">
+        <nz-form-item>
+          <nz-form-control>
+            <input nz-input formControlName="dictLabel" placeholder="字典标签" class="field-sm" />
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-control>
+            <nz-select formControlName="status" nzPlaceHolder="数据状态" nzAllowClear class="field-sm">
+              @for (item of statusOptions(); track item.value) {
+                <nz-option [nzValue]="item.value" [nzLabel]="item.label"></nz-option>
+              }
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-control>
+            <button nz-button nzType="primary" (click)="getDataList()"><nz-icon nzType="search" />搜索</button>
+            <button nz-button class="gap-left" (click)="resetDataQuery()"><nz-icon nzType="reload" />重置</button>
+          </nz-form-control>
+        </nz-form-item>
+      </form>
+
+      <div class="toolbar">
+        <button nz-button nzType="primary" *appHasPermi="['system:dict:add']" (click)="openDataAdd()">
+          <nz-icon nzType="plus" />新增
+        </button>
+        <button
+          nz-button
+          *appHasPermi="['system:dict:edit']"
+          [disabled]="!dataSingle()"
+          class="gap-left"
+          (click)="openDataEdit(dataRows()[0])"
+        >
+          <nz-icon nzType="edit" />修改
+        </button>
+        <button
+          nz-button
+          nzDanger
+          *appHasPermi="['system:dict:remove']"
+          [disabled]="!dataMultiple()"
+          class="gap-left"
+          (click)="deleteData()"
+        >
+          <nz-icon nzType="delete" />删除
+        </button>
+        <button nz-button *appHasPermi="['system:dict:export']" class="gap-left" (click)="exportData()">
+          <nz-icon nzType="download" />导出
+        </button>
+      </div>
+
+      <nz-table
+        nzSize="middle"
+        [nzData]="datas()"
+        [nzLoading]="dataLoading()"
+        [nzTotal]="dataTotal()"
+        [nzPageIndex]="dataPageNum"
+        [nzPageSize]="dataPageSize"
+        [nzFrontPagination]="false"
+        [nzShowSizeChanger]="true"
+        (nzQueryParams)="onDataParams($event)"
+      >
+        <thead>
+          <tr>
+            <th nzWidth="50px"></th>
+            <th nzWidth="90px">字典编码</th>
+            <th nzWidth="140px">字典标签</th>
+            <th nzWidth="140px">字典键值</th>
+            <th nzWidth="90px">字典排序</th>
+            <th nzWidth="100px">回显样式</th>
+            <th nzWidth="80px">状态</th>
+            <th nzWidth="120px">操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of datas(); track row.dictCode) {
+            <tr>
+              <td>
+                <label
+                  nz-checkbox
+                  [ngModel]="dataChecked().has(row.dictCode!)"
+                  (ngModelChange)="onDataChecked(row.dictCode, $event)"
+                ></label>
+              </td>
+              <td>{{ row.dictCode }}</td>
+              <td>{{ row.dictLabel }}</td>
+              <td>{{ row.dictValue }}</td>
+              <td>{{ row.dictSort }}</td>
+              <td>{{ row.listClass }}</td>
+              <td><app-dict-tag [value]="row.status" dictType="sys_normal_disable" /></td>
+              <td>
+                <a *appHasPermi="['system:dict:edit']" (click)="openDataEdit(row)">修改</a>
+                <a *appHasPermi="['system:dict:remove']" class="gap-left" (click)="deleteData(row)">删除</a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </nz-table>
+    </nz-card>
+  </div>
+</div>
+
+<nz-modal
+  [nzVisible]="typeDialog()"
+  (nzVisibleChange)="typeDialog.set($event)"
+  (nzOnCancel)="typeDialog.set(false)"
+  [nzTitle]="typeTitle()"
+  nzWidth="640px"
+  nzOkText="确定"
+  nzCancelText="取消"
+  [nzOkLoading]="submitting()"
+  (nzOnOk)="submitType()"
+>
+  <ng-container *nzModalContent>
+    <form nz-form [formGroup]="typeForm" nzLayout="vertical">
+      <div nz-row [nzGutter]="16">
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="dictName" nzRequired>字典名称</nz-form-label>
+            <nz-form-control nzErrorTip="请输入字典名称">
+              <input nz-input formControlName="dictName" placeholder="请输入字典名称" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="dictType" nzRequired>字典类型</nz-form-label>
+            <nz-form-control nzErrorTip="请输入字典类型">
+              <input nz-input formControlName="dictType" placeholder="请输入字典类型" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="status">状态</nz-form-label>
+            <nz-form-control>
+              <nz-radio-group formControlName="status">
+                @for (item of statusOptions(); track item.value) {
+                  <label nz-radio [nzValue]="item.value">{{ item.label }}</label>
+                }
+              </nz-radio-group>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="24">
+          <nz-form-item>
+            <nz-form-label nzFor="remark">备注</nz-form-label>
+            <nz-form-control>
+              <textarea nz-input formControlName="remark" rows="2" placeholder="请输入备注"></textarea>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+    </form>
+  </ng-container>
+</nz-modal>
+
+<nz-modal
+  [nzVisible]="dataDialog()"
+  (nzVisibleChange)="dataDialog.set($event)"
+  (nzOnCancel)="dataDialog.set(false)"
+  [nzTitle]="dataTitle()"
+  nzWidth="700px"
+  nzOkText="确定"
+  nzCancelText="取消"
+  [nzOkLoading]="submitting()"
+  (nzOnOk)="submitData()"
+>
+  <ng-container *nzModalContent>
+    <form nz-form [formGroup]="dataForm" nzLayout="vertical">
+      <div nz-row [nzGutter]="16">
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="dictType">字典类型</nz-form-label>
+            <nz-form-control>
+              <input nz-input [value]="currentType()" disabled />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="dictLabel" nzRequired>数据标签</nz-form-label>
+            <nz-form-control nzErrorTip="请输入数据标签">
+              <input nz-input formControlName="dictLabel" placeholder="请输入数据标签" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="dictValue" nzRequired>数据键值</nz-form-label>
+            <nz-form-control nzErrorTip="请输入数据键值">
+              <input nz-input formControlName="dictValue" placeholder="请输入数据键值" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="dictSort" nzRequired>显示排序</nz-form-label>
+            <nz-form-control nzErrorTip="请输入显示排序">
+              <nz-input-number formControlName="dictSort" [nzMin]="0" [nzMax]="999" class="full-width"></nz-input-number>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="listClass">回显样式</nz-form-label>
+            <nz-form-control>
+              <nz-select formControlName="listClass">
+                @for (item of listClassOptions; track item.value) {
+                  <nz-option [nzValue]="item.value" [nzLabel]="item.label"></nz-option>
+                }
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="isDefault">是否默认</nz-form-label>
+            <nz-form-control>
+              <nz-radio-group formControlName="isDefault">
+                @for (item of yesNoOptions(); track item.value) {
+                  <label nz-radio [nzValue]="item.value">{{ item.label }}</label>
+                }
+              </nz-radio-group>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="status">状态</nz-form-label>
+            <nz-form-control>
+              <nz-radio-group formControlName="status">
+                @for (item of statusOptions(); track item.value) {
+                  <label nz-radio [nzValue]="item.value">{{ item.label }}</label>
+                }
+              </nz-radio-group>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="24">
+          <nz-form-item>
+            <nz-form-label nzFor="remark">备注</nz-form-label>
+            <nz-form-control>
+              <textarea nz-input formControlName="remark" rows="2" placeholder="请输入备注"></textarea>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+    </form>
+  </ng-container>
+</nz-modal>

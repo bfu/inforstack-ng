@@ -1,0 +1,284 @@
+<div class="menu-page">
+  <nz-card [nzBordered]="false" class="search-card">
+    <form nz-form nzLayout="inline" [formGroup]="searchForm">
+      <nz-form-item>
+        <nz-form-control>
+          <input nz-input formControlName="menuName" placeholder="菜单名称" class="field-md" />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <nz-select formControlName="status" nzPlaceHolder="菜单状态" nzAllowClear class="field-md">
+            @for (item of statusOptions(); track item.value) {
+              <nz-option [nzValue]="item.value" [nzLabel]="item.label"></nz-option>
+            }
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <button nz-button nzType="primary" (click)="getList()"><nz-icon nzType="search" />搜索</button>
+          <button nz-button class="gap-left" (click)="resetQuery()"><nz-icon nzType="reload" />重置</button>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </nz-card>
+
+  <nz-card [nzBordered]="false" class="table-card">
+    <div class="toolbar">
+      <button nz-button nzType="primary" *appHasPermi="['system:menu:add']" (click)="openAdd()">
+        <nz-icon nzType="plus" />新增
+      </button>
+      <button
+        nz-button
+        *appHasPermi="['system:menu:edit']"
+        [disabled]="!selection.single()"
+        class="gap-left"
+        (click)="openEdit(selectedRows()[0])"
+      >
+        <nz-icon nzType="edit" />修改
+      </button>
+      <button
+        nz-button
+        nzDanger
+        *appHasPermi="['system:menu:remove']"
+        [disabled]="!selection.multiple()"
+        class="gap-left"
+        (click)="delete()"
+      >
+        <nz-icon nzType="delete" />删除
+      </button>
+      <button nz-button class="gap-left" (click)="toggleExpandAll()">
+        <nz-icon [nzType]="allExpanded() ? 'up' : 'down'" />{{ allExpanded() ? '折叠' : '展开' }}
+      </button>
+    </div>
+
+    <nz-table nzSize="middle" [nzData]="flatRows()" [nzLoading]="loading()" [nzFrontPagination]="false">
+      <thead>
+        <tr>
+          <th nzWidth="50px"></th>
+          <th nzWidth="220px">菜单名称</th>
+          <th nzWidth="90px">图标</th>
+          <th nzWidth="80px">排序</th>
+          <th nzWidth="160px">权限标识</th>
+          <th nzWidth="180px">组件路径</th>
+          <th nzWidth="90px">状态</th>
+          <th nzWidth="160px">创建时间</th>
+          <th nzWidth="180px" nzRight>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of flatRows(); track row.menuId) {
+          <tr>
+            <td>
+              <label
+                nz-checkbox
+                [ngModel]="selection.hasKey(row.menuId)"
+                (ngModelChange)="selection.onItemChecked(row.menuId, $event)"
+              ></label>
+            </td>
+            <td [style.paddingLeft.px]="12 + row.level * 20">
+              @if (row.children?.length) {
+                <span class="expand-btn" (click)="toggleRow(row)">
+                  <nz-icon [nzType]="expandedIds().has(row.menuId!) ? 'caret-down' : 'caret-right'" />
+                </span>
+              } @else {
+                <span class="expand-placeholder"></span>
+              }
+              {{ row.menuName }}
+            </td>
+            <td>
+              @if (row.icon) {
+                <nz-icon [nzType]="resolveIcon(row.icon)" />
+              } @else {
+                <span class="icon-empty">-</span>
+              }
+            </td>
+            <td>{{ row.orderNum }}</td>
+            <td>{{ row.perms }}</td>
+            <td>{{ row.component }}</td>
+            <td><app-dict-tag [value]="row.status" dictType="sys_normal_disable" /></td>
+            <td>{{ row.createTime }}</td>
+            <td nzRight>
+              <a *appHasPermi="['system:menu:edit']" class="gap-left" (click)="openEdit(row)">
+                <nz-icon nzType="edit" />修改
+              </a>
+              <a *appHasPermi="['system:menu:add']" class="gap-left" (click)="openAdd(row.menuId)">
+                <nz-icon nzType="plus" />新增
+              </a>
+              <a *appHasPermi="['system:menu:remove']" class="gap-left" (click)="delete(row)">
+                <nz-icon nzType="delete" />删除
+              </a>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+  </nz-card>
+</div>
+
+<nz-modal
+  [nzVisible]="dialogVisible()"
+  (nzVisibleChange)="dialogVisible.set($event)"
+  (nzOnCancel)="dialogVisible.set(false)"
+  [nzTitle]="dialogTitle()"
+  nzWidth="700px"
+  nzOkText="确定"
+  nzCancelText="取消"
+  [nzOkLoading]="submitting()"
+  (nzOnOk)="submitForm()"
+>
+  <ng-container *nzModalContent>
+    <form nz-form [formGroup]="form" nzLayout="vertical">
+      <div nz-row [nzGutter]="16">
+        <div nz-col [nzSpan]="24">
+          <nz-form-item>
+            <nz-form-label nzFor="menuType">菜单类型</nz-form-label>
+            <nz-form-control>
+              <nz-radio-group formControlName="menuType">
+                <label nz-radio nzValue="M">目录</label>
+                <label nz-radio nzValue="C">菜单</label>
+                <label nz-radio nzValue="F">按钮</label>
+              </nz-radio-group>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="parentId">上级菜单</nz-form-label>
+            <nz-form-control>
+              <nz-tree-select
+                formControlName="parentId"
+                [nzNodes]="parentOptions()"
+                nzPlaceHolder="请选择上级菜单"
+                nzShowSearch
+              ></nz-tree-select>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="menuName" nzRequired>菜单名称</nz-form-label>
+            <nz-form-control nzErrorTip="请输入菜单名称">
+              <input nz-input formControlName="menuName" placeholder="请输入菜单名称" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        @if (menuType() !== 'F') {
+          <div nz-col [nzSpan]="12">
+            <nz-form-item>
+              <nz-form-label nzFor="icon">菜单图标</nz-form-label>
+              <nz-form-control>
+                <div class="icon-picker">
+                  <nz-select
+                    formControlName="icon"
+                    nzPlaceHolder="请选择图标"
+                    nzAllowClear
+                    nzShowSearch
+                    class="icon-picker-select"
+                  >
+                    @for (name of icons; track name) {
+                      <nz-option [nzValue]="name" [nzLabel]="name"></nz-option>
+                    }
+                  </nz-select>
+                  <nz-icon class="icon-picker-preview" [nzType]="resolveIcon(form.controls.icon.value)" />
+                </div>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="12">
+            <nz-form-item>
+              <nz-form-label nzFor="orderNum" nzRequired>显示排序</nz-form-label>
+              <nz-form-control nzErrorTip="请输入显示排序">
+                <nz-input-number formControlName="orderNum" [nzMin]="0" [nzMax]="999" class="full-width"></nz-input-number>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="12">
+            <nz-form-item>
+              <nz-form-label nzFor="isFrame">是否外链</nz-form-label>
+              <nz-form-control>
+                <nz-radio-group formControlName="isFrame">
+                  <label nz-radio nzValue="0">是</label>
+                  <label nz-radio nzValue="1">否</label>
+                </nz-radio-group>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="12">
+            <nz-form-item>
+              <nz-form-label nzFor="path" nzRequired>路由地址</nz-form-label>
+              <nz-form-control nzErrorTip="请输入路由地址">
+                <input nz-input formControlName="path" placeholder="请输入路由地址" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          @if (menuType() === 'C') {
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label nzFor="component" nzRequired>组件路径</nz-form-label>
+                <nz-form-control nzErrorTip="请输入组件路径">
+                  <input nz-input formControlName="component" placeholder="请输入组件路径" />
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label nzFor="query">路由参数</nz-form-label>
+                <nz-form-control>
+                  <input nz-input formControlName="query" placeholder='如 {"id": 1}' />
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label nzFor="isCache">是否缓存</nz-form-label>
+                <nz-form-control>
+                  <nz-radio-group formControlName="isCache">
+                    @for (item of cacheOptions(); track item.value) {
+                      <label nz-radio [nzValue]="item.value">{{ item.label }}</label>
+                    }
+                  </nz-radio-group>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+          }
+          <div nz-col [nzSpan]="12">
+            <nz-form-item>
+              <nz-form-label nzFor="visible">显示状态</nz-form-label>
+              <nz-form-control>
+                <nz-radio-group formControlName="visible">
+                  @for (item of visibleOptions(); track item.value) {
+                    <label nz-radio [nzValue]="item.value">{{ item.label }}</label>
+                  }
+                </nz-radio-group>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        }
+        @if (menuType() !== 'M') {
+          <div nz-col [nzSpan]="12">
+            <nz-form-item>
+              <nz-form-label nzFor="perms">权限标识</nz-form-label>
+              <nz-form-control>
+                <input nz-input formControlName="perms" placeholder="请输入权限标识" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        }
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="status">菜单状态</nz-form-label>
+            <nz-form-control>
+              <nz-radio-group formControlName="status">
+                @for (item of statusOptions(); track item.value) {
+                  <label nz-radio [nzValue]="item.value">{{ item.label }}</label>
+                }
+              </nz-radio-group>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+    </form>
+  </ng-container>
+</nz-modal>

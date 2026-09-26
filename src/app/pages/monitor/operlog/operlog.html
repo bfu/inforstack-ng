@@ -1,0 +1,155 @@
+<div class="operlog-page">
+  <nz-card [nzBordered]="false" class="search-card">
+    <form nz-form nzLayout="inline" [formGroup]="searchForm">
+      <nz-form-item>
+        <nz-form-control>
+          <input nz-input formControlName="operIp" placeholder="操作地址" class="field-md" />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <input nz-input formControlName="title" placeholder="系统模块" class="field-md" />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <input nz-input formControlName="operName" placeholder="操作人员" class="field-md" />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <nz-select formControlName="businessType" nzPlaceHolder="操作类型" nzAllowClear class="field-md">
+            @for (item of operTypeOptions(); track item.value) {
+              <nz-option [nzValue]="item.value" [nzLabel]="item.label"></nz-option>
+            }
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <nz-select formControlName="status" nzPlaceHolder="操作状态" nzAllowClear class="field-md">
+            @for (item of statusOptions(); track item.value) {
+              <nz-option [nzValue]="item.value" [nzLabel]="item.label"></nz-option>
+            }
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <nz-range-picker [(ngModel)]="dateRange" [ngModelOptions]="{ standalone: true }" class="field-lg"></nz-range-picker>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <button nz-button nzType="primary" (click)="getList()"><nz-icon nzType="search" />搜索</button>
+          <button nz-button class="gap-left" (click)="resetQuery()"><nz-icon nzType="reload" />重置</button>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </nz-card>
+
+  <nz-card [nzBordered]="false" class="table-card">
+    <div class="toolbar">
+      <button nz-button nzDanger *appHasPermi="['monitor:operlog:remove']" [disabled]="!selection.multiple()" (click)="delete()">
+        <nz-icon nzType="delete" />删除
+      </button>
+      <button nz-button nzDanger *appHasPermi="['monitor:operlog:remove']" class="gap-left" (click)="clean()">
+        <nz-icon nzType="delete" />清空
+      </button>
+      <button nz-button *appHasPermi="['monitor:operlog:export']" class="gap-left" (click)="export()">
+        <nz-icon nzType="download" />导出
+      </button>
+    </div>
+
+    <nz-table
+      nzSize="middle"
+      [nzData]="rows()"
+      [nzLoading]="loading()"
+      [nzTotal]="total()"
+      [nzPageIndex]="pageNum"
+      [nzPageSize]="pageSize"
+      [nzFrontPagination]="false"
+      [nzShowSizeChanger]="true"
+      [nzShowTotal]="totalTpl"
+      (nzQueryParams)="onQueryParams($event)"
+    >
+      <thead>
+        <tr>
+          <th nzWidth="50px">
+            <label nz-checkbox [ngModel]="selection.allChecked()" [nzIndeterminate]="selection.indeterminate()" (ngModelChange)="selection.onAllChecked($event, rows())"></label>
+          </th>
+          <th nzWidth="80px">日志编号</th>
+          <th nzWidth="120px">系统模块</th>
+          <th nzWidth="90px">操作类型</th>
+          <th nzWidth="100px">操作人员</th>
+          <th nzWidth="120px">操作地址</th>
+          <th nzWidth="90px">操作状态</th>
+          <th nzWidth="160px">操作日期</th>
+          <th nzWidth="100px">消耗时间</th>
+          <th nzWidth="80px" nzRight>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track row.operId) {
+          <tr>
+            <td>
+              <label nz-checkbox [ngModel]="selection.isChecked(row)" (ngModelChange)="selection.onItemChecked(row.operId, $event)"></label>
+            </td>
+            <td>{{ row.operId }}</td>
+            <td>{{ row.title }}</td>
+            <td><app-dict-tag [value]="row.businessType" dictType="sys_oper_type" /></td>
+            <td>{{ row.operName }}</td>
+            <td>{{ row.operIp }}</td>
+            <td><app-dict-tag [value]="row.status" dictType="sys_common_status" /></td>
+            <td>{{ row.operTime }}</td>
+            <td>{{ row.costTime }}毫秒</td>
+            <td nzRight>
+              <a *appHasPermi="['monitor:operlog:query']" (click)="openDetail(row)"><nz-icon nzType="eye" />详细</a>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+  </nz-card>
+</div>
+
+<ng-template #totalTpl let-total>共 {{ total }} 条</ng-template>
+
+<nz-modal
+  [nzVisible]="detailVisible()"
+  (nzVisibleChange)="detailVisible.set($event)"
+  nzTitle="操作日志详细"
+  nzWidth="780px"
+  [nzFooter]="null"
+>
+  <ng-container *nzModalContent>
+    @if (detailRow(); as row) {
+      <nz-descriptions nzBordered [nzColumn]="2" nzSize="middle" class="detail-desc">
+        <nz-descriptions-item nzTitle="操作模块">{{ row.title }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="业务类型">{{ detailBusinessType() }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="操作时间">{{ row.operTime }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="操作状态">
+          <nz-tag [nzColor]="row.status === 0 ? 'green' : 'red'">{{ row.status === 0 ? '正常' : '异常' }}</nz-tag>
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="操作人员">{{ row.operName }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="部门名称">{{ row.deptName }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="操作地址">{{ row.operIp }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="操作地点">{{ row.operLocation }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="请求地址" [nzSpan]="2">{{ row.requestMethod }} {{ row.operUrl }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="操作方法" [nzSpan]="2">{{ row.method }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="消耗时间" [nzSpan]="2">{{ row.costTime }} 毫秒</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="请求参数" [nzSpan]="2">
+          <pre class="json-block">{{ formatJson(row.operParam) }}</pre>
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="返回参数" [nzSpan]="2">
+          <pre class="json-block">{{ formatJson(row.jsonResult) }}</pre>
+        </nz-descriptions-item>
+        @if (row.status !== 0) {
+          <nz-descriptions-item nzTitle="异常信息" [nzSpan]="2">
+            <pre class="json-block">{{ row.errorMsg }}</pre>
+          </nz-descriptions-item>
+        }
+      </nz-descriptions>
+    }
+  </ng-container>
+</nz-modal>

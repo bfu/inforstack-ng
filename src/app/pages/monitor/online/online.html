@@ -1,0 +1,92 @@
+<div class="online-page">
+  <nz-card [nzBordered]="false" class="search-card">
+    <form nz-form nzLayout="inline" [formGroup]="searchForm">
+      <nz-form-item>
+        <nz-form-control>
+          <input nz-input formControlName="ipaddr" placeholder="登录地址" class="field-md" />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <input nz-input formControlName="userName" placeholder="用户名称" class="field-md" />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <button nz-button nzType="primary" (click)="getList()"><nz-icon nzType="search" />搜索</button>
+          <button nz-button class="gap-left" (click)="resetQuery()"><nz-icon nzType="reload" />重置</button>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </nz-card>
+
+  <nz-card [nzBordered]="false" class="table-card">
+    <div class="toolbar">
+      <button
+        nz-button
+        nzDanger
+        *appHasPermi="['monitor:online:batchLogout']"
+        [disabled]="!selection.multiple()"
+        (click)="forceLogout()"
+      >
+        <nz-icon nzType="logout" />批量强退
+      </button>
+    </div>
+
+    <nz-table
+      nzSize="middle"
+      [nzData]="rows()"
+      [nzLoading]="loading()"
+      [nzTotal]="rows().length"
+      [nzPageIndex]="pageNum"
+      [nzPageSize]="pageSize"
+      [nzFrontPagination]="true"
+      [nzShowSizeChanger]="true"
+      [nzShowTotal]="totalTpl"
+      (nzQueryParams)="onQueryParams($event)"
+    >
+      <thead>
+        <tr>
+          <th nzWidth="50px">
+            <label nz-checkbox [ngModel]="selection.allChecked()" [nzIndeterminate]="selection.indeterminate()" (ngModelChange)="selection.onAllChecked($event, rows())"></label>
+          </th>
+          <th nzWidth="60px">序号</th>
+          <th nzWidth="220px">会话编号</th>
+          <th nzWidth="110px">登录名称</th>
+          <th nzWidth="110px">所属部门</th>
+          <th nzWidth="120px">主机</th>
+          <th nzWidth="120px">登录地点</th>
+          <th nzWidth="110px">操作系统</th>
+          <th nzWidth="110px">浏览器</th>
+          <th nzWidth="160px">登录时间</th>
+          <th nzWidth="80px" nzRight>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track row.tokenId) {
+          <tr>
+            <td>
+              <label nz-checkbox [ngModel]="selection.isChecked(row)" (ngModelChange)="selection.onItemChecked(row.tokenId, $event)"></label>
+            </td>
+            <td>{{ (pageNum - 1) * pageSize + $index + 1 }}</td>
+            <td>{{ row.tokenId }}</td>
+            <td>{{ row.userName }}</td>
+            <td>{{ row.deptName }}</td>
+            <td>{{ row.ipaddr }}</td>
+            <td>{{ row.loginLocation }}</td>
+            <td>{{ row.os }}</td>
+            <td>{{ row.browser }}</td>
+            <td>{{ formatTime(row.loginTime) }}</td>
+            <td nzRight>
+              <a *appHasPermi="['monitor:online:forceLogout']" (click)="forceLogout(row)">
+                <nz-icon nzType="logout" />强退
+              </a>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+  </nz-card>
+</div>
+
+<ng-template #totalTpl let-total>共 {{ total }} 条</ng-template>

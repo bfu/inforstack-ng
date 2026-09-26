@@ -1,0 +1,52 @@
+.user-page {
+  display: block;
+}
+
+.page-layout {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.dept-card {
+  flex: 0 0 240px;
+  max-height: calc(100vh - 74px);
+  overflow: auto;
+
+  @media screen and (max-width: 991px) {
+    display: none;
+  }
+}
+
+.page-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.search-card :host ::ng-deep .ant-card-body {
+  padding-bottom: 0;
+}
+
+.table-card {
+  .toolbar {
+    margin-bottom: 12px;
+  }
+}
+
+.import-option {
+  margin-top: 12px;
+}
+
+.pwd-tpl {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .pwd-label {
+    flex: 0 0 56px;
+    color: #606266;
+  }
+}

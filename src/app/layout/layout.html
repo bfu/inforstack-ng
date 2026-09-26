@@ -1,0 +1,27 @@
+<div
+  class="app-wrapper"
+  [class.hideSidebar]="!app.sidebarOpened()"
+  [class.mobile]="app.isMobile()"
+  [class.sidebar-light]="settings.sideTheme() === 'theme-light'"
+>
+  @if (app.isMobile() && app.sidebarOpened()) {
+    <div class="drawer-bg" (click)="app.closeSideBar(false)"></div>
+  }
+
+  <app-sidebar class="sidebar-container" />
+
+  <div class="main-container" [class.hasTagsView]="settings.tagsView()">
+    <div [class.fixed-header]="settings.fixedHeader()">
+      <app-navbar />
+      @if (settings.tagsView()) {
+        <app-tags-view />
+      }
+    </div>
+    <app-main />
+    @if (settings.footerVisible()) {
+      <div class="app-footer">{{ footerContent }}</div>
+    }
+  </div>
+
+  <app-settings-panel />
+</div>

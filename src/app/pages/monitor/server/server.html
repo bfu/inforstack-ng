@@ -1,0 +1,93 @@
+<div class="server-page">
+  <div nz-row [nzGutter]="12">
+    <div nz-col [nzSpan]="12" class="card-box">
+      <nz-card nzTitle="CPU" [nzBordered]="false" [nzLoading]="loading()">
+        <nz-descriptions nzBordered [nzColumn]="1" nzSize="middle">
+          <nz-descriptions-item nzTitle="核心数">{{ cpu().cpuNum }}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="用户使用率">{{ cpu().used }}%</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="系统使用率">{{ cpu().sys }}%</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="当前空闲率">{{ cpu().free }}%</nz-descriptions-item>
+        </nz-descriptions>
+      </nz-card>
+    </div>
+
+    <div nz-col [nzSpan]="12" class="card-box">
+      <nz-card nzTitle="内存" [nzBordered]="false" [nzLoading]="loading()">
+        <nz-table nzSize="middle" [nzData]="memRows()" [nzShowPagination]="false">
+          <thead>
+            <tr>
+              <th>属性</th>
+              <th>内存</th>
+              <th>JVM</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of memRows(); track row.label) {
+              <tr>
+                <td>{{ row.label }}</td>
+                <td [class.text-danger]="row.memWarning">{{ row.mem }}</td>
+                <td [class.text-danger]="row.jvmWarning">{{ row.jvm }}</td>
+              </tr>
+            }
+          </tbody>
+        </nz-table>
+      </nz-card>
+    </div>
+
+    <div nz-col [nzSpan]="24" class="card-box">
+      <nz-card nzTitle="服务器信息" [nzBordered]="false" [nzLoading]="loading()">
+        <nz-descriptions nzBordered [nzColumn]="2" nzSize="middle">
+          <nz-descriptions-item nzTitle="服务器名称">{{ sys().computerName }}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="操作系统">{{ sys().osName }}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="服务器IP">{{ sys().computerIp }}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="系统架构">{{ sys().osArch }}</nz-descriptions-item>
+        </nz-descriptions>
+      </nz-card>
+    </div>
+
+    <div nz-col [nzSpan]="24" class="card-box">
+      <nz-card nzTitle="Java虚拟机信息" [nzBordered]="false" [nzLoading]="loading()">
+        <nz-descriptions nzBordered [nzColumn]="2" nzSize="middle">
+          <nz-descriptions-item nzTitle="Java名称">{{ jvm().name }}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Java版本">{{ jvm().version }}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="启动时间">{{ jvm().startTime }}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="运行时长">{{ jvm().runTime }}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="安装路径" [nzSpan]="2">{{ jvm().home }}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="项目路径" [nzSpan]="2">{{ sys().userDir }}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="运行参数" [nzSpan]="2">{{ jvm().inputArgs }}</nz-descriptions-item>
+        </nz-descriptions>
+      </nz-card>
+    </div>
+
+    <div nz-col [nzSpan]="24" class="card-box">
+      <nz-card nzTitle="磁盘状态" [nzBordered]="false" [nzLoading]="loading()">
+        <nz-table nzSize="middle" [nzData]="sysFiles()" [nzShowPagination]="false">
+          <thead>
+            <tr>
+              <th>盘符路径</th>
+              <th>文件系统</th>
+              <th>盘符类型</th>
+              <th>总大小</th>
+              <th>可用大小</th>
+              <th>已用大小</th>
+              <th>已用百分比</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (file of sysFiles(); track $index) {
+              <tr>
+                <td>{{ file.dirName }}</td>
+                <td>{{ file.sysTypeName }}</td>
+                <td>{{ file.typeName }}</td>
+                <td>{{ file.total }}</td>
+                <td>{{ file.free }}</td>
+                <td>{{ file.used }}</td>
+                <td [class.text-danger]="isDanger(file.usage)">{{ file.usage }}%</td>
+              </tr>
+            }
+          </tbody>
+        </nz-table>
+      </nz-card>
+    </div>
+  </div>
+</div>

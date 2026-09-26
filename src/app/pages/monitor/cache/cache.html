@@ -1,0 +1,29 @@
+<div class="cache-page">
+  <div nz-row [nzGutter]="12">
+    <div nz-col [nzSpan]="24" class="card-box">
+      <nz-card nzTitle="基本信息" [nzBordered]="false" [nzLoading]="loading()">
+        <nz-descriptions nzBordered [nzColumn]="4" nzSize="middle">
+          @for (row of infoRows(); track row.label) {
+            <nz-descriptions-item [nzTitle]="row.label">{{ row.value }}</nz-descriptions-item>
+          }
+        </nz-descriptions>
+      </nz-card>
+    </div>
+
+    <div nz-col [nzSpan]="12" class="card-box">
+      <nz-card nzTitle="命令统计" [nzBordered]="false" [nzLoading]="loading()">
+        @if (!loading()) {
+          <app-echart [option]="commandOption()" height="420px" />
+        }
+      </nz-card>
+    </div>
+
+    <div nz-col [nzSpan]="12" class="card-box">
+      <nz-card nzTitle="内存信息" [nzBordered]="false" [nzLoading]="loading()">
+        @if (!loading()) {
+          <app-echart [option]="memoryOption()" height="420px" />
+        }
+      </nz-card>
+    </div>
+  </div>
+</div>

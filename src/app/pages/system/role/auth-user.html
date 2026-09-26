@@ -1,0 +1,137 @@
+<div class="auth-user-page">
+  <nz-card [nzBordered]="false" nzTitle="分配用户">
+    <nz-descriptions nzBordered [nzColumn]="2" class="gap-bottom">
+      <nz-descriptions-item nzTitle="角色名称">{{ role().roleName }}</nz-descriptions-item>
+      <nz-descriptions-item nzTitle="权限字符">{{ role().roleKey }}</nz-descriptions-item>
+    </nz-descriptions>
+
+    <form nz-form nzLayout="inline" [formGroup]="searchForm" class="search-form">
+      <nz-form-item>
+        <nz-form-control>
+          <input nz-input formControlName="userName" placeholder="用户名称" class="field-md" />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <input nz-input formControlName="phonenumber" placeholder="手机号码" class="field-md" />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <button nz-button nzType="primary" (click)="search()"><nz-icon nzType="search" />搜索</button>
+          <button nz-button class="gap-left" (click)="resetQuery()"><nz-icon nzType="reload" />重置</button>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+
+    <h3 class="section-title">已分配用户</h3>
+    <div class="toolbar">
+      <button nz-button nzDanger [disabled]="allocatedChecked().size === 0" (click)="cancelAll()">
+        <nz-icon nzType="delete" />批量取消授权
+      </button>
+    </div>
+    <nz-table
+      nzSize="middle"
+      [nzData]="allocated()"
+      [nzLoading]="loading()"
+      [nzTotal]="allocatedTotal()"
+      [nzPageIndex]="pageNum"
+      [nzPageSize]="pageSize"
+      [nzFrontPagination]="false"
+      [nzShowSizeChanger]="true"
+      (nzQueryParams)="onAllocatedParams($event)"
+    >
+      <thead>
+        <tr>
+          <th nzWidth="50px"></th>
+          <th nzWidth="100px">用户名称</th>
+          <th nzWidth="120px">用户昵称</th>
+          <th nzWidth="140px">邮箱</th>
+          <th nzWidth="120px">手机</th>
+          <th nzWidth="80px">状态</th>
+          <th nzWidth="160px">创建时间</th>
+          <th nzWidth="120px">操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of allocated(); track row.userId) {
+          <tr>
+            <td>
+              <label
+                nz-checkbox
+                [ngModel]="allocatedChecked().has(row.userId!)"
+                (ngModelChange)="onChecked('allocated', row.userId, $event)"
+              ></label>
+            </td>
+            <td>{{ row.userName }}</td>
+            <td>{{ row.nickName }}</td>
+            <td>{{ row.email }}</td>
+            <td>{{ row.phonenumber }}</td>
+            <td>{{ row.status === '0' ? '正常' : '停用' }}</td>
+            <td>{{ row.createTime }}</td>
+            <td>
+              <a class="text-danger" (click)="cancelOne(row)"><nz-icon nzType="delete" />取消授权</a>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+
+    <h3 class="section-title">未分配用户</h3>
+    <div class="toolbar">
+      <button nz-button nzType="primary" [disabled]="unallocatedChecked().size === 0" (click)="selectAll()">
+        <nz-icon nzType="user-add" />批量添加授权
+      </button>
+    </div>
+    <nz-table
+      nzSize="middle"
+      [nzData]="unallocated()"
+      [nzLoading]="loading()"
+      [nzTotal]="unallocatedTotal()"
+      [nzPageIndex]="unPageNum"
+      [nzPageSize]="unPageSize"
+      [nzFrontPagination]="false"
+      [nzShowSizeChanger]="true"
+      (nzQueryParams)="onUnallocatedParams($event)"
+    >
+      <thead>
+        <tr>
+          <th nzWidth="50px"></th>
+          <th nzWidth="100px">用户名称</th>
+          <th nzWidth="120px">用户昵称</th>
+          <th nzWidth="140px">邮箱</th>
+          <th nzWidth="120px">手机</th>
+          <th nzWidth="80px">状态</th>
+          <th nzWidth="160px">创建时间</th>
+          <th nzWidth="120px">操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of unallocated(); track row.userId) {
+          <tr>
+            <td>
+              <label
+                nz-checkbox
+                [ngModel]="unallocatedChecked().has(row.userId!)"
+                (ngModelChange)="onChecked('unallocated', row.userId, $event)"
+              ></label>
+            </td>
+            <td>{{ row.userName }}</td>
+            <td>{{ row.nickName }}</td>
+            <td>{{ row.email }}</td>
+            <td>{{ row.phonenumber }}</td>
+            <td>{{ row.status === '0' ? '正常' : '停用' }}</td>
+            <td>{{ row.createTime }}</td>
+            <td>
+              <a (click)="selectOne(row)"><nz-icon nzType="user-add" />添加授权</a>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+
+    <div class="footer-bar">
+      <button nz-button (click)="close()">关闭</button>
+    </div>
+  </nz-card>
+</div>

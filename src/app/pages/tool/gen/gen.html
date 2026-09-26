@@ -1,0 +1,317 @@
+<div class="gen-page">
+  <nz-card [nzBordered]="false" class="search-card">
+    <!-- 日期选择器使用 ngModel，需置于 formGroup 之外，ngNoForm 避免被 NgForm 接管 -->
+    <form nz-form nzLayout="inline" ngNoForm>
+      <ng-container [formGroup]="searchForm">
+        <nz-form-item>
+          <nz-form-control>
+            <input
+              nz-input
+              formControlName="tableName"
+              placeholder="请输入表名称"
+              class="field-md"
+            />
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-control>
+            <input
+              nz-input
+              formControlName="tableComment"
+              placeholder="请输入表描述"
+              class="field-md"
+            />
+          </nz-form-control>
+        </nz-form-item>
+      </ng-container>
+      <nz-form-item>
+        <nz-form-control>
+          <nz-range-picker
+            [(ngModel)]="dateRange"
+            [ngModelOptions]="{ standalone: true }"
+            class="field-lg"
+          ></nz-range-picker>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <button nz-button nzType="primary" (click)="getList()">
+            <nz-icon nzType="search" />搜索
+          </button>
+          <button nz-button class="gap-left" (click)="resetQuery()">
+            <nz-icon nzType="reload" />重置
+          </button>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </nz-card>
+
+  <nz-card [nzBordered]="false" class="table-card">
+    <div class="toolbar">
+      <button
+        nz-button
+        nzType="primary"
+        *appHasPermi="['tool:gen:code']"
+        [disabled]="!selection.multiple()"
+        (click)="handleGenTable()"
+      >
+        <nz-icon nzType="download" />生成
+      </button>
+      <button
+        nz-button
+        nzType="primary"
+        *appHasRole="['admin']"
+        class="gap-left"
+        (click)="openCreateTable()"
+      >
+        <nz-icon nzType="plus" />创建
+      </button>
+      <button
+        nz-button
+        *appHasPermi="['tool:gen:import']"
+        class="gap-left"
+        (click)="openImportTable()"
+      >
+        <nz-icon nzType="upload" />导入
+      </button>
+      <button
+        nz-button
+        nzType="primary"
+        *appHasPermi="['tool:gen:edit']"
+        [disabled]="!selection.single()"
+        class="gap-left"
+        (click)="handleEditTable()"
+      >
+        <nz-icon nzType="edit" />修改
+      </button>
+      <button
+        nz-button
+        nzDanger
+        *appHasPermi="['tool:gen:remove']"
+        [disabled]="!selection.multiple()"
+        class="gap-left"
+        (click)="handleDelete()"
+      >
+        <nz-icon nzType="delete" />删除
+      </button>
+    </div>
+
+    <nz-table
+      nzSize="middle"
+      [nzData]="rows()"
+      [nzLoading]="loading()"
+      [nzTotal]="total()"
+      [nzPageIndex]="pageNum"
+      [nzPageSize]="pageSize"
+      [nzFrontPagination]="false"
+      [nzShowSizeChanger]="true"
+      [nzShowTotal]="totalTpl"
+      (nzQueryParams)="onQueryParams($event)"
+    >
+      <thead>
+        <tr>
+          <th nzWidth="50px">
+            <label
+              nz-checkbox
+              [ngModel]="selection.allChecked()"
+              [nzIndeterminate]="selection.indeterminate()"
+              (ngModelChange)="selection.onAllChecked($event, rows())"
+            ></label>
+          </th>
+          <th nzWidth="50px">序号</th>
+          <th>表名称</th>
+          <th>表描述</th>
+          <th>实体</th>
+          <th nzWidth="160px" [nzSortFn]="true" [nzSortOrder]="'descend'">创建时间</th>
+          <th nzWidth="160px">更新时间</th>
+          <th nzWidth="280px" nzRight>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track row.tableId; let i = $index) {
+          <tr>
+            <td>
+              <label
+                nz-checkbox
+                [ngModel]="selection.isChecked(row)"
+                (ngModelChange)="selection.onItemChecked(row.tableId, $event)"
+              ></label>
+            </td>
+            <td>{{ (pageNum - 1) * pageSize + i + 1 }}</td>
+            <td>{{ row.tableName }}</td>
+            <td>{{ row.tableComment }}</td>
+            <td>{{ row.className }}</td>
+            <td>{{ row.createTime }}</td>
+            <td>{{ row.updateTime }}</td>
+            <td nzRight>
+              <a *appHasPermi="['tool:gen:preview']" (click)="handlePreview(row)"
+                ><nz-icon nzType="eye" />预览</a
+              >
+              <a *appHasPermi="['tool:gen:edit']" class="gap-left" (click)="handleEditTable(row)">
+                <nz-icon nzType="edit" />编辑
+              </a>
+              <a *appHasPermi="['tool:gen:edit']" class="gap-left" (click)="handleSynchDb(row)">
+                <nz-icon nzType="reload" />同步
+              </a>
+              <a *appHasPermi="['tool:gen:code']" class="gap-left" (click)="handleGenTable(row)">
+                <nz-icon nzType="download" />生成代码
+              </a>
+              <a *appHasPermi="['tool:gen:remove']" class="gap-left" (click)="handleDelete(row)">
+                <nz-icon nzType="delete" />删除
+              </a>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+  </nz-card>
+</div>
+
+<ng-template #totalTpl let-total>共 {{ total }} 条</ng-template>
+
+<!-- 导入表 -->
+<nz-modal
+  [nzVisible]="importVisible()"
+  (nzVisibleChange)="onImportVisibleChange($event)"
+  (nzOnCancel)="closeImport()"
+  nzTitle="导入表"
+  nzWidth="800px"
+  nzOkText="确 定"
+  nzCancelText="取 消"
+  [nzOkLoading]="importSubmitting()"
+  (nzOnOk)="submitImport()"
+>
+  <ng-container *nzModalContent>
+    <form nz-form nzLayout="inline" class="search-form">
+      <ng-container [formGroup]="importSearchForm">
+        <nz-form-item>
+          <nz-form-control>
+            <input
+              nz-input
+              formControlName="tableName"
+              placeholder="请输入表名称"
+              class="field-sm"
+            />
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-control>
+            <input
+              nz-input
+              formControlName="tableComment"
+              placeholder="请输入表描述"
+              class="field-sm"
+            />
+          </nz-form-control>
+        </nz-form-item>
+      </ng-container>
+      <nz-form-item>
+        <nz-form-control>
+          <button nz-button nzType="primary" (click)="searchImport()">
+            <nz-icon nzType="search" />搜索
+          </button>
+          <button nz-button class="gap-left" (click)="resetImportQuery()">
+            <nz-icon nzType="reload" />重置
+          </button>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+
+    <nz-table
+      nzSize="middle"
+      [nzData]="importRows()"
+      [nzLoading]="importLoading()"
+      [nzTotal]="importTotal()"
+      [nzPageIndex]="importPageNum"
+      [nzPageSize]="importPageSize"
+      [nzFrontPagination]="false"
+      [nzShowSizeChanger]="true"
+      [nzShowTotal]="importTotalTpl"
+      [nzScroll]="{ y: '260px' }"
+      (nzQueryParams)="onImportQueryParams($event)"
+    >
+      <thead>
+        <tr>
+          <th nzWidth="50px">
+            <label
+              nz-checkbox
+              [ngModel]="importSelection.allChecked()"
+              [nzIndeterminate]="importSelection.indeterminate()"
+              (ngModelChange)="importSelection.onAllChecked($event, importRows())"
+            ></label>
+          </th>
+          <th>表名称</th>
+          <th>表描述</th>
+          <th nzWidth="160px">创建时间</th>
+          <th nzWidth="160px">更新时间</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of importRows(); track row.tableName) {
+          <tr class="clickable-row" (click)="toggleImportRow(row)">
+            <td>
+              <label
+                nz-checkbox
+                [ngModel]="importSelection.isChecked(row)"
+                (ngModelChange)="importSelection.onItemChecked(row.tableName, $event)"
+                (click)="$event.stopPropagation()"
+              ></label>
+            </td>
+            <td>{{ row.tableName }}</td>
+            <td>{{ row.tableComment }}</td>
+            <td>{{ row.createTime }}</td>
+            <td>{{ row.updateTime }}</td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+  </ng-container>
+</nz-modal>
+
+<ng-template #importTotalTpl let-total>共 {{ total }} 条</ng-template>
+
+<!-- 创建表 -->
+<nz-modal
+  [nzVisible]="createVisible()"
+  (nzVisibleChange)="onCreateVisibleChange($event)"
+  (nzOnCancel)="closeCreate()"
+  nzTitle="创建表"
+  nzWidth="800px"
+  nzOkText="确 定"
+  nzCancelText="取 消"
+  [nzOkLoading]="createSubmitting()"
+  (nzOnOk)="submitCreate()"
+>
+  <ng-container *nzModalContent>
+    <p class="tip">创建表语句(支持多个建表语句)：</p>
+    <textarea nz-input [(ngModel)]="createContent" rows="10" placeholder="请输入文本"></textarea>
+  </ng-container>
+</nz-modal>
+
+<!-- 代码预览 -->
+<nz-modal
+  [nzVisible]="previewVisible()"
+  (nzVisibleChange)="onPreviewVisibleChange($event)"
+  (nzOnCancel)="closePreview()"
+  nzTitle="代码预览"
+  nzWidth="80%"
+  [nzFooter]="null"
+>
+  <ng-container *nzModalContent>
+    <nz-spin [nzSpinning]="previewLoading()">
+      <nz-tabs
+        [nzSelectedIndex]="previewActiveIndex()"
+        (nzSelectedIndexChange)="previewActiveIndex.set($event)"
+      >
+        @for (file of previewFiles(); track file.name) {
+          <nz-tab [nzTitle]="file.name">
+            <div class="code-toolbar">
+              <a (click)="copy(file.code)"><nz-icon nzType="copy" />复制</a>
+            </div>
+            <pre class="code">{{ file.code }}</pre>
+          </nz-tab>
+        }
+      </nz-tabs>
+    </nz-spin>
+  </ng-container>
+</nz-modal>

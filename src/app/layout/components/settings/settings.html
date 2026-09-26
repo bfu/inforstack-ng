@@ -1,0 +1,93 @@
+<nz-drawer
+  [nzVisible]="settings.panelOpen()"
+  nzPlacement="right"
+  [nzWidth]="320"
+  nzTitle="布局设置"
+  (nzOnClose)="settings.closePanel()"
+>
+  <ng-container *nzDrawerContent>
+    <div class="setting-block">
+      <h4 class="setting-title">主题色</h4>
+      <div class="theme-colors">
+        @for (color of themeColors; track color) {
+          <span
+            class="theme-color"
+            [class.theme-color-active]="settings.theme() === color"
+            [style.background]="color"
+            nz-tooltip
+            [nzTooltipTitle]="color"
+            (click)="selectTheme(color)"
+          ></span>
+        }
+      </div>
+    </div>
+
+    <nz-divider></nz-divider>
+
+    <div class="setting-block">
+      <h4 class="setting-title">侧边栏主题</h4>
+      <div class="side-themes">
+        @for (item of sideThemes; track item.value) {
+          <span
+            class="side-theme"
+            [class.side-theme-active]="settings.sideTheme() === item.value"
+            [style.background]="item.bg"
+            [style.color]="item.fg"
+            (click)="selectSideTheme(item.value)"
+          >
+            {{ item.label }}
+          </span>
+        }
+      </div>
+    </div>
+
+    <nz-divider></nz-divider>
+
+    <div class="setting-block">
+      <h4 class="setting-title">界面显示</h4>
+      <div class="setting-row">
+        <span>固定顶栏</span>
+        <nz-switch
+          [ngModel]="settings.fixedHeader()"
+          (ngModelChange)="toggle('fixedHeader', $event)"
+        ></nz-switch>
+      </div>
+      <div class="setting-row">
+        <span>显示标签页</span>
+        <nz-switch [ngModel]="settings.tagsView()" (ngModelChange)="toggle('tagsView', $event)"></nz-switch>
+      </div>
+      <div class="setting-row">
+        <span>显示侧边栏 Logo</span>
+        <nz-switch
+          [ngModel]="settings.sidebarLogo()"
+          (ngModelChange)="toggle('sidebarLogo', $event)"
+        ></nz-switch>
+      </div>
+      <div class="setting-row">
+        <span>显示设置入口</span>
+        <nz-switch
+          [ngModel]="settings.showSettings()"
+          (ngModelChange)="toggle('showSettings', $event)"
+        ></nz-switch>
+      </div>
+      <div class="setting-row">
+        <span>显示底部版权</span>
+        <nz-switch
+          [ngModel]="settings.footerVisible()"
+          (ngModelChange)="toggle('footerVisible', $event)"
+        ></nz-switch>
+      </div>
+      <div class="setting-row">
+        <span>动态标题</span>
+        <nz-switch
+          [ngModel]="settings.dynamicTitle()"
+          (ngModelChange)="toggle('dynamicTitle', $event)"
+        ></nz-switch>
+      </div>
+    </div>
+
+    <nz-divider></nz-divider>
+
+    <button nz-button nzBlock (click)="reset()">重置为默认配置</button>
+  </ng-container>
+</nz-drawer>

@@ -1,0 +1,42 @@
+.dict-page {
+  display: block;
+}
+
+.dict-layout {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.type-card {
+  flex: 1 1 45%;
+  min-width: 0;
+}
+
+.data-card {
+  flex: 1 1 55%;
+  min-width: 0;
+}
+
+.search-form {
+  margin-bottom: 4px;
+}
+
+.toolbar {
+  margin-bottom: 12px;
+}
+
+.row-active {
+  background: #ecf5ff;
+}
+
+@media screen and (max-width: 1199px) {
+  .dict-layout {
+    flex-direction: column;
+  }
+
+  .type-card,
+  .data-card {
+    width: 100%;
+  }
+}

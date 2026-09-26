@@ -1,0 +1,98 @@
+<div class="cache-list-page">
+  <div nz-row [nzGutter]="12">
+    <div nz-col [nzSpan]="8">
+      <nz-card nzTitle="缓存列表" [nzBordered]="false" [nzExtra]="nameExtraTpl" class="cache-card">
+        <nz-table nzSize="small" [nzData]="cacheNames()" [nzLoading]="loading()" [nzShowPagination]="false" [nzScroll]="{ y: 'calc(100vh - 260px)' }">
+          <thead>
+            <tr>
+              <th nzWidth="60px">序号</th>
+              <th>缓存名称</th>
+              <th>备注</th>
+              <th nzWidth="60px">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of cacheNames(); track row.cacheName; let index = $index) {
+              <tr class="row-click" [class.row-active]="row.cacheName === currentCacheName()" (click)="getCacheKeys(row)">
+                <td>{{ index + 1 }}</td>
+                <td>{{ nameFormatter(row.cacheName) }}</td>
+                <td>{{ row.remark }}</td>
+                <td>
+                  <a (click)="clearCacheName(row); $event.stopPropagation()"><nz-icon nzType="delete" /></a>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </nz-table>
+      </nz-card>
+    </div>
+
+    <div nz-col [nzSpan]="8">
+      <nz-card nzTitle="键名列表" [nzBordered]="false" [nzExtra]="keyExtraTpl" class="cache-card">
+        <nz-table nzSize="small" [nzData]="cacheKeys()" [nzLoading]="keyLoading()" [nzShowPagination]="false" [nzScroll]="{ y: 'calc(100vh - 260px)' }">
+          <thead>
+            <tr>
+              <th nzWidth="60px">序号</th>
+              <th>缓存键名</th>
+              <th nzWidth="60px">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (cacheKey of cacheKeys(); track cacheKey; let index = $index) {
+              <tr class="row-click" (click)="handleCacheValue(cacheKey)">
+                <td>{{ index + 1 }}</td>
+                <td>{{ keyFormatter(cacheKey) }}</td>
+                <td>
+                  <a (click)="clearCacheKey(cacheKey); $event.stopPropagation()"><nz-icon nzType="delete" /></a>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </nz-table>
+      </nz-card>
+    </div>
+
+    <div nz-col [nzSpan]="8">
+      <nz-card nzTitle="缓存内容" [nzBordered]="false" [nzExtra]="valueExtraTpl" class="cache-card">
+        <form nz-form nzLayout="horizontal">
+          <nz-form-item>
+            <nz-form-label [nzSpan]="6">缓存名称</nz-form-label>
+            <nz-form-control [nzSpan]="18">
+              <input nz-input [ngModel]="nameFormatter(cacheForm().cacheName)" [ngModelOptions]="{ standalone: true }" readonly />
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-label [nzSpan]="6">缓存键名</nz-form-label>
+            <nz-form-control [nzSpan]="18">
+              <input nz-input [ngModel]="keyFormatter(cacheForm().cacheKey)" [ngModelOptions]="{ standalone: true }" readonly />
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-label [nzSpan]="6">缓存内容</nz-form-label>
+            <nz-form-control [nzSpan]="18">
+              <textarea
+                nz-input
+                rows="8"
+                [ngModel]="cacheForm().cacheValue"
+                [ngModelOptions]="{ standalone: true }"
+                readonly
+              ></textarea>
+            </nz-form-control>
+          </nz-form-item>
+        </form>
+      </nz-card>
+    </div>
+  </div>
+</div>
+
+<ng-template #nameExtraTpl>
+  <button nz-button nzType="link" nzSize="small" (click)="refreshCacheNames()"><nz-icon nzType="reload" />刷新</button>
+</ng-template>
+
+<ng-template #keyExtraTpl>
+  <button nz-button nzType="link" nzSize="small" (click)="refreshCacheKeys()"><nz-icon nzType="reload" />刷新</button>
+</ng-template>
+
+<ng-template #valueExtraTpl>
+  <button nz-button nzType="link" nzSize="small" (click)="clearCacheAll()"><nz-icon nzType="delete" />清理全部</button>
+</ng-template>

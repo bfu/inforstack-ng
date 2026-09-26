@@ -1,0 +1,59 @@
+<div class="sidebar-wrapper">
+  @if (settings.sidebarLogo()) {
+    <div class="sidebar-logo">
+      <div class="logo-mark">R</div>
+      <h1 [hidden]="collapsed()">{{ title }}</h1>
+    </div>
+  }
+
+  <!--
+    递归菜单的 ng-template 必须声明在 nz-menu 元素内部：
+    嵌入视图的注入上下文取自「声明处」而不是「插入处」，声明在 ul 外面时
+    拿不到 NzMenuDirective 提供的 MenuService / NzIsMenuInsideDropdownToken，会报 NG0201。
+  -->
+  <ul nz-menu nzMode="inline" [nzTheme]="menuTheme()" class="sidebar-menu" [nzInlineCollapsed]="collapsed()">
+    <ng-template #menuTpl let-nodes let-level="level">
+      @for (node of asNodes(nodes); track node.path) {
+        @if (node.children && node.children.length) {
+          <li
+            nz-submenu
+            [nzTitle]="node.title"
+            [nzIcon]="node.icon ?? ''"
+            [nzPaddingLeft]="paddingOf(level)"
+          >
+            <ul>
+              <ng-container
+                *ngTemplateOutlet="menuTpl; context: { $implicit: node.children, level: level + 1 }"
+              ></ng-container>
+            </ul>
+          </li>
+        } @else {
+          <!--
+            nz-menu-item 是「指令型」组件（模板为空、内容直接投影），不支持 nzIcon，
+            必须显式渲染 nz-icon；且标题要用 span 包一层，
+            折叠态的 CSS（.anticon + span { opacity: 0 }）才能把文字隐藏只留图标。
+          -->
+          <li
+            nz-menu-item
+            [nzMatchRouter]="!isExternalLink(node.path)"
+            [nzPaddingLeft]="paddingOf(level)"
+          >
+            @if (isExternalLink(node.path)) {
+              <a [href]="node.path" target="_blank" rel="noopener noreferrer">
+                <nz-icon [nzType]="node.icon || defaultIcon" />
+                <span>{{ node.title }}</span>
+              </a>
+            } @else {
+              <a [routerLink]="node.path">
+                <nz-icon [nzType]="node.icon || defaultIcon" />
+                <span>{{ node.title }}</span>
+              </a>
+            }
+          </li>
+        }
+      }
+    </ng-template>
+
+    <ng-container *ngTemplateOutlet="menuTpl; context: { $implicit: menus(), level: 1 }"></ng-container>
+  </ul>
+</div>

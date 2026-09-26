@@ -1,0 +1,201 @@
+<div class="config-page">
+  <nz-card [nzBordered]="false" class="search-card">
+    <!-- ng-zorro 日期选择器内部自身使用 ngModel，若放在 formGroup 作用域内，
+         会因 @Host() 注入在组件边界被截断而触发 NG01354，故 formGroup 只包裹响应式控件；
+         ngNoForm 用于避免整张 form 被 NgForm 接管 -->
+    <form nz-form nzLayout="inline" ngNoForm>
+      <ng-container [formGroup]="searchForm">
+        <nz-form-item>
+          <nz-form-control>
+            <input nz-input formControlName="configName" placeholder="参数名称" class="field-md" />
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-control>
+            <input nz-input formControlName="configKey" placeholder="参数键名" class="field-md" />
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-control>
+            <nz-select formControlName="configType" nzPlaceHolder="系统内置" nzAllowClear class="field-md">
+              @for (item of yesNoOptions(); track item.value) {
+                <nz-option [nzValue]="item.value" [nzLabel]="item.label"></nz-option>
+              }
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+      </ng-container>
+      <nz-form-item>
+        <nz-form-control>
+          <nz-range-picker [(ngModel)]="dateRange" [ngModelOptions]="{ standalone: true }" class="field-lg"></nz-range-picker>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <button nz-button nzType="primary" (click)="getList()"><nz-icon nzType="search" />搜索</button>
+          <button nz-button class="gap-left" (click)="resetQuery()"><nz-icon nzType="reload" />重置</button>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </nz-card>
+
+  <nz-card [nzBordered]="false" class="table-card">
+    <div class="toolbar">
+      <button nz-button nzType="primary" *appHasPermi="['system:config:add']" (click)="openAdd()">
+        <nz-icon nzType="plus" />新增
+      </button>
+      <button
+        nz-button
+        *appHasPermi="['system:config:edit']"
+        [disabled]="!selection.single()"
+        class="gap-left"
+        (click)="openEdit(selectedRows()[0])"
+      >
+        <nz-icon nzType="edit" />修改
+      </button>
+      <button
+        nz-button
+        nzDanger
+        *appHasPermi="['system:config:remove']"
+        [disabled]="!selection.multiple()"
+        class="gap-left"
+        (click)="delete()"
+      >
+        <nz-icon nzType="delete" />删除
+      </button>
+      <button nz-button *appHasPermi="['system:config:export']" class="gap-left" (click)="export()">
+        <nz-icon nzType="download" />导出
+      </button>
+      <button nz-button *appHasPermi="['system:config:remove']" class="gap-left" (click)="refreshCache()">
+        <nz-icon nzType="sync" />清除缓存
+      </button>
+    </div>
+
+    <nz-table
+      nzSize="middle"
+      [nzData]="rows()"
+      [nzLoading]="loading()"
+      [nzTotal]="total()"
+      [nzPageIndex]="pageNum"
+      [nzPageSize]="pageSize"
+      [nzFrontPagination]="false"
+      [nzShowSizeChanger]="true"
+      [nzShowTotal]="totalTpl"
+      (nzQueryParams)="onQueryParams($event)"
+    >
+      <thead>
+        <tr>
+          <th nzWidth="50px">
+            <label
+              nz-checkbox
+              [ngModel]="selection.allChecked()"
+              [nzIndeterminate]="selection.indeterminate()"
+              (ngModelChange)="selection.onAllChecked($event, rows())"
+            ></label>
+          </th>
+          <th nzWidth="90px">参数主键</th>
+          <th nzWidth="160px">参数名称</th>
+          <th nzWidth="160px">参数键名</th>
+          <th nzWidth="140px">参数键值</th>
+          <th nzWidth="90px">系统内置</th>
+          <th>备注</th>
+          <th nzWidth="160px">创建时间</th>
+          <th nzWidth="140px" nzRight>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track row.configId) {
+          <tr>
+            <td>
+              <label
+                nz-checkbox
+                [ngModel]="selection.isChecked(row)"
+                (ngModelChange)="selection.onItemChecked(row.configId, $event)"
+              ></label>
+            </td>
+            <td>{{ row.configId }}</td>
+            <td>{{ row.configName }}</td>
+            <td>{{ row.configKey }}</td>
+            <td>{{ row.configValue }}</td>
+            <td><app-dict-tag [value]="row.configType" dictType="sys_yes_no" /></td>
+            <td>{{ row.remark }}</td>
+            <td>{{ row.createTime }}</td>
+            <td nzRight>
+              <a *appHasPermi="['system:config:edit']" class="gap-left" (click)="openEdit(row)">
+                <nz-icon nzType="edit" />修改
+              </a>
+              <a *appHasPermi="['system:config:remove']" class="gap-left" (click)="delete(row)">
+                <nz-icon nzType="delete" />删除
+              </a>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+  </nz-card>
+</div>
+
+<ng-template #totalTpl let-total>共 {{ total }} 条</ng-template>
+
+<nz-modal
+  [nzVisible]="dialogVisible()"
+  (nzVisibleChange)="dialogVisible.set($event)"
+  (nzOnCancel)="dialogVisible.set(false)"
+  [nzTitle]="dialogTitle()"
+  nzWidth="640px"
+  nzOkText="确定"
+  nzCancelText="取消"
+  [nzOkLoading]="submitting()"
+  (nzOnOk)="submitForm()"
+>
+  <ng-container *nzModalContent>
+    <form nz-form [formGroup]="form" nzLayout="vertical">
+      <div nz-row [nzGutter]="16">
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="configName" nzRequired>参数名称</nz-form-label>
+            <nz-form-control nzErrorTip="请输入参数名称">
+              <input nz-input formControlName="configName" placeholder="请输入参数名称" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="configKey" nzRequired>参数键名</nz-form-label>
+            <nz-form-control nzErrorTip="请输入参数键名">
+              <input nz-input formControlName="configKey" placeholder="请输入参数键名" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="24">
+          <nz-form-item>
+            <nz-form-label nzFor="configValue" nzRequired>参数键值</nz-form-label>
+            <nz-form-control nzErrorTip="请输入参数键值">
+              <input nz-input formControlName="configValue" placeholder="请输入参数键值" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="configType">系统内置</nz-form-label>
+            <nz-form-control>
+              <nz-radio-group formControlName="configType">
+                @for (item of yesNoOptions(); track item.value) {
+                  <label nz-radio [nzValue]="item.value">{{ item.label }}</label>
+                }
+              </nz-radio-group>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="24">
+          <nz-form-item>
+            <nz-form-label nzFor="remark">备注</nz-form-label>
+            <nz-form-control>
+              <textarea nz-input formControlName="remark" rows="2" placeholder="请输入备注"></textarea>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+    </form>
+  </ng-container>
+</nz-modal>

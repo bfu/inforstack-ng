@@ -1,0 +1,13 @@
+<nz-upload
+  nzListType="picture-card"
+  [nzFileList]="fileList()"
+  [nzLimit]="1"
+  [nzBeforeUpload]="beforeUpload"
+  [nzCustomRequest]="customRequest"
+  (nzChange)="onChange($event)"
+>
+  <div class="upload-trigger">
+    <nz-icon nzType="plus" />
+    <div class="upload-text">上传</div>
+  </div>
+</nz-upload>

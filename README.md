@@ -7,7 +7,7 @@ RuoYi 管理系统的 **Angular 前端实现**：界面与交互对齐官方 Ruo
 ![ECharts](https://img.shields.io/badge/ECharts-6-C1233C)
 ![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&logoColor=white)
 
-> 只含前端。后端请先启动 RuoYi 的 `ruoyi-admin`（MySQL + Redis），默认地址 `http://localhost:8080`。
+> 只含前端。后端需搭配定制版 [RuoYi-Angular](https://github.com/bfu/RuoYi-Angular) 使用：它在官方 RuoYi-Vue 基础上**只改动了代码生成**——生成模板改为输出 Angular 页面与 `api` 代码，其余接口完全一致。启动其 `ruoyi-admin`（MySQL + Redis），默认地址 `http://localhost:8080`。
 
 ## 特性
 
@@ -18,6 +18,7 @@ RuoYi 管理系统的 **Angular 前端实现**：界面与交互对齐官方 Ruo
 - **统一请求层**：`core/request.service.ts` + 拦截器自动注入 Token、统一错误提示、401 自动登出，支持按请求关闭 loading / 错误弹窗。
 - **字典与缓存**：字典数据在 `store/dict.store.ts` 全局缓存，配合 `dict-tag`、`dict.pipe` 零成本渲染。
 - **内置系统 / 监控 / 工具三大模块**：用户、部门、岗位、菜单、角色、字典、参数、通知；在线用户、定时任务、操作日志、登录日志、缓存监控、服务监控、Druid；代码生成、Swagger。
+- **代码生成直出 Angular**：配合定制后端的生成模板，建表后一键生成可直接放进本工程的页面与 `api` 代码，无需手工改写 Vue 模板。
 - **主题与布局设置**：侧边栏主题、顶栏、标签页、深色模式等偏好持久化。
 
 ## 技术栈
@@ -35,7 +36,7 @@ RuoYi 管理系统的 **Angular 前端实现**：界面与交互对齐官方 Ruo
 ## 环境要求
 
 - Node.js 20.19+ / 22+（Angular 22 要求），npm 10+
-- 后端服务已启动：MySQL + Redis + `ruoyi-admin`（8080）
+- 后端服务已启动：MySQL + Redis + `ruoyi-admin`（8080），且须为定制版 [bfu/RuoYi-Angular](https://github.com/bfu/RuoYi-Angular)
 
 ## 快速开始
 
@@ -47,6 +48,14 @@ npm start           # ng serve，http://localhost:4200
 ```
 
 默认账号：`admin / admin123`（取决于后端初始化数据）。
+
+### 启动后端
+
+```bash
+git clone https://github.com/bfu/RuoYi-Angular.git
+```
+
+按后端 README 初始化 MySQL 与 Redis，启动 `ruoyi-admin` 监听 `8080`。使用未经改造的官方 RuoYi 后端也能正常登录和跑通业务，但**代码生成会输出 Vue 代码**，不能用于本工程。
 
 接口前缀 `/dev-api` 由 `proxy.conf.json` 转发到 `http://localhost:8080`，`ng serve` 已在 `angular.json` 中通过 `proxyConfig` 自动加载，**后端无需额外配置 CORS**。后端地址不同时，改 `proxy.conf.json` 的 `target` 即可。
 
@@ -112,6 +121,7 @@ src/app
 
 ## 相关链接
 
+- [定制后端（必配）](https://github.com/bfu/RuoYi-Angular)：RuoYi-Vue 后端 + Angular 代码生成模板
 - [RuoYi 官方（Vue 版）](https://gitee.com/y_project/RuoYi-Vue)
 - [Angular CLI 概览与命令参考](https://angular.dev/tools/cli)
 - [NG-ZORRO 官方文档](https://ng.ant.design/)

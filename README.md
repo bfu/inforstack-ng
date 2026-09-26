@@ -1,6 +1,24 @@
 # inforstack-ng
 
-RuoYi 管理系统的 **Angular 前端**，配套后端为仓库根目录的 Spring Boot 工程（`ruoyi-admin`，默认 `http://localhost:8080`）。后端接口与官方 RuoYi-Vue 完全一致，仅前端由 Vue 重写为 Angular。
+RuoYi 管理系统的 **Angular 前端实现**：界面与交互对齐官方 RuoYi-Vue，后端接口完全一致，可直接对接任意 RuoYi（Spring Boot）后端，无需改动后端代码。
+
+![Angular](https://img.shields.io/badge/Angular-22-DD0031?logo=angular&logoColor=white)
+![NG-ZORRO](https://img.shields.io/badge/NG--ZORRO-22-0170FE?logo=ant-design&logoColor=white)
+![ECharts](https://img.shields.io/badge/ECharts-6-C1233C)
+![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&logoColor=white)
+
+> 只含前端。后端请先启动 RuoYi 的 `ruoyi-admin`（MySQL + Redis），默认地址 `http://localhost:8080`。
+
+## 特性
+
+- **完全对齐 RuoYi-Vue**：路由、菜单、字典、权限、导入导出等行为与官方 Vue 版保持一致，接口零改造。
+- **后端菜单驱动路由**：`pages/dynamic-routes.ts` 把后端返回的菜单树动态编译成 Angular 路由，菜单改动无需改前端代码。
+- **细粒度权限**：`*hasPermi` 结构型指令控制按钮级权限，路由级由 `auth.guard.ts` 兜底。
+- **标签页路由复用**：`core/reuse-strategy.ts` 实现多标签页打开、切换、刷新、关闭并保持组件状态。
+- **统一请求层**：`core/request.service.ts` + 拦截器自动注入 Token、统一错误提示、401 自动登出，支持按请求关闭 loading / 错误弹窗。
+- **字典与缓存**：字典数据在 `store/dict.store.ts` 全局缓存，配合 `dict-tag`、`dict.pipe` 零成本渲染。
+- **内置系统 / 监控 / 工具三大模块**：用户、部门、岗位、菜单、角色、字典、参数、通知；在线用户、定时任务、操作日志、登录日志、缓存监控、服务监控、Druid；代码生成、Swagger。
+- **主题与布局设置**：侧边栏主题、顶栏、标签页、深色模式等偏好持久化。
 
 ## 技术栈
 
@@ -22,24 +40,37 @@ RuoYi 管理系统的 **Angular 前端**，配套后端为仓库根目录的 Spr
 ## 快速开始
 
 ```bash
+git clone https://github.com/bfu/inforstack-ng.git
+cd inforstack-ng
 npm install
 npm start           # ng serve，http://localhost:4200
 ```
 
-默认账号：`admin / admin123`。
+默认账号：`admin / admin123`（取决于后端初始化数据）。
 
-接口前缀 `/dev-api` 由 `proxy.conf.json` 转发到 `http://localhost:8080`（`ng serve` 已通过 `angular.json` 的 `proxyConfig` 自动加载），无需后端额外配置 CORS。若后端地址不同，改 `proxy.conf.json` 的 `target` 即可。
+接口前缀 `/dev-api` 由 `proxy.conf.json` 转发到 `http://localhost:8080`，`ng serve` 已在 `angular.json` 中通过 `proxyConfig` 自动加载，**后端无需额外配置 CORS**。后端地址不同时，改 `proxy.conf.json` 的 `target` 即可。
 
-其他命令：
+### 可用脚本
 
-```bash
-npm run build       # 生产构建，产物在 dist/
-npm run watch       # 开发模式增量构建
-npm test            # Vitest 单元测试
-npm run ng -- generate component xxx   # 脚手架
-```
+| 命令 | 说明 |
+| :--- | :--- |
+| `npm start` | 启动开发服务（4200），带接口代理 |
+| `npm run build` | 生产构建，产物在 `dist/` |
+| `npm run watch` | 开发模式增量构建 |
+| `npm test` | Vitest 单元测试 |
+| `npm run ng -- generate component xxx` | Angular CLI 脚手架 |
 
-环境相关配置集中在 `src/environments/environment.ts`：接口前缀 `apiBaseUrl`、系统标题 `title`、默认分页大小 `pageSize`、是否开放注册 `registerEnabled`、页脚文案等；生产构建会替换为 `environment.prod.ts`。
+## 配置
+
+环境相关配置集中在 `src/environments/environment.ts`，生产构建会替换为 `environment.prod.ts`：
+
+| 字段 | 说明 |
+| :--- | :--- |
+| `apiBaseUrl` | 接口前缀，默认 `/dev-api` |
+| `title` | 系统标题 |
+| `pageSize` | 表格默认分页条数 |
+| `registerEnabled` | 是否开放注册入口（需后端 `sys.account.registerUser` 同时开启） |
+| `footerContent` | 页脚文案 |
 
 ## 目录结构
 
@@ -79,8 +110,12 @@ src/app
 - 写 UI 前先查离线文档：`docs/ng-zorro/llms.txt` 查组件起始行 → 按行区间读取 `docs/ng-zorro/llms-full.txt`；**不要整文件读入上下文，也不要凭记忆编造 NG-ZORRO API**。
 - 权限：`*hasPermi` 结构型指令控制按钮，路由由 `pages/dynamic-routes.ts` 根据后端菜单动态生成，`shared/guards/auth.guard.ts` 控制登录态。
 
-## 更多资源
+## 相关链接
 
+- [RuoYi 官方（Vue 版）](https://gitee.com/y_project/RuoYi-Vue)
 - [Angular CLI 概览与命令参考](https://angular.dev/tools/cli)
 - [NG-ZORRO 官方文档](https://ng.ant.design/)
-- 仓库根目录 `README.md`：整体架构、后端启动与已实现功能清单
+
+## 许可证
+
+本项目为 RuoYi 前端的 Angular 实现，许可协议沿用 RuoYi 的 [MIT License](https://gitee.com/y_project/RuoYi/blob/master/LICENSE)。

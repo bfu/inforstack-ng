@@ -24,7 +24,9 @@ export class CacheApi {
 
   /** 指定缓存名称下的键名列表 */
   getCacheKeys(cacheName: string): Observable<AjaxResult<string[]>> {
-    return this.request.get<AjaxResult<string[]>>(`/monitor/cache/getKeys/${encodeURIComponent(cacheName)}`);
+    return this.request.get<AjaxResult<string[]>>(
+      `/monitor/cache/getKeys/${encodeURIComponent(cacheName)}`,
+    );
   }
 
   /** 指定键名的缓存内容 */
@@ -35,12 +37,16 @@ export class CacheApi {
 
   /** 清理指定名称下的全部缓存 */
   clearCacheName(cacheName: string): Observable<AjaxResult> {
-    return this.request.delete<AjaxResult>(`/monitor/cache/clearCacheName/${encodeURIComponent(cacheName)}`);
+    return this.request.delete<AjaxResult>(
+      `/monitor/cache/clearCacheName/${encodeURIComponent(cacheName)}`,
+    );
   }
 
   /** 清理指定键名 */
   clearCacheKey(cacheKey: string): Observable<AjaxResult> {
-    return this.request.delete<AjaxResult>(`/monitor/cache/clearCacheKey/${encodeURIComponent(cacheKey)}`);
+    return this.request.delete<AjaxResult>(
+      `/monitor/cache/clearCacheKey/${encodeURIComponent(cacheKey)}`,
+    );
   }
 
   /** 清理全部缓存 */

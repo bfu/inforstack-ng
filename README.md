@@ -13,7 +13,7 @@ RuoYi 管理系统的 **Angular 前端实现**：界面与交互对齐官方 Ruo
 
 - **完全对齐 RuoYi-Vue**：路由、菜单、字典、权限、导入导出等行为与官方 Vue 版保持一致，接口零改造。
 - **后端菜单驱动路由**：`pages/dynamic-routes.ts` 把后端返回的菜单树动态编译成 Angular 路由，菜单改动无需改前端代码。
-- **细粒度权限**：`*hasPermi` 结构型指令控制按钮级权限，路由级由 `auth.guard.ts` 兜底。
+- **细粒度权限**：`*appHasPermi` / `*appHasRole` 结构型指令控制按钮级权限，路由级由 `auth.guard.ts` 兜底。
 - **标签页路由复用**：`core/reuse-strategy.ts` 实现多标签页打开、切换、刷新、关闭并保持组件状态。
 - **统一请求层**：`core/request.service.ts` + 拦截器自动注入 Token、统一错误提示、401 自动登出，支持按请求关闭 loading / 错误弹窗。
 - **字典与缓存**：字典数据在 `store/dict.store.ts` 全局缓存，配合 `dict-tag`、`dict.pipe` 零成本渲染。
@@ -103,7 +103,7 @@ src/app
 │   ├── dynamic-routes.ts   # 后端菜单 → Angular 路由
 │   └── component-map.ts    # 菜单 component 名 → 组件映射
 ├── shared/         # 通用组件（dict-tag / echart / file-upload / image-upload / iframe-frame）、
-│                   # 指令 hasPermi、守卫 auth.guard、管道 dict.pipe、工具 tree.util / table-selection
+│                   # 指令 appHasPermi / appHasRole、守卫 auth.guard、管道 dict.pipe、工具 tree.util / table-selection
 ├── store/          # app / user / permission / dict / settings / tags-view 状态
 ├── icons-provider.ts   # NG-ZORRO 图标按需注册
 ├── app.config.ts       # 应用级 providers
@@ -117,7 +117,8 @@ src/app
 - 应用级 providers 集中在 `src/app/app.config.ts`（已配置 `provideNzI18n(zh_CN)`、`provideNzIcons(icons)`、`provideNzDateFnsAdapter()`）。
 - `NzModalService` 不是 `providedIn: 'root'`，已通过 `importProvidersFrom(NzModalModule)` 注册到根注入器，**不要删除也不要重复 provide**（拦截器依赖它）。
 - 写 UI 前先查离线文档：`docs/ng-zorro/llms.txt` 查组件起始行 → 按行区间读取 `docs/ng-zorro/llms-full.txt`；**不要整文件读入上下文，也不要凭记忆编造 NG-ZORRO API**。
-- 权限：`*hasPermi` 结构型指令控制按钮，路由由 `pages/dynamic-routes.ts` 根据后端菜单动态生成，`shared/guards/auth.guard.ts` 控制登录态。
+- 权限：`*appHasPermi` 结构型指令控制按钮，路由由 `pages/dynamic-routes.ts` 根据后端菜单动态生成，`shared/guards/auth.guard.ts` 控制登录态。
+- 会话清理：401 过期与主动登出一律走 `core/session.service.ts` 的 `SessionService.resetAll()`，**不要只清 Token**——否则重新登录后 `authGuard` 会命中 `user.loaded()` 沿用上一个账号的菜单与权限。
 
 ## 相关链接
 

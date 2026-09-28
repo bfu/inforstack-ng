@@ -27,7 +27,7 @@
       </ng-container>
       <nz-form-item>
         <nz-form-control>
-          <nz-range-picker [(ngModel)]="dateRange" [ngModelOptions]="{ standalone: true }" class="field-lg"></nz-range-picker>
+          <nz-range-picker [ngModel]="dateRange()" (ngModelChange)="dateRange.set($event)" [ngModelOptions]="{ standalone: true }" class="field-lg"></nz-range-picker>
         </nz-form-control>
       </nz-form-item>
       <nz-form-item>
@@ -77,8 +77,8 @@
       [nzData]="rows()"
       [nzLoading]="loading()"
       [nzTotal]="total()"
-      [nzPageIndex]="pageNum"
-      [nzPageSize]="pageSize"
+      [nzPageIndex]="pageNum()"
+      [nzPageSize]="pageSize()"
       [nzFrontPagination]="false"
       [nzShowSizeChanger]="true"
       [nzShowTotal]="totalTpl"
@@ -118,7 +118,7 @@
             <td>{{ row.roleKey }}</td>
             <td>{{ row.roleSort }}</td>
             <td>
-              <nz-switch [ngModel]="row.status === '0'" (ngModelChange)="statusChange(row)"></nz-switch>
+              <nz-switch [ngModel]="row.status === '0'" (ngModelChange)="statusChange(row, $event)"></nz-switch>
             </td>
             <td>{{ row.createTime }}</td>
             <td nzRight>

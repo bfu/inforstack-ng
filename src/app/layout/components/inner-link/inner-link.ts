@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { DomSanitizer } from '@angular/platform-browser';
 
@@ -7,6 +7,7 @@ import { DomSanitizer } from '@angular/platform-browser';
  * 对应 ruoyi-vue3/src/layout/components/InnerLink
  */
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-inner-link',
   template: `<iframe class="inner-link" [src]="safeUrl()" frameborder="0"></iframe>`,
   styles: [

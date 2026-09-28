@@ -200,7 +200,9 @@ export class PermissionStore {
       if (route.component !== Layout) {
         return route;
       }
-      const base = (route.children ?? []).filter((child) => child.path === '' || child.path === 'index');
+      const base = (route.children ?? []).filter(
+        (child) => child.path === '' || child.path === 'index',
+      );
       return {
         ...route,
         children: [...base, ...permitted, ...dynamic, { path: '**', redirectTo: '/404' }],

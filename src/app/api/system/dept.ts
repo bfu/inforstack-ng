@@ -32,10 +32,15 @@ export class DeptApi {
   }
 
   /** 角色对应的部门树 */
-  roleDeptTreeselect(roleId: number | string): Observable<{ code: number; msg: string; depts: TreeSelectNode[]; checkedKeys: number[] }> {
-    return this.request.get<{ code: number; msg: string; depts: TreeSelectNode[]; checkedKeys: number[] }>(
-      `/system/dept/roleDeptTreeselect/${roleId}`,
-    );
+  roleDeptTreeselect(
+    roleId: number | string,
+  ): Observable<{ code: number; msg: string; depts: TreeSelectNode[]; checkedKeys: number[] }> {
+    return this.request.get<{
+      code: number;
+      msg: string;
+      depts: TreeSelectNode[];
+      checkedKeys: number[];
+    }>(`/system/dept/roleDeptTreeselect/${roleId}`);
   }
 
   addDept(data: SysDept): Observable<AjaxResult> {

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -18,11 +18,9 @@ import { DownloadService } from '@core/download.service';
 import { PageQuery } from '@core/models/result';
 import { DEFAULT_TPL_WEB_TYPE, GenPreview, GenTable } from '@core/models/tool';
 import { addDateRange, parseTime } from '@core/utils/ruoyi';
-import {
-  HasPermiDirective,
-  HasRoleDirective,
-} from '@shared/directives/has-permi.directive';
+import { HasPermiDirective, HasRoleDirective } from '@shared/directives/has-permi.directive';
 import { TableSelection } from '@shared/utils/table-selection';
+import { environment } from '@env/environment';
 
 interface PreviewFile {
   /** 文件名，如 domain.java */
@@ -35,6 +33,7 @@ interface PreviewFile {
  * 导入表 / 创建表 / 代码预览三个弹窗以页面内 nz-modal 方式实现，与其余列表页保持一致
  */
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-gen-page',
   imports: [
     FormsModule,
@@ -69,13 +68,13 @@ export class GenPage implements OnInit {
     tableComment: [''],
   });
 
-  dateRange: Date[] = [];
+  readonly dateRange = signal<Date[]>([]);
 
   readonly rows = signal<GenTable[]>([]);
   readonly total = signal(0);
   readonly loading = signal(false);
-  pageNum = 1;
-  pageSize = 10;
+  readonly pageNum = signal(1);
+  readonly pageSize = signal(environment.pageSize);
   orderByColumn = 'createTime';
   isAsc = 'descending';
 
@@ -89,8 +88,8 @@ export class GenPage implements OnInit {
   readonly importRows = signal<GenTable[]>([]);
   readonly importTotal = signal(0);
   readonly importSelection = new TableSelection<GenTable, string>((row) => row.tableName);
-  importPageNum = 1;
-  importPageSize = 10;
+  readonly importPageNum = signal(1);
+  readonly importPageSize = signal(environment.pageSize);
 
   readonly importSearchForm = this.fb.nonNullable.group({
     tableName: [''],
@@ -100,7 +99,7 @@ export class GenPage implements OnInit {
   // 创建表弹窗
   readonly createVisible = signal(false);
   readonly createSubmitting = signal(false);
-  createContent = '';
+  readonly createContent = signal('');
 
   // 代码预览弹窗
   readonly previewVisible = signal(false);
@@ -117,17 +116,17 @@ export class GenPage implements OnInit {
   private buildQuery(): PageQuery {
     const value = this.searchForm.getRawValue();
     const query: PageQuery = {
-      pageNum: this.pageNum,
-      pageSize: this.pageSize,
+      pageNum: this.pageNum(),
+      pageSize: this.pageSize(),
       orderByColumn: this.orderByColumn,
       isAsc: this.isAsc,
       tableName: value.tableName || undefined,
       tableComment: value.tableComment || undefined,
     };
-    const range = this.dateRange?.length
+    const range = this.dateRange()?.length
       ? [
-          parseTime(this.dateRange[0], '{y}-{m}-{d}') ?? '',
-          parseTime(this.dateRange[1], '{y}-{m}-{d}') ?? '',
+          parseTime(this.dateRange()[0], '{y}-{m}-{d}') ?? '',
+          parseTime(this.dateRange()[1], '{y}-{m}-{d}') ?? '',
         ]
       : [];
     return addDateRange(query, range);
@@ -147,8 +146,8 @@ export class GenPage implements OnInit {
   }
 
   onQueryParams(params: NzTableQueryParams): void {
-    this.pageNum = params.pageIndex;
-    this.pageSize = params.pageSize;
+    this.pageNum.set(params.pageIndex);
+    this.pageSize.set(params.pageSize);
     // 服务端排序：后端 PageDomain 会将 ascending/descending 归一化为 asc/desc
     const sort = params.sort?.find((item) => item.value !== null);
     this.orderByColumn = sort?.key ?? 'createTime';
@@ -158,8 +157,8 @@ export class GenPage implements OnInit {
 
   resetQuery(): void {
     this.searchForm.reset({ tableName: '', tableComment: '' });
-    this.dateRange = [];
-    this.pageNum = 1;
+    this.dateRange.set([]);
+    this.pageNum.set(1);
     this.getList();
   }
 
@@ -170,7 +169,7 @@ export class GenPage implements OnInit {
       return;
     }
     void this.router.navigate(['/tool/gen-edit/index', tableId], {
-      queryParams: { pageNum: this.pageNum },
+      queryParams: { pageNum: this.pageNum() },
     });
   }
 
@@ -241,7 +240,7 @@ export class GenPage implements OnInit {
   // ---------- 导入表弹窗 ----------
 
   openImportTable(): void {
-    this.importPageNum = 1;
+    this.importPageNum.set(1);
     this.importSelection.clear();
     this.importVisible.set(true);
     this.getImportList();
@@ -250,8 +249,8 @@ export class GenPage implements OnInit {
   private buildImportQuery(): PageQuery {
     const value = this.importSearchForm.getRawValue();
     return {
-      pageNum: this.importPageNum,
-      pageSize: this.importPageSize,
+      pageNum: this.importPageNum(),
+      pageSize: this.importPageSize(),
       tableName: value.tableName || undefined,
       tableComment: value.tableComment || undefined,
     };
@@ -271,13 +270,13 @@ export class GenPage implements OnInit {
   }
 
   onImportQueryParams(params: NzTableQueryParams): void {
-    this.importPageNum = params.pageIndex;
-    this.importPageSize = params.pageSize;
+    this.importPageNum.set(params.pageIndex);
+    this.importPageSize.set(params.pageSize);
     this.getImportList();
   }
 
   searchImport(): void {
-    this.importPageNum = 1;
+    this.importPageNum.set(1);
     this.getImportList();
   }
 
@@ -304,7 +303,7 @@ export class GenPage implements OnInit {
         this.message.success(res.msg);
         if (res.code === 200) {
           this.closeImport();
-          this.pageNum = 1;
+          this.pageNum.set(1);
           this.getList();
         }
       },
@@ -330,34 +329,36 @@ export class GenPage implements OnInit {
   // ---------- 创建表弹窗 ----------
 
   openCreateTable(): void {
-    this.createContent = '';
+    this.createContent.set('');
     this.createVisible.set(true);
   }
 
   submitCreate(): void {
-    if (!this.createContent.trim()) {
+    if (!this.createContent().trim()) {
       this.message.error('请输入建表语句');
       return;
     }
     this.createSubmitting.set(true);
-    this.api.createTable({ sql: this.createContent, tplWebType: DEFAULT_TPL_WEB_TYPE }).subscribe({
-      next: (res) => {
-        this.createSubmitting.set(false);
-        this.message.success(res.msg);
-        if (res.code === 200) {
-          this.closeCreate();
-          this.pageNum = 1;
-          this.getList();
-        }
-      },
-      error: () => this.createSubmitting.set(false),
-    });
+    this.api
+      .createTable({ sql: this.createContent(), tplWebType: DEFAULT_TPL_WEB_TYPE })
+      .subscribe({
+        next: (res) => {
+          this.createSubmitting.set(false);
+          this.message.success(res.msg);
+          if (res.code === 200) {
+            this.closeCreate();
+            this.pageNum.set(1);
+            this.getList();
+          }
+        },
+        error: () => this.createSubmitting.set(false),
+      });
   }
 
   closeCreate(): void {
     this.createVisible.set(false);
     this.createSubmitting.set(false);
-    this.createContent = '';
+    this.createContent.set('');
   }
 
   onCreateVisibleChange(visible: boolean): void {

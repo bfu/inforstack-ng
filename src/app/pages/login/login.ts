@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -19,8 +19,16 @@ const REMEMBER_KEY = 'login-username';
  * 说明：零依赖方案下不使用 jsencrypt，「记住我」仅缓存账号，不保存密码
  */
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-login',
-  imports: [ReactiveFormsModule, RouterLink, NzFormModule, NzInputModule, NzButtonModule, NzCheckboxModule],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    NzFormModule,
+    NzInputModule,
+    NzButtonModule,
+    NzCheckboxModule,
+  ],
   templateUrl: './login.html',
   styleUrl: './login.less',
 })
@@ -37,8 +45,9 @@ export class Login implements OnInit {
   readonly registerEnabled = environment.registerEnabled;
 
   readonly form = this.fb.nonNullable.group({
-    username: ['admin', [Validators.required]],
-    password: ['admin123', [Validators.required]],
+    // 不预置账号密码，避免把真实凭据打进生产包；账号由「记住我」回填
+    username: ['', [Validators.required]],
+    password: ['', [Validators.required]],
     code: [''],
     uuid: [''],
     rememberMe: [false],

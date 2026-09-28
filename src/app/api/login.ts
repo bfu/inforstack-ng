@@ -58,7 +58,10 @@ export class LoginApi {
   private readonly request = inject(RequestService);
 
   login(data: LoginBody): Observable<LoginResult> {
-    return this.request.post<LoginResult>('/login', data, { skipToken: true, noRepeatSubmit: true });
+    return this.request.post<LoginResult>('/login', data, {
+      skipToken: true,
+      noRepeatSubmit: true,
+    });
   }
 
   register(data: RegisterBody): Observable<AjaxResult> {
@@ -74,6 +77,9 @@ export class LoginApi {
   }
 
   getCodeImg(): Observable<CaptchaResult> {
-    return this.request.get<CaptchaResult>('/captchaImage', undefined, { skipToken: true, timeout: 20000 });
+    return this.request.get<CaptchaResult>('/captchaImage', undefined, {
+      skipToken: true,
+      timeout: 20000,
+    });
   }
 }

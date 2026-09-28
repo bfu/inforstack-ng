@@ -38,8 +38,8 @@
       [nzData]="rows()"
       [nzLoading]="loading()"
       [nzTotal]="rows().length"
-      [nzPageIndex]="pageNum"
-      [nzPageSize]="pageSize"
+      [nzPageIndex]="pageNum()"
+      [nzPageSize]="pageSize()"
       [nzFrontPagination]="true"
       [nzShowSizeChanger]="true"
       [nzShowTotal]="totalTpl"
@@ -68,7 +68,7 @@
             <td>
               <label nz-checkbox [ngModel]="selection.isChecked(row)" (ngModelChange)="selection.onItemChecked(row.tokenId, $event)"></label>
             </td>
-            <td>{{ (pageNum - 1) * pageSize + $index + 1 }}</td>
+            <td>{{ (pageNum() - 1) * pageSize() + $index + 1 }}</td>
             <td>{{ row.tokenId }}</td>
             <td>{{ row.userName }}</td>
             <td>{{ row.deptName }}</td>

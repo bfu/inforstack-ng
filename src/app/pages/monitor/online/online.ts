@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzCardModule } from 'ng-zorro-antd/card';
@@ -15,12 +15,14 @@ import { SysUserOnline } from '@core/models/monitor';
 import { parseTime } from '@core/utils/ruoyi';
 import { HasPermiDirective } from '@shared/directives/has-permi.directive';
 import { TableSelection } from '@shared/utils/table-selection';
+import { environment } from '@env/environment';
 
 /**
  * 在线用户，对应 ruoyi-vue3/src/views/monitor/online/index.vue
  * 注意：后端一次返回全部在线会话，分页由 nz-table 前端分页完成
  */
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-online-page',
   imports: [
     FormsModule,
@@ -52,8 +54,8 @@ export class OnlinePage implements OnInit {
 
   readonly rows = signal<SysUserOnline[]>([]);
   readonly loading = signal(false);
-  pageNum = 1;
-  pageSize = 10;
+  readonly pageNum = signal(1);
+  readonly pageSize = signal(environment.pageSize);
 
   /** 表格多选状态（主键为 tokenId 字符串） */
   readonly selection = new TableSelection<SysUserOnline, string>((row) => row.tokenId);
@@ -65,25 +67,27 @@ export class OnlinePage implements OnInit {
   getList(): void {
     this.loading.set(true);
     const value = this.searchForm.getRawValue();
-    this.api.listOnline({ ipaddr: value.ipaddr || undefined, userName: value.userName || undefined }).subscribe({
-      next: (res) => {
-        this.rows.set(res.rows ?? []);
-        this.loading.set(false);
-        this.selection.refresh(this.rows());
-      },
-      error: () => this.loading.set(false),
-    });
+    this.api
+      .listOnline({ ipaddr: value.ipaddr || undefined, userName: value.userName || undefined })
+      .subscribe({
+        next: (res) => {
+          this.rows.set(res.rows ?? []);
+          this.loading.set(false);
+          this.selection.refresh(this.rows());
+        },
+        error: () => this.loading.set(false),
+      });
   }
 
   resetQuery(): void {
     this.searchForm.reset({ ipaddr: '', userName: '' });
-    this.pageNum = 1;
+    this.pageNum.set(1);
     this.getList();
   }
 
   onQueryParams(params: NzTableQueryParams): void {
-    this.pageNum = params.pageIndex;
-    this.pageSize = params.pageSize;
+    this.pageNum.set(params.pageIndex);
+    this.pageSize.set(params.pageSize);
   }
 
   /** 登录时间为时间戳，需格式化展示 */

@@ -34,7 +34,7 @@
           <nz-form-item>
             <nz-form-control>
               <nz-range-picker
-                [(ngModel)]="dateRange"
+                [ngModel]="dateRange()" (ngModelChange)="dateRange.set($event)"
                 [ngModelOptions]="{ standalone: true }"
                 class="field-lg"
               ></nz-range-picker>
@@ -90,8 +90,8 @@
           [nzData]="rows()"
           [nzLoading]="loading()"
           [nzTotal]="total()"
-          [nzPageIndex]="pageNum"
-          [nzPageSize]="pageSize"
+          [nzPageIndex]="pageNum()"
+          [nzPageSize]="pageSize()"
           [nzFrontPagination]="false"
           [nzShowSizeChanger]="true"
           [nzShowTotal]="totalTpl"
@@ -135,7 +135,7 @@
                 <td>
                   <nz-switch
                     [ngModel]="row.status === '0'"
-                    (ngModelChange)="statusChange(row)"
+                    (ngModelChange)="statusChange(row, $event)"
                   ></nz-switch>
                 </td>
                 <td>{{ row.createTime }}</td>
@@ -347,6 +347,6 @@
 <ng-template #pwdTpl>
   <div class="pwd-tpl">
     <span class="pwd-label">新密码</span>
-    <input nz-input [(ngModel)]="newPassword" placeholder="请输入新密码（5-20 位）" />
+    <input nz-input [ngModel]="newPassword()" (ngModelChange)="newPassword.set($event)" placeholder="请输入新密码（5-20 位）" />
   </div>
 </ng-template>

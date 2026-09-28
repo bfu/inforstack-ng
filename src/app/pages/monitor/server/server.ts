@@ -1,4 +1,11 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
 import { NzGridModule } from 'ng-zorro-antd/grid';
@@ -17,6 +24,7 @@ interface MemRow {
 
 /** 服务监控，对应 ruoyi-vue3/src/views/monitor/server/index.vue */
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-server-page',
   imports: [NzCardModule, NzDescriptionsModule, NzGridModule, NzTableModule],
   templateUrl: './server.html',

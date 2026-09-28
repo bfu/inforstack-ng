@@ -1,4 +1,11 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import type { EChartsOption } from 'echarts';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
@@ -18,6 +25,7 @@ interface InfoRow {
  * 两个图表（命令统计玫瑰饼图、内存消耗仪表盘）由通用 echarts 组件渲染
  */
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-cache-page',
   imports: [Echart, NzCardModule, NzDescriptionsModule, NzGridModule],
   templateUrl: './cache.html',

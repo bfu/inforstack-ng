@@ -33,7 +33,10 @@ export class HasPermiDirective {
       const list = this.permissions();
       const mode = this.mode();
       const visible =
-        list.length > 0 && (mode === 'and' ? list.every((p) => this.store.hasPermi(p)) : list.some((p) => this.store.hasPermi(p)));
+        list.length > 0 &&
+        (mode === 'and'
+          ? list.every((p) => this.store.hasPermi(p))
+          : list.some((p) => this.store.hasPermi(p)));
       this.viewContainer.clear();
       if (visible) {
         this.viewContainer.createEmbeddedView(this.templateRef);
@@ -71,7 +74,10 @@ export class HasRoleDirective {
       const list = this.roles();
       const mode = this.mode();
       const visible =
-        list.length > 0 && (mode === 'and' ? list.every((r) => this.store.hasRole(r)) : list.some((r) => this.store.hasRole(r)));
+        list.length > 0 &&
+        (mode === 'and'
+          ? list.every((r) => this.store.hasRole(r))
+          : list.some((r) => this.store.hasRole(r)));
       this.viewContainer.clear();
       if (visible) {
         this.viewContainer.createEmbeddedView(this.templateRef);

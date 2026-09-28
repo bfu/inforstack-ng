@@ -1,4 +1,4 @@
-import { Component, computed, inject, input } from '@angular/core';
+import { Component, computed, inject, input, ChangeDetectionStrategy } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 
 /**
@@ -6,6 +6,7 @@ import { DomSanitizer } from '@angular/platform-browser';
  * 供外链、监控、接口文档等页面复用，避免每个页面各写一份 iframe + 样式
  */
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-iframe-frame',
   template: `<iframe class="iframe-frame" [src]="safeUrl()" frameborder="0"></iframe>`,
   styles: [

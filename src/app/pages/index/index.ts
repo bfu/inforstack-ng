@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzIconModule } from 'ng-zorro-antd/icon';
@@ -14,6 +14,7 @@ interface QuickEntry {
 
 /** 首页概览，对应 ruoyi-vue3/src/views/index.vue */
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-index',
   imports: [RouterLink, NzCardModule, NzIconModule, NzTagModule],
   templateUrl: './index.html',

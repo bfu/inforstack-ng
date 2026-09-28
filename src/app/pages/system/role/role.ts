@@ -1,4 +1,11 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -28,9 +35,11 @@ import { DictStore } from '@store/dict.store';
 import { HasPermiDirective } from '@shared/directives/has-permi.directive';
 import { toTreeNodes } from '@shared/utils/tree.util';
 import { TableSelection } from '@shared/utils/table-selection';
+import { environment } from '@env/environment';
 
 /** 角色管理，对应 ruoyi-vue3/src/views/system/role/index.vue */
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-role-page',
   imports: [
     FormsModule,
@@ -72,13 +81,13 @@ export class RolePage implements OnInit {
     status: [''],
   });
 
-  dateRange: Date[] = [];
+  readonly dateRange = signal<Date[]>([]);
 
   readonly rows = signal<SysRole[]>([]);
   readonly total = signal(0);
   readonly loading = signal(false);
-  pageNum = 1;
-  pageSize = 10;
+  readonly pageNum = signal(1);
+  readonly pageSize = signal(environment.pageSize);
 
   /** 表格多选状态 */
   readonly selection = new TableSelection<SysRole, number>((row) => row.roleId);
@@ -99,7 +108,7 @@ export class RolePage implements OnInit {
     remark: [''],
   });
 
-  readonly isEdit = computed(() => this.form.controls.roleId.value !== undefined);
+  readonly isEdit = computed(() => this.form.controls.roleId.value != null);
   readonly statusOptions = computed(() => this.dictStore.getDict('sys_normal_disable') ?? []);
   readonly dataScopeOptions = computed(() => this.dictStore.getDict('sys_data_scope') ?? []);
 
@@ -117,19 +126,24 @@ export class RolePage implements OnInit {
         this.dictStore.loadDict(type).subscribe();
       }
     }
+    // nz-table 的 (nzQueryParams) 带 skip(1)，首次进入不会触发，需显式发起首查
+    this.getList();
   }
 
   private buildQuery(): PageQuery {
     const value = this.searchForm.getRawValue();
     const query: PageQuery = {
-      pageNum: this.pageNum,
-      pageSize: this.pageSize,
+      pageNum: this.pageNum(),
+      pageSize: this.pageSize(),
       roleName: value.roleName || undefined,
       roleKey: value.roleKey || undefined,
       status: value.status || undefined,
     };
-    const range = this.dateRange?.length
-      ? [parseTime(this.dateRange[0], '{y}-{m}-{d}') ?? '', parseTime(this.dateRange[1], '{y}-{m}-{d}') ?? '']
+    const range = this.dateRange()?.length
+      ? [
+          parseTime(this.dateRange()[0], '{y}-{m}-{d}') ?? '',
+          parseTime(this.dateRange()[1], '{y}-{m}-{d}') ?? '',
+        ]
       : [];
     if (range.length) {
       query['params[beginTime]'] = range[0];
@@ -152,15 +166,15 @@ export class RolePage implements OnInit {
   }
 
   onQueryParams(params: NzTableQueryParams): void {
-    this.pageNum = params.pageIndex;
-    this.pageSize = params.pageSize;
+    this.pageNum.set(params.pageIndex);
+    this.pageSize.set(params.pageSize);
     this.getList();
   }
 
   resetQuery(): void {
     this.searchForm.reset({ roleName: '', roleKey: '', status: '' });
-    this.dateRange = [];
-    this.pageNum = 1;
+    this.dateRange.set([]);
+    this.pageNum.set(1);
     this.getList();
   }
 
@@ -267,9 +281,19 @@ export class RolePage implements OnInit {
     });
   }
 
-  statusChange(row: SysRole): void {
-    const next = row.status === '0' ? '1' : '0';
+  /**
+   * 切换角色状态。
+   * 开关是单向绑定，原地改 row.status 不会让 signal 通知、视图也不刷新，
+   * 故先乐观更新让数据与开关一致，取消或失败时再回滚。
+   */
+  statusChange(row: SysRole, checked: boolean): void {
+    const next = checked ? '0' : '1';
+    const previous = row.status ?? '0';
+    if (next === previous) {
+      return;
+    }
     const text = next === '0' ? '启用' : '停用';
+    this.setRowStatus(row.roleId, next);
     this.modal.confirm({
       nzTitle: '系统提示',
       nzContent: `确认要${text}「${row.roleName}」角色吗？`,
@@ -277,13 +301,22 @@ export class RolePage implements OnInit {
       nzCancelText: '取消',
       nzOnOk: () => {
         this.api.changeStatus(row.roleId!, next).subscribe({
-          next: () => {
-            row.status = next;
-            this.message.success(`${text}成功`);
-          },
+          next: () => this.message.success(`${text}成功`),
+          error: () => this.setRowStatus(row.roleId, previous),
         });
       },
+      nzOnCancel: () => this.setRowStatus(row.roleId, previous),
     });
+  }
+
+  /** 以不可变方式更新行状态，保证开关绑定值随数据变化 */
+  private setRowStatus(roleId: number | undefined, status: string): void {
+    if (roleId === undefined) {
+      return;
+    }
+    this.rows.update((list) =>
+      list.map((item) => (item.roleId === roleId ? { ...item, status } : item)),
+    );
   }
 
   /** 打开数据权限弹窗 */
@@ -310,15 +343,17 @@ export class RolePage implements OnInit {
       return;
     }
     this.scopeSubmitting.set(true);
-    this.api.dataScope(roleId, this.scopeDataScope(), this.checkedDeptKeys().map(Number)).subscribe({
-      next: () => {
-        this.message.success('设置成功');
-        this.scopeSubmitting.set(false);
-        this.scopeVisible.set(false);
-        this.getList();
-      },
-      error: () => this.scopeSubmitting.set(false),
-    });
+    this.api
+      .dataScope(roleId, this.scopeDataScope(), this.checkedDeptKeys().map(Number))
+      .subscribe({
+        next: () => {
+          this.message.success('设置成功');
+          this.scopeSubmitting.set(false);
+          this.scopeVisible.set(false);
+          this.getList();
+        },
+        error: () => this.scopeSubmitting.set(false),
+      });
   }
 
   authUser(row: SysRole): void {

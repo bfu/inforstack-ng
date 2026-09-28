@@ -1,4 +1,11 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzCardModule } from 'ng-zorro-antd/card';
@@ -23,9 +30,11 @@ import { DictStore } from '@store/dict.store';
 import { DictTag } from '@shared/components/dict-tag/dict-tag';
 import { HasPermiDirective } from '@shared/directives/has-permi.directive';
 import { TableSelection } from '@shared/utils/table-selection';
+import { environment } from '@env/environment';
 
 /** 操作日志，对应 ruoyi-vue3/src/views/monitor/operlog/index.vue */
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-operlog-page',
   imports: [
     FormsModule,
@@ -65,13 +74,13 @@ export class OperlogPage implements OnInit {
     status: [''],
   });
 
-  dateRange: Date[] = [];
+  readonly dateRange = signal<Date[]>([]);
 
   readonly rows = signal<SysOperLog[]>([]);
   readonly total = signal(0);
   readonly loading = signal(false);
-  pageNum = 1;
-  pageSize = 10;
+  readonly pageNum = signal(1);
+  readonly pageSize = signal(environment.pageSize);
 
   /** 表格多选状态 */
   readonly selection = new TableSelection<SysOperLog, number>((row) => row.operId);
@@ -95,21 +104,21 @@ export class OperlogPage implements OnInit {
   }
 
   private dateRangeParams(): string[] {
-    if (!this.dateRange?.length) {
+    if (!this.dateRange()?.length) {
       return [];
     }
     // 与 vue3 的 default-time [00:00:00, 23:59:59] 保持一致
     return [
-      parseTime(this.dateRange[0], '{y}-{m}-{d} 00:00:00') ?? '',
-      parseTime(this.dateRange[1], '{y}-{m}-{d} 23:59:59') ?? '',
+      parseTime(this.dateRange()[0], '{y}-{m}-{d} 00:00:00') ?? '',
+      parseTime(this.dateRange()[1], '{y}-{m}-{d} 23:59:59') ?? '',
     ];
   }
 
   private buildQuery(): PageQuery {
     const value = this.searchForm.getRawValue();
     const query: PageQuery = {
-      pageNum: this.pageNum,
-      pageSize: this.pageSize,
+      pageNum: this.pageNum(),
+      pageSize: this.pageSize(),
       operIp: value.operIp || undefined,
       title: value.title || undefined,
       operName: value.operName || undefined,
@@ -133,15 +142,15 @@ export class OperlogPage implements OnInit {
   }
 
   onQueryParams(params: NzTableQueryParams): void {
-    this.pageNum = params.pageIndex;
-    this.pageSize = params.pageSize;
+    this.pageNum.set(params.pageIndex);
+    this.pageSize.set(params.pageSize);
     this.getList();
   }
 
   resetQuery(): void {
     this.searchForm.reset({ operIp: '', title: '', operName: '', businessType: '', status: '' });
-    this.dateRange = [];
-    this.pageNum = 1;
+    this.dateRange.set([]);
+    this.pageNum.set(1);
     this.getList();
   }
 

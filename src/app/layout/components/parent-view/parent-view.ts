@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 /**
@@ -6,6 +6,7 @@ import { RouterOutlet } from '@angular/router';
  * 对应 ruoyi-vue3/src/components/ParentView
  */
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-parent-view',
   imports: [RouterOutlet],
   template: `<router-outlet />`,

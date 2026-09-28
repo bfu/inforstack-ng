@@ -1,6 +1,8 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRouteSnapshot, NavigationEnd, Router, RouterLink } from '@angular/router';
+import { filter } from 'rxjs';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { AppStore } from '@store/app.store';
@@ -18,15 +20,25 @@ const INLINE_INDENT = 24;
  * 对应 ruoyi-vue3/src/layout/components/Sidebar/index.vue
  */
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-sidebar',
   imports: [NgTemplateOutlet, RouterLink, NzIconModule, NzMenuModule],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.less',
 })
 export class Sidebar {
+  private readonly router = inject(Router);
+
   readonly app = inject(AppStore);
   readonly settings = inject(SettingsStore);
   readonly permission = inject(PermissionStore);
+
+  /**
+   * 当前路由通过 data.activeMenu 声明的高亮菜单路径。
+   * 分配角色、调度日志、生成配置等详情页不在菜单里，
+   * 靠它把侧边栏高亮回父菜单（对应 ruoyi-vue3 的 activeMenu）。
+   */
+  readonly activeMenuPath = signal('');
 
   readonly title = environment.title;
   /** 菜单未配置图标时的兜底图标 */
@@ -37,6 +49,29 @@ export class Sidebar {
   readonly menuTheme = computed<'light' | 'dark'>(() =>
     this.settings.sideTheme() === 'theme-light' ? 'light' : 'dark',
   );
+
+  constructor() {
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntilDestroyed(),
+      )
+      .subscribe(() => this.activeMenuPath.set(this.resolveActiveMenu()));
+  }
+
+  /** 沿路由树向下取最后一个非空 data.activeMenu，与 tags-view.resolveTitle 同构 */
+  private resolveActiveMenu(): string {
+    let node: ActivatedRouteSnapshot | null = this.router.routerState.snapshot.root;
+    let activeMenu = '';
+    while (node) {
+      const value = node.data?.['activeMenu'] as string | undefined;
+      if (value) {
+        activeMenu = value;
+      }
+      node = node.firstChild ?? null;
+    }
+    return activeMenu;
+  }
 
   /** 供 ngTemplateOutlet 递归时做类型推断 */
   asNodes(nodes: unknown): MenuNode[] {
@@ -50,6 +85,15 @@ export class Sidebar {
    */
   isExternalLink(path: string): boolean {
     return isExternal(path);
+  }
+
+  /**
+   * 是否命中当前路由声明的 activeMenu。
+   * 命中时模板会关掉 nzMatchRouter 改用 nzSelected，
+   * 避免 nzMatchRouter 的路由自匹配把我们设的高亮覆盖掉。
+   */
+  isActiveMenu(path: string): boolean {
+    return !this.isExternalLink(path) && !!this.activeMenuPath() && path === this.activeMenuPath();
   }
 
   /**

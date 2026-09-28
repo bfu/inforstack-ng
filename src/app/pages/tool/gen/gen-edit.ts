@@ -1,4 +1,11 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -26,6 +33,7 @@ type ColumnFlag = 'isInsert' | 'isEdit' | 'isList' | 'isQuery' | 'isRequired';
 
 /** 修改生成配置，对应 ruoyi-vue3/src/views/tool/gen/editTable.vue */
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-gen-edit-page',
   imports: [
     FormsModule,
@@ -248,9 +256,16 @@ export class GenEditPage implements OnInit {
     });
   }
 
-  /** 布尔标记位，后端以 char(1) 的 "0"/"1" 存储 */
-  setFlag(col: GenTableColumn, key: ColumnFlag, checked: boolean): void {
-    col[key] = checked ? '1' : '0';
+  /**
+   * 布尔标记位，后端以 char(1) 的 "0"/"1" 存储。
+   * 按行下标做不可变更新：直接改 col 不会让 columns() signal 通知，
+   * 且 OnPush 下依赖默认变更检测才刷新的写法会失效。
+   */
+  setFlag(index: number, key: ColumnFlag, checked: boolean): void {
+    const value = checked ? '1' : '0';
+    this.columns.update((list) =>
+      list.map((col, i) => (i === index ? { ...col, [key]: value } : col)),
+    );
   }
 
   isFlagOn(col: GenTableColumn, key: ColumnFlag): boolean {

@@ -27,7 +27,7 @@
       <nz-form-item>
         <nz-form-control>
           <nz-range-picker
-            [(ngModel)]="dateRange"
+            [ngModel]="dateRange()" (ngModelChange)="dateRange.set($event)"
             [ngModelOptions]="{ standalone: true }"
             class="field-lg"
           ></nz-range-picker>
@@ -101,8 +101,8 @@
       [nzData]="rows()"
       [nzLoading]="loading()"
       [nzTotal]="total()"
-      [nzPageIndex]="pageNum"
-      [nzPageSize]="pageSize"
+      [nzPageIndex]="pageNum()"
+      [nzPageSize]="pageSize()"
       [nzFrontPagination]="false"
       [nzShowSizeChanger]="true"
       [nzShowTotal]="totalTpl"
@@ -137,7 +137,7 @@
                 (ngModelChange)="selection.onItemChecked(row.tableId, $event)"
               ></label>
             </td>
-            <td>{{ (pageNum - 1) * pageSize + i + 1 }}</td>
+            <td>{{ (pageNum() - 1) * pageSize() + i + 1 }}</td>
             <td>{{ row.tableName }}</td>
             <td>{{ row.tableComment }}</td>
             <td>{{ row.className }}</td>
@@ -222,8 +222,8 @@
       [nzData]="importRows()"
       [nzLoading]="importLoading()"
       [nzTotal]="importTotal()"
-      [nzPageIndex]="importPageNum"
-      [nzPageSize]="importPageSize"
+      [nzPageIndex]="importPageNum()"
+      [nzPageSize]="importPageSize()"
       [nzFrontPagination]="false"
       [nzShowSizeChanger]="true"
       [nzShowTotal]="importTotalTpl"
@@ -284,7 +284,7 @@
 >
   <ng-container *nzModalContent>
     <p class="tip">创建表语句(支持多个建表语句)：</p>
-    <textarea nz-input [(ngModel)]="createContent" rows="10" placeholder="请输入文本"></textarea>
+    <textarea nz-input [ngModel]="createContent()" (ngModelChange)="createContent.set($event)" rows="10" placeholder="请输入文本"></textarea>
   </ng-container>
 </nz-modal>
 

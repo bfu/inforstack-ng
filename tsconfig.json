@@ -3,6 +3,7 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "strict": true,
     "paths": {
       "@api/*": ["./src/app/api/*"],
       "@core/*": ["./src/app/core/*"],

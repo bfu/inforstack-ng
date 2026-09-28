@@ -1,4 +1,11 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzCardModule } from 'ng-zorro-antd/card';
@@ -32,6 +39,7 @@ interface MenuRow extends SysMenu {
 
 /** 菜单管理，对应 ruoyi-vue3/src/views/system/menu/index.vue */
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-menu-page',
   imports: [
     FormsModule,
@@ -87,7 +95,11 @@ export class MenuPage implements OnInit {
     const walk = (nodes: SysMenu[], level: number) => {
       for (const node of nodes) {
         rows.push({ ...node, level });
-        if (node.children?.length && node.menuId !== undefined && this.expandedIds().has(node.menuId)) {
+        if (
+          node.children?.length &&
+          node.menuId !== undefined &&
+          this.expandedIds().has(node.menuId)
+        ) {
           walk(node.children, level + 1);
         }
       }
@@ -123,7 +135,7 @@ export class MenuPage implements OnInit {
     isCache: ['0'],
   });
 
-  readonly isEdit = computed(() => this.form.controls.menuId.value !== undefined);
+  readonly isEdit = computed(() => this.form.controls.menuId.value != null);
   readonly menuType = computed(() => this.form.controls.menuType.value ?? 'M');
   readonly statusOptions = computed(() => this.dictStore.getDict('sys_normal_disable') ?? []);
   readonly visibleOptions = computed(() => this.dictStore.getDict('sys_show_hide') ?? []);
@@ -162,17 +174,19 @@ export class MenuPage implements OnInit {
   getList(): void {
     this.loading.set(true);
     const value = this.searchForm.getRawValue();
-    this.api.listMenu({ menuName: value.menuName || undefined, status: value.status || undefined }).subscribe({
-      next: (res) => {
-        const tree = this.buildTree(res.data ?? []);
-        this.menuTree.set(tree);
-        if (!this.expandedIds().size) {
-          this.expandedIds.set(new Set(tree.map((item) => item.menuId!)));
-        }
-        this.loading.set(false);
-      },
-      error: () => this.loading.set(false),
-    });
+    this.api
+      .listMenu({ menuName: value.menuName || undefined, status: value.status || undefined })
+      .subscribe({
+        next: (res) => {
+          const tree = this.buildTree(res.data ?? []);
+          this.menuTree.set(tree);
+          if (!this.expandedIds().size) {
+            this.expandedIds.set(new Set(tree.map((item) => item.menuId!)));
+          }
+          this.loading.set(false);
+        },
+        error: () => this.loading.set(false),
+      });
   }
 
   resetQuery(): void {
@@ -228,7 +242,9 @@ export class MenuPage implements OnInit {
   private loadParentOptions(currentId?: number): void {
     this.api.treeselect().subscribe({
       next: (res) => {
-        const nodes = toTreeNodes(res.data ?? []).filter((node) => String(node.key) !== String(currentId));
+        const nodes = toTreeNodes(res.data ?? []).filter(
+          (node) => String(node.key) !== String(currentId),
+        );
         this.parentOptions.set([
           { title: '主类目', key: '0', isLeaf: true, children: nodes.length ? nodes : undefined },
         ]);

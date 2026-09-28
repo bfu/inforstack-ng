@@ -37,7 +37,10 @@ export class DownloadService {
   name(fileName: string, isDelete = true): void {
     const loadingId = this.message.loading('正在下载数据，请稍候', { nzDuration: 0 }).messageId;
     this.request
-      .getBlobResponse('/common/download', { fileName: encodeURIComponent(fileName), delete: isDelete })
+      .getBlobResponse('/common/download', {
+        fileName: encodeURIComponent(fileName),
+        delete: isDelete,
+      })
       .pipe(finalize(() => this.message.remove(loadingId)))
       .subscribe({
         next: (res) => {
@@ -96,13 +99,19 @@ export class DownloadService {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    // 同步回收会让部分浏览器（Firefox / Safari）取消尚未开始的下载
+    setTimeout(() => URL.revokeObjectURL(url), 0);
   }
 
   /** 解析错误流中的提示信息 */
   private async printErrMsg(data: Blob): Promise<void> {
     const text = await data.text();
-    const rspObj = JSON.parse(text) as { code: number; msg: string };
-    this.message.error(resolveErrorMessage(rspObj.code, rspObj.msg));
+    try {
+      const rspObj = JSON.parse(text) as { code: number; msg: string };
+      this.message.error(resolveErrorMessage(rspObj.code, rspObj.msg));
+    } catch {
+      // 错误流不是 JSON（如网关返回的 HTML 错误页）时兜底
+      this.message.error('下载文件出现错误，请联系管理员！');
+    }
   }
 }

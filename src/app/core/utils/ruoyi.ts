@@ -21,7 +21,10 @@ export function parseTime(
       if (/^[0-9]+$/.test(value)) {
         value = parseInt(value, 10);
       } else {
-        value = value.replace(/-/gm, '/').replace('T', ' ').replace(/\.[\d]{3}/gm, '');
+        value = value
+          .replace(/-/gm, '/')
+          .replace('T', ' ')
+          .replace(/\.[\d]{3}/gm, '');
       }
     }
     if (typeof value === 'number' && value.toString().length === 10) {
@@ -68,7 +71,9 @@ export function addDateRange<T extends Record<string, unknown>>(
 ): T {
   const search: Record<string, unknown> = { ...params };
   const map: Record<string, unknown> =
-    typeof search['params'] === 'object' && search['params'] !== null && !Array.isArray(search['params'])
+    typeof search['params'] === 'object' &&
+    search['params'] !== null &&
+    !Array.isArray(search['params'])
       ? { ...(search['params'] as Record<string, unknown>) }
       : {};
   const range = Array.isArray(dateRange) ? dateRange : [];
@@ -84,7 +89,10 @@ export function addDateRange<T extends Record<string, unknown>>(
 }
 
 /** 回显数据字典（单个值） */
-export function selectDictLabel(datas: Array<{ value: string; label: string }>, value: unknown): string {
+export function selectDictLabel(
+  datas: Array<{ value: string; label: string }>,
+  value: unknown,
+): string {
   if (value === undefined || value === null) {
     return '';
   }

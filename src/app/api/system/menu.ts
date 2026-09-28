@@ -28,7 +28,9 @@ export class SysMenuApi {
 
   /** 菜单下拉树 */
   treeselect(): Observable<{ code: number; msg: string; data: TreeSelectNode[] }> {
-    return this.request.get<{ code: number; msg: string; data: TreeSelectNode[] }>('/system/menu/treeselect');
+    return this.request.get<{ code: number; msg: string; data: TreeSelectNode[] }>(
+      '/system/menu/treeselect',
+    );
   }
 
   /** 角色对应的菜单树 */

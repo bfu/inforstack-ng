@@ -5,6 +5,9 @@ interface DetachedHandle extends DetachedRouteHandle {
   componentRef?: ComponentRef<unknown>;
 }
 
+/** 不参与缓存的顶层路由：登录 / 注册 / 错误页 / 通配兜底 */
+const NO_CACHE_PATHS = new Set(['login', 'register', '404', '**']);
+
 /**
  * 路由复用策略：为 TagsView 提供页面级缓存
  * 对应 ruoyi-vue3 中 <keep-alive :include="cachedViews"> 的能力
@@ -17,7 +20,15 @@ export class RuoYiReuseStrategy implements RouteReuseStrategy {
 
   shouldDetach(route: ActivatedRouteSnapshot): boolean {
     // 仅叶子路由参与缓存
-    return !!route.routeConfig && route.children.length === 0;
+    if (!route.routeConfig || route.children.length > 0) {
+      return false;
+    }
+    // 后端菜单 meta.noCache 标记的页面不缓存
+    if (route.data?.['noCache']) {
+      return false;
+    }
+    // 登录、注册、404、通配兜底路由无需缓存
+    return !NO_CACHE_PATHS.has(route.routeConfig?.path ?? '');
   }
 
   store(route: ActivatedRouteSnapshot, handle: DetachedRouteHandle | null): void {
@@ -38,7 +49,10 @@ export class RuoYiReuseStrategy implements RouteReuseStrategy {
   }
 
   shouldReuseRoute(future: ActivatedRouteSnapshot, curr: ActivatedRouteSnapshot): boolean {
-    return future.routeConfig === curr.routeConfig && JSON.stringify(future.params) === JSON.stringify(curr.params);
+    return (
+      future.routeConfig === curr.routeConfig &&
+      JSON.stringify(future.params) === JSON.stringify(curr.params)
+    );
   }
 
   /** 清除指定路径的缓存 */

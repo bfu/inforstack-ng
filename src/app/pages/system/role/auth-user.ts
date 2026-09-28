@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -14,9 +14,11 @@ import { NzTableModule, NzTableQueryParams } from 'ng-zorro-antd/table';
 import { RoleApi } from '@api/system/role';
 import { PageQuery } from '@core/models/result';
 import { SysRole, SysUser } from '@core/models/system';
+import { environment } from '@env/environment';
 
 /** 分配用户，对应 ruoyi-vue3/src/views/system/role/authUser.vue */
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-role-auth-user',
   imports: [
     FormsModule,
@@ -56,10 +58,10 @@ export class RoleAuthUser implements OnInit {
     phonenumber: [''],
   });
 
-  pageNum = 1;
-  pageSize = 10;
-  unPageNum = 1;
-  unPageSize = 10;
+  readonly pageNum = signal(1);
+  readonly pageSize = signal(environment.pageSize);
+  readonly unPageNum = signal(1);
+  readonly unPageSize = signal(environment.pageSize);
 
   private roleId = 0;
 
@@ -86,20 +88,26 @@ export class RoleAuthUser implements OnInit {
 
   loadAllocated(): void {
     this.loading.set(true);
-    this.api.allocatedList({ ...this.searchQuery(), pageNum: this.pageNum, pageSize: this.pageSize }).subscribe({
-      next: (res) => {
-        this.allocated.set(res.rows ?? []);
-        this.allocatedTotal.set(res.total ?? 0);
-        this.loading.set(false);
-      },
-      error: () => this.loading.set(false),
-    });
+    this.api
+      .allocatedList({ ...this.searchQuery(), pageNum: this.pageNum(), pageSize: this.pageSize() })
+      .subscribe({
+        next: (res) => {
+          this.allocated.set(res.rows ?? []);
+          this.allocatedTotal.set(res.total ?? 0);
+          this.loading.set(false);
+        },
+        error: () => this.loading.set(false),
+      });
   }
 
   loadUnallocated(): void {
     this.loading.set(true);
     this.api
-      .unallocatedList({ ...this.searchQuery(), pageNum: this.unPageNum, pageSize: this.unPageSize })
+      .unallocatedList({
+        ...this.searchQuery(),
+        pageNum: this.unPageNum(),
+        pageSize: this.unPageSize(),
+      })
       .subscribe({
         next: (res) => {
           this.unallocated.set(res.rows ?? []);
@@ -111,20 +119,20 @@ export class RoleAuthUser implements OnInit {
   }
 
   onAllocatedParams(params: NzTableQueryParams): void {
-    this.pageNum = params.pageIndex;
-    this.pageSize = params.pageSize;
+    this.pageNum.set(params.pageIndex);
+    this.pageSize.set(params.pageSize);
     this.loadAllocated();
   }
 
   onUnallocatedParams(params: NzTableQueryParams): void {
-    this.unPageNum = params.pageIndex;
-    this.unPageSize = params.pageSize;
+    this.unPageNum.set(params.pageIndex);
+    this.unPageSize.set(params.pageSize);
     this.loadUnallocated();
   }
 
   search(): void {
-    this.pageNum = 1;
-    this.unPageNum = 1;
+    this.pageNum.set(1);
+    this.unPageNum.set(1);
     this.loadAllocated();
     this.loadUnallocated();
   }
@@ -134,7 +142,11 @@ export class RoleAuthUser implements OnInit {
     this.search();
   }
 
-  onChecked(target: 'allocated' | 'unallocated', userId: number | undefined, checked: boolean): void {
+  onChecked(
+    target: 'allocated' | 'unallocated',
+    userId: number | undefined,
+    checked: boolean,
+  ): void {
     if (userId === undefined) {
       return;
     }

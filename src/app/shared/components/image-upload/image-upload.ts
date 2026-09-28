@@ -1,7 +1,20 @@
-import { Component, computed, inject, input, model, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  input,
+  model,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { NzUploadChangeParam, NzUploadFile, NzUploadModule, NzUploadXHRArgs } from 'ng-zorro-antd/upload';
+import {
+  NzUploadChangeParam,
+  NzUploadFile,
+  NzUploadModule,
+  NzUploadXHRArgs,
+} from 'ng-zorro-antd/upload';
 import { CommonApi, UploadResult } from '@api/common';
 
 /**
@@ -11,6 +24,7 @@ import { CommonApi, UploadResult } from '@api/common';
  * 用法：<app-image-upload [(url)]="form.avatar" />
  */
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-image-upload',
   imports: [NzIconModule, NzUploadModule],
   templateUrl: './image-upload.html',
@@ -32,7 +46,9 @@ export class ImageUpload {
   constructor() {
     const initial = this.url();
     if (initial) {
-      this.fileList.set([{ uid: initial, name: initial.split('/').pop() ?? initial, status: 'done', url: initial }]);
+      this.fileList.set([
+        { uid: initial, name: initial.split('/').pop() ?? initial, status: 'done', url: initial },
+      ]);
     }
   }
 

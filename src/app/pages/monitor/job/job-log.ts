@@ -1,4 +1,11 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -25,12 +32,14 @@ import { DictStore } from '@store/dict.store';
 import { DictTag } from '@shared/components/dict-tag/dict-tag';
 import { HasPermiDirective } from '@shared/directives/has-permi.directive';
 import { TableSelection } from '@shared/utils/table-selection';
+import { environment } from '@env/environment';
 
 /**
  * 定时任务调度日志，对应 ruoyi-vue3/src/views/monitor/job/log.vue
  * 该页为隐藏路由（后端无菜单），由定时任务页跳转并携带 jobId
  */
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-job-log-page',
   imports: [
     FormsModule,
@@ -71,13 +80,13 @@ export class JobLogPage implements OnInit {
     status: [''],
   });
 
-  dateRange: Date[] = [];
+  readonly dateRange = signal<Date[]>([]);
 
   readonly rows = signal<SysJobLog[]>([]);
   readonly total = signal(0);
   readonly loading = signal(false);
-  pageNum = 1;
-  pageSize = 10;
+  readonly pageNum = signal(1);
+  readonly pageSize = signal(environment.pageSize);
 
   /** 表格多选状态 */
   readonly selection = new TableSelection<SysJobLog, number>((row) => row.jobLogId);
@@ -93,7 +102,9 @@ export class JobLogPage implements OnInit {
     if (!row?.startTime || !row.endTime) {
       return '';
     }
-    const cost = new Date(row.endTime.replace(/-/g, '/')).getTime() - new Date(row.startTime.replace(/-/g, '/')).getTime();
+    const cost =
+      new Date(row.endTime.replace(/-/g, '/')).getTime() -
+      new Date(row.startTime.replace(/-/g, '/')).getTime();
     return Number.isNaN(cost) ? '' : `${cost} 毫秒`;
   });
 
@@ -125,21 +136,21 @@ export class JobLogPage implements OnInit {
   }
 
   private dateRangeParams(): string[] {
-    if (!this.dateRange?.length) {
+    if (!this.dateRange()?.length) {
       return [];
     }
     // 与 vue3 保持一致：调度日志按日期查询
     return [
-      parseTime(this.dateRange[0], '{y}-{m}-{d}') ?? '',
-      parseTime(this.dateRange[1], '{y}-{m}-{d}') ?? '',
+      parseTime(this.dateRange()[0], '{y}-{m}-{d}') ?? '',
+      parseTime(this.dateRange()[1], '{y}-{m}-{d}') ?? '',
     ];
   }
 
   private buildQuery(): PageQuery {
     const value = this.searchForm.getRawValue();
     const query: PageQuery = {
-      pageNum: this.pageNum,
-      pageSize: this.pageSize,
+      pageNum: this.pageNum(),
+      pageSize: this.pageSize(),
       jobName: value.jobName || undefined,
       jobGroup: value.jobGroup || undefined,
       status: value.status || undefined,
@@ -161,15 +172,15 @@ export class JobLogPage implements OnInit {
   }
 
   onQueryParams(params: NzTableQueryParams): void {
-    this.pageNum = params.pageIndex;
-    this.pageSize = params.pageSize;
+    this.pageNum.set(params.pageIndex);
+    this.pageSize.set(params.pageSize);
     this.getList();
   }
 
   resetQuery(): void {
     this.searchForm.reset({ jobName: '', jobGroup: '', status: '' });
-    this.dateRange = [];
-    this.pageNum = 1;
+    this.dateRange.set([]);
+    this.pageNum.set(1);
     this.getList();
   }
 

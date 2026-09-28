@@ -1,4 +1,11 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzCardModule } from 'ng-zorro-antd/card';
@@ -22,9 +29,11 @@ import { DictStore } from '@store/dict.store';
 import { DictTag } from '@shared/components/dict-tag/dict-tag';
 import { HasPermiDirective } from '@shared/directives/has-permi.directive';
 import { TableSelection } from '@shared/utils/table-selection';
+import { environment } from '@env/environment';
 
 /** 参数设置，对应 ruoyi-vue3/src/views/system/config/index.vue */
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-config-page',
   imports: [
     FormsModule,
@@ -61,13 +70,13 @@ export class ConfigPage implements OnInit {
     configType: [''],
   });
 
-  dateRange: Date[] = [];
+  readonly dateRange = signal<Date[]>([]);
 
   readonly rows = signal<SysConfig[]>([]);
   readonly total = signal(0);
   readonly loading = signal(false);
-  pageNum = 1;
-  pageSize = 10;
+  readonly pageNum = signal(1);
+  readonly pageSize = signal(environment.pageSize);
 
   /** 表格多选状态 */
   readonly selection = new TableSelection<SysConfig, number>((row) => row.configId);
@@ -85,26 +94,31 @@ export class ConfigPage implements OnInit {
     remark: [''],
   });
 
-  readonly isEdit = computed(() => this.form.controls.configId.value !== undefined);
+  readonly isEdit = computed(() => this.form.controls.configId.value != null);
   readonly yesNoOptions = computed(() => this.dictStore.getDict('sys_yes_no') ?? []);
 
   ngOnInit(): void {
     if (!this.dictStore.getDict('sys_yes_no')) {
       this.dictStore.loadDict('sys_yes_no').subscribe();
     }
+    // nz-table 的 (nzQueryParams) 带 skip(1)，首次进入不会触发，需显式发起首查
+    this.getList();
   }
 
   private buildQuery(): PageQuery {
     const value = this.searchForm.getRawValue();
     const query: PageQuery = {
-      pageNum: this.pageNum,
-      pageSize: this.pageSize,
+      pageNum: this.pageNum(),
+      pageSize: this.pageSize(),
       configName: value.configName || undefined,
       configKey: value.configKey || undefined,
       configType: value.configType || undefined,
     };
-    const range = this.dateRange?.length
-      ? [parseTime(this.dateRange[0], '{y}-{m}-{d}') ?? '', parseTime(this.dateRange[1], '{y}-{m}-{d}') ?? '']
+    const range = this.dateRange()?.length
+      ? [
+          parseTime(this.dateRange()[0], '{y}-{m}-{d}') ?? '',
+          parseTime(this.dateRange()[1], '{y}-{m}-{d}') ?? '',
+        ]
       : [];
     if (range.length) {
       query['params[beginTime]'] = range[0];
@@ -127,15 +141,15 @@ export class ConfigPage implements OnInit {
   }
 
   onQueryParams(params: NzTableQueryParams): void {
-    this.pageNum = params.pageIndex;
-    this.pageSize = params.pageSize;
+    this.pageNum.set(params.pageIndex);
+    this.pageSize.set(params.pageSize);
     this.getList();
   }
 
   resetQuery(): void {
     this.searchForm.reset({ configName: '', configKey: '', configType: '' });
-    this.dateRange = [];
-    this.pageNum = 1;
+    this.dateRange.set([]);
+    this.pageNum.set(1);
     this.getList();
   }
 

@@ -1,4 +1,11 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzCardModule } from 'ng-zorro-antd/card';
@@ -28,6 +35,7 @@ interface DeptRow extends SysDept {
 
 /** 部门管理，对应 ruoyi-vue3/src/views/system/dept/index.vue */
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-dept-page',
   imports: [
     FormsModule,
@@ -74,7 +82,11 @@ export class DeptPage implements OnInit {
     const walk = (nodes: SysDept[], level: number) => {
       for (const node of nodes) {
         rows.push({ ...node, level });
-        if (node.children?.length && node.deptId !== undefined && this.expandedIds().has(node.deptId)) {
+        if (
+          node.children?.length &&
+          node.deptId !== undefined &&
+          this.expandedIds().has(node.deptId)
+        ) {
           walk(node.children as SysDept[], level + 1);
         }
       }
@@ -104,7 +116,7 @@ export class DeptPage implements OnInit {
     status: ['0'],
   });
 
-  readonly isEdit = computed(() => this.form.controls.deptId.value !== undefined);
+  readonly isEdit = computed(() => this.form.controls.deptId.value != null);
   readonly statusOptions = computed(() => this.dictStore.getDict('sys_normal_disable') ?? []);
 
   ngOnInit(): void {
@@ -115,7 +127,10 @@ export class DeptPage implements OnInit {
   }
 
   private countNodes(nodes: SysDept[]): number {
-    return nodes.reduce((sum, node) => sum + 1 + this.countNodes((node.children ?? []) as SysDept[]), 0);
+    return nodes.reduce(
+      (sum, node) => sum + 1 + this.countNodes((node.children ?? []) as SysDept[]),
+      0,
+    );
   }
 
   private buildTree(list: SysDept[]): SysDept[] {
@@ -137,17 +152,19 @@ export class DeptPage implements OnInit {
   getList(): void {
     this.loading.set(true);
     const value = this.searchForm.getRawValue();
-    this.api.listDept({ deptName: value.deptName || undefined, status: value.status || undefined }).subscribe({
-      next: (res) => {
-        const tree = this.buildTree(res.data ?? []);
-        this.deptTree.set(tree);
-        if (!this.expandedIds().size) {
-          this.expandedIds.set(new Set(tree.map((item) => item.deptId!)));
-        }
-        this.loading.set(false);
-      },
-      error: () => this.loading.set(false),
-    });
+    this.api
+      .listDept({ deptName: value.deptName || undefined, status: value.status || undefined })
+      .subscribe({
+        next: (res) => {
+          const tree = this.buildTree(res.data ?? []);
+          this.deptTree.set(tree);
+          if (!this.expandedIds().size) {
+            this.expandedIds.set(new Set(tree.map((item) => item.deptId!)));
+          }
+          this.loading.set(false);
+        },
+        error: () => this.loading.set(false),
+      });
   }
 
   resetQuery(): void {

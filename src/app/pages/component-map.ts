@@ -19,7 +19,8 @@ export const COMPONENT_MAP: Record<string, ComponentLoader> = {
   'system/config/index': () => import('./system/config/config').then((m) => m.ConfigPage),
   'system/notice/index': () => import('./system/notice/notice').then((m) => m.NoticePage),
   'monitor/operlog/index': () => import('./monitor/operlog/operlog').then((m) => m.OperlogPage),
-  'monitor/logininfor/index': () => import('./monitor/logininfor/logininfor').then((m) => m.LogininforPage),
+  'monitor/logininfor/index': () =>
+    import('./monitor/logininfor/logininfor').then((m) => m.LogininforPage),
   'monitor/online/index': () => import('./monitor/online/online').then((m) => m.OnlinePage),
   'monitor/job/index': () => import('./monitor/job/job').then((m) => m.JobPage),
   'monitor/server/index': () => import('./monitor/server/server').then((m) => m.ServerPage),

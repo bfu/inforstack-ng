@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -29,6 +29,7 @@ function equalToPassword(group: AbstractControl): ValidationErrors | null {
  * 对应 ruoyi-vue3/src/views/register.vue
  */
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-register',
   imports: [ReactiveFormsModule, RouterLink, NzFormModule, NzInputModule, NzButtonModule],
   templateUrl: './register.html',

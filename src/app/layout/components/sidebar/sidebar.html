@@ -35,7 +35,8 @@
           -->
           <li
             nz-menu-item
-            [nzMatchRouter]="!isExternalLink(node.path)"
+            [nzMatchRouter]="!isExternalLink(node.path) && !isActiveMenu(node.path)"
+            [nzSelected]="isActiveMenu(node.path)"
             [nzPaddingLeft]="paddingOf(level)"
           >
             @if (isExternalLink(node.path)) {

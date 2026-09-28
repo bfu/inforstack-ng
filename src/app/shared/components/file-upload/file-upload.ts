@@ -1,8 +1,21 @@
-import { Component, computed, inject, input, model, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  input,
+  model,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { NzUploadChangeParam, NzUploadFile, NzUploadModule, NzUploadXHRArgs } from 'ng-zorro-antd/upload';
+import {
+  NzUploadChangeParam,
+  NzUploadFile,
+  NzUploadModule,
+  NzUploadXHRArgs,
+} from 'ng-zorro-antd/upload';
 import { CommonApi, UploadResult } from '@api/common';
 
 /**
@@ -13,6 +26,7 @@ import { CommonApi, UploadResult } from '@api/common';
  * 绑定值为后端保存名，多个以逗号分隔
  */
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-file-upload',
   imports: [NzButtonModule, NzIconModule, NzUploadModule],
   templateUrl: './file-upload.html',

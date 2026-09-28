@@ -1,4 +1,11 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -26,6 +33,7 @@ import { DictStore } from '@store/dict.store';
 import { DictTag } from '@shared/components/dict-tag/dict-tag';
 import { HasPermiDirective } from '@shared/directives/has-permi.directive';
 import { TableSelection } from '@shared/utils/table-selection';
+import { environment } from '@env/environment';
 
 /** 执行策略选项，对应后端 ScheduleConstants.MISFIRE_* */
 const MISFIRE_OPTIONS = [
@@ -43,6 +51,7 @@ const CONCURRENT_OPTIONS = [
 
 /** 定时任务，对应 ruoyi-vue3/src/views/monitor/job/index.vue */
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-job-page',
   imports: [
     FormsModule,
@@ -86,8 +95,8 @@ export class JobPage implements OnInit {
   readonly rows = signal<SysJob[]>([]);
   readonly total = signal(0);
   readonly loading = signal(false);
-  pageNum = 1;
-  pageSize = 10;
+  readonly pageNum = signal(1);
+  readonly pageSize = signal(environment.pageSize);
 
   /** 表格多选状态 */
   readonly selection = new TableSelection<SysJob, number>((row) => row.jobId);
@@ -113,11 +122,12 @@ export class JobPage implements OnInit {
   readonly misfireOptions = MISFIRE_OPTIONS;
   readonly concurrentOptions = CONCURRENT_OPTIONS;
 
-  readonly isEdit = computed(() => this.form.controls.jobId.value !== undefined);
+  readonly isEdit = computed(() => this.form.controls.jobId.value != null);
   readonly jobGroupOptions = computed(() => this.dictStore.getDict('sys_job_group') ?? []);
   readonly jobStatusOptions = computed(() => this.dictStore.getDict('sys_job_status') ?? []);
   readonly detailMisfireText = computed(
-    () => MISFIRE_OPTIONS.find((item) => item.value === this.detailRow()?.misfirePolicy)?.label ?? '',
+    () =>
+      MISFIRE_OPTIONS.find((item) => item.value === this.detailRow()?.misfirePolicy)?.label ?? '',
   );
 
   ngOnInit(): void {
@@ -132,8 +142,8 @@ export class JobPage implements OnInit {
   private buildQuery(): PageQuery {
     const value = this.searchForm.getRawValue();
     return {
-      pageNum: this.pageNum,
-      pageSize: this.pageSize,
+      pageNum: this.pageNum(),
+      pageSize: this.pageSize(),
       jobName: value.jobName || undefined,
       jobGroup: value.jobGroup || undefined,
       status: value.status || undefined,
@@ -154,14 +164,14 @@ export class JobPage implements OnInit {
   }
 
   onQueryParams(params: NzTableQueryParams): void {
-    this.pageNum = params.pageIndex;
-    this.pageSize = params.pageSize;
+    this.pageNum.set(params.pageIndex);
+    this.pageSize.set(params.pageSize);
     this.getList();
   }
 
   resetQuery(): void {
     this.searchForm.reset({ jobName: '', jobGroup: '', status: '' });
-    this.pageNum = 1;
+    this.pageNum.set(1);
     this.getList();
   }
 

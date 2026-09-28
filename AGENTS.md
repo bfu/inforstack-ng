@@ -8,6 +8,9 @@ Angular CLI 22.2 生成的独立组件（standalone）工程，UI 组件一律�
 - NG-ZORRO 全局配置已就绪：`provideNzI18n(zh_CN)`、`provideNzIcons(icons)`（`src/app/icons-provider.ts`）、`provideNzDateFnsAdapter()`。
 - 组件模板与样式独立成文件：`templateUrl: './xxx.html'` + `styleUrl: './xxx.less'`（Less）。
 - 已知坑：`NzModalService` 不是 `providedIn: 'root'`，已在 `app.config.ts` 通过 `importProvidersFrom(NzModalModule)` 注册到根注入器（拦截器要用），**不要删除也不要重复 provide**。
+- 会话清理统一走 `core/session.service.ts` 的 `SessionService.resetAll()`（401 拦截器与登出共用）。只清 Token 会残留角色/权限/动态路由/页签，导致重登后 `authGuard` 命中 `user.loaded()` 沿用旧账号菜单（越权）。
+- 权限指令选择器是 `appHasPermi` / `appHasRole`，用法 `*appHasPermi="['system:user:add']"`（不是 `hasPermi`）。
+- 列表页必须自己发起首查：ng-zorro `nz-table` 的 `(nzQueryParams)` 管道带 `skip(1)`，首次进入不会触发。
 - 后端接口代理见 `proxy.conf.json`。
 
 ## NG-ZORRO 离线文档（写 UI 前务必查）

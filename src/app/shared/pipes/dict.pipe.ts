@@ -37,9 +37,6 @@ export class DictPipe implements PipeTransform {
       return;
     }
     this.loaded.update((state) => ({ ...state, [dictType]: true }));
-    this.dictStore
-      .loadDict(dictType)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe();
+    this.dictStore.loadDict(dictType).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
   }
 }

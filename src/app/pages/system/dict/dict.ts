@@ -1,4 +1,11 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzCardModule } from 'ng-zorro-antd/card';
@@ -22,6 +29,7 @@ import { parseTime } from '@core/utils/ruoyi';
 import { DictStore } from '@store/dict.store';
 import { DictTag } from '@shared/components/dict-tag/dict-tag';
 import { HasPermiDirective } from '@shared/directives/has-permi.directive';
+import { environment } from '@env/environment';
 
 /** 字典数据回显样式选项（对应后端 listClass） */
 const LIST_CLASS_OPTIONS = [
@@ -35,6 +43,7 @@ const LIST_CLASS_OPTIONS = [
 
 /** 字典管理，对应 ruoyi-vue3/src/views/system/dict/index.vue */
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-dict-page',
   imports: [
     FormsModule,
@@ -73,8 +82,8 @@ export class DictPage implements OnInit {
   readonly types = signal<SysDictType[]>([]);
   readonly typeTotal = signal(0);
   readonly typeLoading = signal(false);
-  typePageNum = 1;
-  typePageSize = 10;
+  readonly typePageNum = signal(1);
+  readonly typePageSize = signal(environment.pageSize);
   readonly typeChecked = signal<Set<number>>(new Set());
   readonly currentType = signal<string>('');
 
@@ -83,8 +92,8 @@ export class DictPage implements OnInit {
   readonly datas = signal<SysDictData[]>([]);
   readonly dataTotal = signal(0);
   readonly dataLoading = signal(false);
-  dataPageNum = 1;
-  dataPageSize = 10;
+  readonly dataPageNum = signal(1);
+  readonly dataPageSize = signal(environment.pageSize);
   readonly dataChecked = signal<Set<number>>(new Set());
 
   // 弹窗
@@ -113,8 +122,8 @@ export class DictPage implements OnInit {
     remark: [''],
   });
 
-  readonly typeEdit = computed(() => this.typeForm.controls.dictId.value !== undefined);
-  readonly dataEdit = computed(() => this.dataForm.controls.dictCode.value !== undefined);
+  readonly typeEdit = computed(() => this.typeForm.controls.dictId.value != null);
+  readonly dataEdit = computed(() => this.dataForm.controls.dictCode.value != null);
   readonly typeSingle = computed(() => this.typeChecked().size === 1);
   readonly typeMultiple = computed(() => this.typeChecked().size > 0);
   readonly dataSingle = computed(() => this.dataChecked().size === 1);
@@ -131,6 +140,9 @@ export class DictPage implements OnInit {
         this.dictStore.loadDict(type).subscribe();
       }
     }
+    // nz-table 的 (nzQueryParams) 带 skip(1)，首次进入不会触发，需显式发起首查
+    // 字典数据列表依赖选中的字典类型，只需首查类型列表
+    this.getTypeList();
   }
 
   // ---------- 字典类型 ----------
@@ -138,8 +150,8 @@ export class DictPage implements OnInit {
   private typeQuery(): PageQuery {
     const value = this.typeSearch.getRawValue();
     return {
-      pageNum: this.typePageNum,
-      pageSize: this.typePageSize,
+      pageNum: this.typePageNum(),
+      pageSize: this.typePageSize(),
       dictName: value.dictName || undefined,
       dictType: value.dictType || undefined,
       status: value.status || undefined,
@@ -159,14 +171,14 @@ export class DictPage implements OnInit {
   }
 
   onTypeParams(params: NzTableQueryParams): void {
-    this.typePageNum = params.pageIndex;
-    this.typePageSize = params.pageSize;
+    this.typePageNum.set(params.pageIndex);
+    this.typePageSize.set(params.pageSize);
     this.getTypeList();
   }
 
   resetTypeQuery(): void {
     this.typeSearch.reset({ dictName: '', dictType: '', status: '' });
-    this.typePageNum = 1;
+    this.typePageNum.set(1);
     this.getTypeList();
   }
 
@@ -184,14 +196,16 @@ export class DictPage implements OnInit {
   }
 
   typeRows(): SysDictType[] {
-    return this.types().filter((row) => row.dictId !== undefined && this.typeChecked().has(row.dictId));
+    return this.types().filter(
+      (row) => row.dictId !== undefined && this.typeChecked().has(row.dictId),
+    );
   }
 
   /** 选中某一行字典类型，加载其字典数据 */
   selectType(row: SysDictType): void {
     this.currentType.set(row.dictType ?? '');
     this.dataChecked.set(new Set());
-    this.dataPageNum = 1;
+    this.dataPageNum.set(1);
     this.getDataList();
   }
 
@@ -224,7 +238,9 @@ export class DictPage implements OnInit {
     }
     this.submitting.set(true);
     const payload = this.typeForm.getRawValue() as SysDictType;
-    const request$ = this.typeEdit() ? this.typeApi.updateType(payload) : this.typeApi.addType(payload);
+    const request$ = this.typeEdit()
+      ? this.typeApi.updateType(payload)
+      : this.typeApi.addType(payload);
     request$.subscribe({
       next: () => {
         this.message.success(this.typeEdit() ? '修改成功' : '新增成功');
@@ -287,8 +303,8 @@ export class DictPage implements OnInit {
   private dataQuery(): PageQuery {
     const value = this.dataSearch.getRawValue();
     return {
-      pageNum: this.dataPageNum,
-      pageSize: this.dataPageSize,
+      pageNum: this.dataPageNum(),
+      pageSize: this.dataPageSize(),
       dictType: this.currentType() || undefined,
       dictLabel: value.dictLabel || undefined,
       status: value.status || undefined,
@@ -311,14 +327,14 @@ export class DictPage implements OnInit {
   }
 
   onDataParams(params: NzTableQueryParams): void {
-    this.dataPageNum = params.pageIndex;
-    this.dataPageSize = params.pageSize;
+    this.dataPageNum.set(params.pageIndex);
+    this.dataPageSize.set(params.pageSize);
     this.getDataList();
   }
 
   resetDataQuery(): void {
     this.dataSearch.reset({ dictLabel: '', status: '' });
-    this.dataPageNum = 1;
+    this.dataPageNum.set(1);
     this.getDataList();
   }
 
@@ -336,7 +352,9 @@ export class DictPage implements OnInit {
   }
 
   dataRows(): SysDictData[] {
-    return this.datas().filter((row) => row.dictCode !== undefined && this.dataChecked().has(row.dictCode));
+    return this.datas().filter(
+      (row) => row.dictCode !== undefined && this.dataChecked().has(row.dictCode),
+    );
   }
 
   openDataAdd(): void {
@@ -392,8 +410,13 @@ export class DictPage implements OnInit {
       return;
     }
     this.submitting.set(true);
-    const payload = { ...(this.dataForm.getRawValue() as SysDictData), dictType: this.currentType() };
-    const request$ = this.dataEdit() ? this.dataApi.updateData(payload) : this.dataApi.addData(payload);
+    const payload = {
+      ...(this.dataForm.getRawValue() as SysDictData),
+      dictType: this.currentType(),
+    };
+    const request$ = this.dataEdit()
+      ? this.dataApi.updateData(payload)
+      : this.dataApi.addData(payload);
     request$.subscribe({
       next: () => {
         this.message.success(this.dataEdit() ? '修改成功' : '新增成功');

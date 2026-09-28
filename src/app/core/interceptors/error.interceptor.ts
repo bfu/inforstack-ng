@@ -5,7 +5,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { catchError, map, throwError } from 'rxjs';
 import { RESPONSE_BLOB } from '@core/http-context';
-import { removeToken } from '@core/utils/auth';
+import { SessionService } from '@core/session.service';
 import { resolveErrorMessage } from '@core/utils/error-code';
 
 /**
@@ -16,10 +16,14 @@ import { resolveErrorMessage } from '@core/utils/error-code';
 /** 是否显示重新登录弹窗（防止并发请求重复弹出） */
 export const isRelogin = { show: false };
 
+/** RxJS TimeoutError 的 message 为 'Timeout has occurred'，需忽略大小写匹配 */
+const TIMEOUT_MESSAGE = /timeout/i;
+
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
   const message = inject(NzMessageService);
   const modal = inject(NzModalService);
+  const session = inject(SessionService);
   const isBlob = req.context.get(RESPONSE_BLOB);
 
   return next(req).pipe(
@@ -28,10 +32,8 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       let msg = error.message;
       if (error.status === 0) {
         msg = '后端接口连接异常';
-      } else if (msg.includes('timeout')) {
+      } else if (TIMEOUT_MESSAGE.test(msg)) {
         msg = '系统接口请求超时';
-      } else if (msg.includes('Request failed with status code')) {
-        msg = '系统接口' + msg.slice(-3) + '异常';
       }
       message.error(msg, { nzDuration: 5000 });
       return throwError(() => error);
@@ -58,7 +60,9 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
             nzCancelText: '取消',
             nzOnOk: () => {
               isRelogin.show = false;
-              removeToken();
+              // 必须清理全部会话态：只清 Token 会让 authGuard 命中 user.loaded()
+              // 而跳过 getInfo / generateRoutes，沿用上一个账号的菜单与权限
+              session.resetAll();
               router.navigate(['/login']);
             },
             nzOnCancel: () => {

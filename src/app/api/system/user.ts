@@ -73,7 +73,10 @@ export class UserApi {
   }
 
   updateUserPwd(oldPassword: string, newPassword: string): Observable<AjaxResult> {
-    return this.request.put<AjaxResult>('/system/user/profile/updatePwd', { oldPassword, newPassword });
+    return this.request.put<AjaxResult>('/system/user/profile/updatePwd', {
+      oldPassword,
+      newPassword,
+    });
   }
 
   /** 查询授权角色 */
@@ -89,6 +92,8 @@ export class UserApi {
 
   /** 部门下拉树 */
   deptTreeSelect(): Observable<{ code: number; msg: string; data: TreeSelectNode[] }> {
-    return this.request.get<{ code: number; msg: string; data: TreeSelectNode[] }>('/system/user/deptTree');
+    return this.request.get<{ code: number; msg: string; data: TreeSelectNode[] }>(
+      '/system/user/deptTree',
+    );
   }
 }

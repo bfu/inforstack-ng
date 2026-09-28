@@ -1,4 +1,4 @@
-import { Component, HostListener, inject } from '@angular/core';
+import { Component, HostListener, inject, ChangeDetectionStrategy } from '@angular/core';
 import { AppStore } from '@store/app.store';
 import { SettingsStore } from '@store/settings.store';
 import { environment } from '@env/environment';
@@ -16,6 +16,7 @@ const MOBILE_WIDTH = 992;
  * 对应 ruoyi-vue3/src/layout/index.vue
  */
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-layout',
   imports: [Sidebar, Navbar, TagsView, AppMain, SettingsPanel],
   templateUrl: './layout.html',

@@ -1,4 +1,12 @@
-import { Component, DestroyRef, OnInit, computed, inject, input } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  OnInit,
+  computed,
+  inject,
+  input,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { DictStore } from '@store/dict.store';
@@ -19,6 +27,7 @@ const TAG_COLOR: Record<string, string> = {
  * 用法：<app-dict-tag [value]="row.status" dictType="sys_normal_disable" />
  */
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-dict-tag',
   imports: [NzTagModule],
   template: `<nz-tag [nzColor]="color()">{{ text() }}</nz-tag>`,

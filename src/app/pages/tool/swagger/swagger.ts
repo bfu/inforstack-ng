@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { environment } from '@env/environment';
 import { IframeFrame } from '@shared/components/iframe-frame/iframe-frame';
 
@@ -7,6 +7,7 @@ import { IframeFrame } from '@shared/components/iframe-frame/iframe-frame';
  * 后端引入 springdoc-openapi-starter-webmvc-ui，默认地址为 /swagger-ui/index.html
  */
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-swagger-page',
   imports: [IframeFrame],
   template: `<app-iframe-frame [src]="url" />`,

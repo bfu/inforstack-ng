@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -14,8 +14,16 @@ import { TableSelection } from '@shared/utils/table-selection';
 
 /** 分配角色，对应 ruoyi-vue3/src/views/system/user/authRole.vue */
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-user-auth-role',
-  imports: [FormsModule, NzButtonModule, NzCardModule, NzCheckboxModule, NzDescriptionsModule, NzTableModule],
+  imports: [
+    FormsModule,
+    NzButtonModule,
+    NzCardModule,
+    NzCheckboxModule,
+    NzDescriptionsModule,
+    NzTableModule,
+  ],
   templateUrl: './auth-role.html',
   styleUrl: './auth-role.less',
 })

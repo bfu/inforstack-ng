@@ -29,7 +29,9 @@ export class TagsViewStore {
   }
 
   updateTitle(path: string, title: string): void {
-    this._visitedViews.update((views) => views.map((item) => (item.path === path ? { ...item, title } : item)));
+    this._visitedViews.update((views) =>
+      views.map((item) => (item.path === path ? { ...item, title } : item)),
+    );
   }
 
   delView(view: VisitedView): void {
@@ -37,7 +39,9 @@ export class TagsViewStore {
   }
 
   delOthersViews(view: VisitedView): void {
-    this._visitedViews.update((views) => views.filter((item) => item.path === view.path || !item.closable));
+    this._visitedViews.update((views) =>
+      views.filter((item) => item.path === view.path || !item.closable),
+    );
   }
 
   delAllViews(): void {

@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRouteSnapshot, NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
@@ -14,6 +14,7 @@ import { TagsViewStore, VisitedView } from '@store/tags-view.store';
  * 对应 ruoyi-vue3/src/layout/components/TagsView/index.vue
  */
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-tags-view',
   imports: [NzDropdownModule, NzIconModule, NzMenuModule],
   templateUrl: './tags-view.html',
@@ -28,7 +29,9 @@ export class TagsView {
   readonly views = this.tags.visitedViews;
   private readonly currentPath = signal('');
 
-  readonly current = computed(() => this.views().find((view) => view.path === this.currentPath()) ?? null);
+  readonly current = computed(
+    () => this.views().find((view) => view.path === this.currentPath()) ?? null,
+  );
 
   constructor() {
     this.router.events

@@ -39,7 +39,10 @@ const DEFAULT_SETTING: LayoutSetting = {
 };
 
 function loadSetting(): LayoutSetting {
-  return { ...DEFAULT_SETTING, ...(cache.local.getJSON<Partial<LayoutSetting>>(STORAGE_KEY) ?? {}) };
+  return {
+    ...DEFAULT_SETTING,
+    ...(cache.local.getJSON<Partial<LayoutSetting>>(STORAGE_KEY) ?? {}),
+  };
 }
 
 /**
@@ -70,7 +73,9 @@ export class SettingsStore {
   constructor() {
     effect(() => {
       const dynamic = this.dynamicTitle();
-      this.titleService.setTitle(dynamic ? `${this._pageTitle()} - ${this._title()}` : this._title());
+      this.titleService.setTitle(
+        dynamic ? `${this._pageTitle()} - ${this._title()}` : this._title(),
+      );
     });
     // 主题色写入 CSS 变量，供自定义组件样式消费
     effect(() => {

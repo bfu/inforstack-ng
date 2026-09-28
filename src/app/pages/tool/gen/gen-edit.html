@@ -94,28 +94,28 @@
                   <label
                     nz-checkbox
                     [ngModel]="isFlagOn(col, 'isInsert')"
-                    (ngModelChange)="setFlag(col, 'isInsert', $event)"
+                    (ngModelChange)="setFlag($index, 'isInsert', $event)"
                   ></label>
                 </td>
                 <td>
                   <label
                     nz-checkbox
                     [ngModel]="isFlagOn(col, 'isEdit')"
-                    (ngModelChange)="setFlag(col, 'isEdit', $event)"
+                    (ngModelChange)="setFlag($index, 'isEdit', $event)"
                   ></label>
                 </td>
                 <td>
                   <label
                     nz-checkbox
                     [ngModel]="isFlagOn(col, 'isList')"
-                    (ngModelChange)="setFlag(col, 'isList', $event)"
+                    (ngModelChange)="setFlag($index, 'isList', $event)"
                   ></label>
                 </td>
                 <td>
                   <label
                     nz-checkbox
                     [ngModel]="isFlagOn(col, 'isQuery')"
-                    (ngModelChange)="setFlag(col, 'isQuery', $event)"
+                    (ngModelChange)="setFlag($index, 'isQuery', $event)"
                   ></label>
                 </td>
                 <td>
@@ -129,7 +129,7 @@
                   <label
                     nz-checkbox
                     [ngModel]="isFlagOn(col, 'isRequired')"
-                    (ngModelChange)="setFlag(col, 'isRequired', $event)"
+                    (ngModelChange)="setFlag($index, 'isRequired', $event)"
                   ></label>
                 </td>
                 <td>

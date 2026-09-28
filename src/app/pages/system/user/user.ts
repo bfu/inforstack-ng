@@ -1,4 +1,13 @@
-import { Component, OnInit, TemplateRef, ViewChild, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  TemplateRef,
+  ViewChild,
+  computed,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -28,9 +37,11 @@ import { DictStore } from '@store/dict.store';
 import { HasPermiDirective } from '@shared/directives/has-permi.directive';
 import { toTreeNodes } from '@shared/utils/tree.util';
 import { TableSelection } from '@shared/utils/table-selection';
+import { environment } from '@env/environment';
 
 /** 用户管理，对应 ruoyi-vue3/src/views/system/user/index.vue */
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-user-page',
   imports: [
     FormsModule,
@@ -72,13 +83,13 @@ export class UserPage implements OnInit {
     status: [''],
   });
 
-  dateRange: Date[] = [];
+  readonly dateRange = signal<Date[]>([]);
 
   readonly rows = signal<SysUser[]>([]);
   readonly total = signal(0);
   readonly loading = signal(false);
-  pageNum = 1;
-  pageSize = 10;
+  readonly pageNum = signal(1);
+  readonly pageSize = signal(environment.pageSize);
 
   readonly deptNodes = signal<NzTreeNodeOptions[]>([]);
   readonly deptOptions = signal<NzTreeNodeOptions[]>([]);
@@ -108,11 +119,11 @@ export class UserPage implements OnInit {
     remark: [''],
   });
 
-  readonly isEdit = computed(() => this.form.controls.userId.value !== undefined);
+  readonly isEdit = computed(() => this.form.controls.userId.value != null);
   readonly statusOptions = computed(() => this.dictStore.getDict('sys_normal_disable') ?? []);
   readonly sexOptions = computed(() => this.dictStore.getDict('sys_user_sex') ?? []);
 
-  newPassword = '';
+  readonly newPassword = signal('');
 
   readonly importVisible = signal(false);
   readonly updateSupport = signal(false);
@@ -122,6 +133,8 @@ export class UserPage implements OnInit {
   ngOnInit(): void {
     this.loadDicts();
     this.loadDeptTree();
+    // nz-table 的 (nzQueryParams) 带 skip(1)，首次进入不会触发，需显式发起首查
+    this.getList();
   }
 
   private loadDicts(): void {
@@ -146,17 +159,17 @@ export class UserPage implements OnInit {
   private buildQuery(): PageQuery {
     const value = this.searchForm.getRawValue();
     const query: PageQuery = {
-      pageNum: this.pageNum,
-      pageSize: this.pageSize,
+      pageNum: this.pageNum(),
+      pageSize: this.pageSize(),
       userName: value.userName || undefined,
       phonenumber: value.phonenumber || undefined,
       status: value.status || undefined,
       deptId: this.deptId(),
     };
-    const range = this.dateRange?.length
+    const range = this.dateRange()?.length
       ? [
-          parseTime(this.dateRange[0], '{y}-{m}-{d}') ?? '',
-          parseTime(this.dateRange[1], '{y}-{m}-{d}') ?? '',
+          parseTime(this.dateRange()[0], '{y}-{m}-{d}') ?? '',
+          parseTime(this.dateRange()[1], '{y}-{m}-{d}') ?? '',
         ]
       : [];
     return addDateRange(query, range);
@@ -176,23 +189,23 @@ export class UserPage implements OnInit {
   }
 
   onQueryParams(params: NzTableQueryParams): void {
-    this.pageNum = params.pageIndex;
-    this.pageSize = params.pageSize;
+    this.pageNum.set(params.pageIndex);
+    this.pageSize.set(params.pageSize);
     this.getList();
   }
 
   onDeptSelect(event: NzFormatEmitEvent): void {
     const key = event.node?.key;
     this.deptId.set(key ? Number(key) : undefined);
-    this.pageNum = 1;
+    this.pageNum.set(1);
     this.getList();
   }
 
   resetQuery(): void {
     this.searchForm.reset({ userName: '', phonenumber: '', status: '' });
-    this.dateRange = [];
+    this.dateRange.set([]);
     this.deptId.set(undefined);
-    this.pageNum = 1;
+    this.pageNum.set(1);
     this.getList();
   }
 
@@ -266,7 +279,9 @@ export class UserPage implements OnInit {
     }
     this.submitting.set(true);
     const value = this.form.getRawValue();
-    const request$ = this.isEdit() ? this.api.updateUser(value as SysUser) : this.api.addUser(value as SysUser);
+    const request$ = this.isEdit()
+      ? this.api.updateUser(value as SysUser)
+      : this.api.addUser(value as SysUser);
     request$.subscribe({
       next: () => {
         this.message.success(this.isEdit() ? '修改成功' : '新增成功');
@@ -304,14 +319,14 @@ export class UserPage implements OnInit {
   }
 
   resetPwd(row: SysUser): void {
-    this.newPassword = '';
+    this.newPassword.set('');
     this.modal.create({
       nzTitle: `重置「${row.userName}」的密码`,
       nzContent: this.pwdTpl,
       nzOkText: '确定',
       nzCancelText: '取消',
       nzOnOk: () => {
-        const password = this.newPassword?.trim();
+        const password = this.newPassword()?.trim();
         if (!password || password.length < 5 || password.length > 20) {
           this.message.warning('密码长度必须介于 5 和 20 之间');
           return false;
@@ -324,9 +339,19 @@ export class UserPage implements OnInit {
     });
   }
 
-  statusChange(row: SysUser): void {
-    const next = row.status === '0' ? '1' : '0';
+  /**
+   * 切换用户状态。
+   * 开关是单向绑定，取消确认后绑定值不变则不会回弹，
+   * 故先乐观更新让数据与开关一致，取消或失败时再回滚。
+   */
+  statusChange(row: SysUser, checked: boolean): void {
+    const next = checked ? '0' : '1';
+    const previous = row.status ?? '0';
+    if (next === previous) {
+      return;
+    }
     const text = next === '0' ? '启用' : '停用';
+    this.setRowStatus(row.userId, next);
     this.modal.confirm({
       nzTitle: '系统提示',
       nzContent: `确认要${text}「${row.userName}」用户吗？`,
@@ -334,13 +359,22 @@ export class UserPage implements OnInit {
       nzCancelText: '取消',
       nzOnOk: () => {
         this.api.changeUserStatus(row.userId!, next).subscribe({
-          next: () => {
-            row.status = next;
-            this.message.success(`${text}成功`);
-          },
+          next: () => this.message.success(`${text}成功`),
+          error: () => this.setRowStatus(row.userId, previous),
         });
       },
+      nzOnCancel: () => this.setRowStatus(row.userId, previous),
     });
+  }
+
+  /** 以不可变方式更新行状态，保证开关绑定值随数据变化 */
+  private setRowStatus(userId: number | undefined, status: string): void {
+    if (userId === undefined) {
+      return;
+    }
+    this.rows.update((list) =>
+      list.map((item) => (item.userId === userId ? { ...item, status } : item)),
+    );
   }
 
   authRole(row: SysUser): void {

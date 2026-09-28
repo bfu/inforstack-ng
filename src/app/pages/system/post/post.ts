@@ -1,4 +1,11 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzCardModule } from 'ng-zorro-antd/card';
@@ -22,9 +29,11 @@ import { DictStore } from '@store/dict.store';
 import { DictTag } from '@shared/components/dict-tag/dict-tag';
 import { HasPermiDirective } from '@shared/directives/has-permi.directive';
 import { TableSelection } from '@shared/utils/table-selection';
+import { environment } from '@env/environment';
 
 /** 岗位管理，对应 ruoyi-vue3/src/views/system/post/index.vue */
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-post-page',
   imports: [
     FormsModule,
@@ -64,8 +73,8 @@ export class PostPage implements OnInit {
   readonly rows = signal<SysPost[]>([]);
   readonly total = signal(0);
   readonly loading = signal(false);
-  pageNum = 1;
-  pageSize = 10;
+  readonly pageNum = signal(1);
+  readonly pageSize = signal(environment.pageSize);
 
   /** 表格多选状态 */
   readonly selection = new TableSelection<SysPost, number>((row) => row.postId);
@@ -83,20 +92,22 @@ export class PostPage implements OnInit {
     remark: [''],
   });
 
-  readonly isEdit = computed(() => this.form.controls.postId.value !== undefined);
+  readonly isEdit = computed(() => this.form.controls.postId.value != null);
   readonly statusOptions = computed(() => this.dictStore.getDict('sys_normal_disable') ?? []);
 
   ngOnInit(): void {
     if (!this.dictStore.getDict('sys_normal_disable')) {
       this.dictStore.loadDict('sys_normal_disable').subscribe();
     }
+    // nz-table 的 (nzQueryParams) 带 skip(1)，首次进入不会触发，需显式发起首查
+    this.getList();
   }
 
   private buildQuery(): PageQuery {
     const value = this.searchForm.getRawValue();
     return {
-      pageNum: this.pageNum,
-      pageSize: this.pageSize,
+      pageNum: this.pageNum(),
+      pageSize: this.pageSize(),
       postCode: value.postCode || undefined,
       postName: value.postName || undefined,
       status: value.status || undefined,
@@ -117,14 +128,14 @@ export class PostPage implements OnInit {
   }
 
   onQueryParams(params: NzTableQueryParams): void {
-    this.pageNum = params.pageIndex;
-    this.pageSize = params.pageSize;
+    this.pageNum.set(params.pageIndex);
+    this.pageSize.set(params.pageSize);
     this.getList();
   }
 
   resetQuery(): void {
     this.searchForm.reset({ postCode: '', postName: '', status: '' });
-    this.pageNum = 1;
+    this.pageNum.set(1);
     this.getList();
   }
 

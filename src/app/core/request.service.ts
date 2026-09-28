@@ -29,30 +29,49 @@ export class RequestService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = environment.apiBaseUrl;
 
-  get<T>(url: string, params?: Record<string, unknown>, options: RequestOptions = {}): Observable<T> {
+  get<T>(
+    url: string,
+    params?: Record<string, unknown>,
+    options: RequestOptions = {},
+  ): Observable<T> {
     return this.http
       .get<T>(this.buildUrl(url, params), this.buildOptions(options))
       .pipe(this.withTimeout(options));
   }
 
   post<T>(url: string, data?: unknown, options: RequestOptions = {}): Observable<T> {
-    return this.http.post<T>(this.buildUrl(url), data, this.buildOptions(options)).pipe(this.withTimeout(options));
+    return this.http
+      .post<T>(this.buildUrl(url), data, this.buildOptions(options))
+      .pipe(this.withTimeout(options));
   }
 
   put<T>(url: string, data?: unknown, options: RequestOptions = {}): Observable<T> {
-    return this.http.put<T>(this.buildUrl(url), data, this.buildOptions(options)).pipe(this.withTimeout(options));
+    return this.http
+      .put<T>(this.buildUrl(url), data, this.buildOptions(options))
+      .pipe(this.withTimeout(options));
   }
 
-  delete<T>(url: string, params?: Record<string, unknown>, options: RequestOptions = {}): Observable<T> {
+  delete<T>(
+    url: string,
+    params?: Record<string, unknown>,
+    options: RequestOptions = {},
+  ): Observable<T> {
     return this.http
       .delete<T>(this.buildUrl(url, params), this.buildOptions(options))
       .pipe(this.withTimeout(options));
   }
 
   /** 文件流下载（GET） */
-  getBlob(url: string, params?: Record<string, unknown>, options: RequestOptions = {}): Observable<Blob> {
+  getBlob(
+    url: string,
+    params?: Record<string, unknown>,
+    options: RequestOptions = {},
+  ): Observable<Blob> {
     return this.http
-      .get(this.buildUrl(url, params), { ...this.buildOptions(options, true), responseType: 'blob' })
+      .get(this.buildUrl(url, params), {
+        ...this.buildOptions(options, true),
+        responseType: 'blob',
+      })
       .pipe(this.withTimeout(options));
   }
 
@@ -72,12 +91,22 @@ export class RequestService {
   }
 
   /** 文件流下载（POST，form-urlencoded，用于导出） */
-  postBlob(url: string, data?: Record<string, unknown>, options: RequestOptions = {}): Observable<Blob> {
+  postBlob(
+    url: string,
+    data?: Record<string, unknown>,
+    options: RequestOptions = {},
+  ): Observable<Blob> {
     const body = tansParams(data ?? {}).slice(0, -1);
     return this.http
       .post(this.buildUrl(url), body, {
         ...this.buildOptions(
-          { ...options, headers: { 'Content-Type': 'application/x-www-form-urlencoded', ...(options.headers ?? {}) } },
+          {
+            ...options,
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              ...(options.headers ?? {}),
+            },
+          },
           true,
         ),
         responseType: 'blob',
@@ -97,7 +126,10 @@ export class RequestService {
     return `${fullUrl}${fullUrl.includes('?') ? '&' : '?'}${query.slice(0, -1)}`;
   }
 
-  private buildOptions(options: RequestOptions, isBlob = false): { context: HttpContext; headers?: HttpHeaders } {
+  private buildOptions(
+    options: RequestOptions,
+    isBlob = false,
+  ): { context: HttpContext; headers?: HttpHeaders } {
     const context = new HttpContext();
     if (options.skipToken) {
       context.set(SKIP_TOKEN, true);
@@ -117,6 +149,7 @@ export class RequestService {
   }
 
   private withTimeout<T>(options: RequestOptions) {
-    return (source: Observable<T>): Observable<T> => source.pipe(timeout({ each: options.timeout ?? DEFAULT_TIMEOUT }));
+    return (source: Observable<T>): Observable<T> =>
+      source.pipe(timeout({ each: options.timeout ?? DEFAULT_TIMEOUT }));
   }
 }

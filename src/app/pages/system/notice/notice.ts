@@ -1,4 +1,11 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzCardModule } from 'ng-zorro-antd/card';
@@ -21,9 +28,11 @@ import { DictStore } from '@store/dict.store';
 import { DictTag } from '@shared/components/dict-tag/dict-tag';
 import { HasPermiDirective } from '@shared/directives/has-permi.directive';
 import { TableSelection } from '@shared/utils/table-selection';
+import { environment } from '@env/environment';
 
 /** 通知公告，对应 ruoyi-vue3/src/views/system/notice/index.vue */
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-notice-page',
   imports: [
     FormsModule,
@@ -62,8 +71,8 @@ export class NoticePage implements OnInit {
   readonly rows = signal<SysNotice[]>([]);
   readonly total = signal(0);
   readonly loading = signal(false);
-  pageNum = 1;
-  pageSize = 10;
+  readonly pageNum = signal(1);
+  readonly pageSize = signal(environment.pageSize);
 
   /** 表格多选状态 */
   readonly selection = new TableSelection<SysNotice, number>((row) => row.noticeId);
@@ -80,7 +89,7 @@ export class NoticePage implements OnInit {
     noticeContent: [''],
   });
 
-  readonly isEdit = computed(() => this.form.controls.noticeId.value !== undefined);
+  readonly isEdit = computed(() => this.form.controls.noticeId.value != null);
   readonly noticeTypeOptions = computed(() => this.dictStore.getDict('sys_notice_type') ?? []);
   readonly statusOptions = computed(() => this.dictStore.getDict('sys_notice_status') ?? []);
 
@@ -90,13 +99,15 @@ export class NoticePage implements OnInit {
         this.dictStore.loadDict(type).subscribe();
       }
     }
+    // nz-table 的 (nzQueryParams) 带 skip(1)，首次进入不会触发，需显式发起首查
+    this.getList();
   }
 
   private buildQuery(): PageQuery {
     const value = this.searchForm.getRawValue();
     return {
-      pageNum: this.pageNum,
-      pageSize: this.pageSize,
+      pageNum: this.pageNum(),
+      pageSize: this.pageSize(),
       noticeTitle: value.noticeTitle || undefined,
       createBy: value.createBy || undefined,
       noticeType: value.noticeType || undefined,
@@ -117,14 +128,14 @@ export class NoticePage implements OnInit {
   }
 
   onQueryParams(params: NzTableQueryParams): void {
-    this.pageNum = params.pageIndex;
-    this.pageSize = params.pageSize;
+    this.pageNum.set(params.pageIndex);
+    this.pageSize.set(params.pageSize);
     this.getList();
   }
 
   resetQuery(): void {
     this.searchForm.reset({ noticeTitle: '', createBy: '', noticeType: '' });
-    this.pageNum = 1;
+    this.pageNum.set(1);
     this.getList();
   }
 

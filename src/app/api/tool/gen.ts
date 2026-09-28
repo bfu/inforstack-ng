@@ -27,12 +27,16 @@ export class GenApi {
 
   /** 导入表（后端为 @RequestParam，需拼接 query string） */
   importTable(params: { tables: string; tplWebType: string }): Observable<AjaxResult> {
-    return this.request.post<AjaxResult>(`/tool/gen/importTable?${tansParams(params).slice(0, -1)}`);
+    return this.request.post<AjaxResult>(
+      `/tool/gen/importTable?${tansParams(params).slice(0, -1)}`,
+    );
   }
 
   /** 创建表（后端为 @RequestParam，需拼接 query string） */
   createTable(params: { sql: string; tplWebType: string }): Observable<AjaxResult> {
-    return this.request.post<AjaxResult>(`/tool/gen/createTable?${tansParams(params).slice(0, -1)}`);
+    return this.request.post<AjaxResult>(
+      `/tool/gen/createTable?${tansParams(params).slice(0, -1)}`,
+    );
   }
 
   /** 修改代码生成信息 */

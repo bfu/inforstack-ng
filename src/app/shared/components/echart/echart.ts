@@ -1,5 +1,6 @@
 import {
   AfterViewInit,
+  ChangeDetectionStrategy,
   Component,
   ElementRef,
   OnDestroy,
@@ -20,6 +21,7 @@ import { fromEvent } from 'rxjs';
  * 注：ruoyi-vue3 使用 macarons 主题，此处改用默认主题 + 自定义色板（主题文件未按 exports 暴露）
  */
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-echart',
   template: `<div class="echart-host" #host [style.height]="height()"></div>`,
   styleUrl: './echart.less',

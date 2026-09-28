@@ -24,6 +24,8 @@ export class LogininforApi {
 
   /** 解锁账号 */
   unlockLogininfor(userName: string): Observable<AjaxResult> {
-    return this.request.get<AjaxResult>(`/monitor/logininfor/unlock/${encodeURIComponent(userName)}`);
+    return this.request.get<AjaxResult>(
+      `/monitor/logininfor/unlock/${encodeURIComponent(userName)}`,
+    );
   }
 }

@@ -1,0 +1,28 @@
+version: 2
+updates:
+  # npm 生产依赖：每周检查
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      # 开发依赖批量升级，减少 PR 数量
+      dev-dependencies:
+        dependency-type: development
+        update-types:
+          - minor
+          - patch
+    reviewers:
+      - bfu
+    labels:
+      - deps
+
+  # GitHub Actions 工作流依赖：每月检查
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    labels:
+      - deps

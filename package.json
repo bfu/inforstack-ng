@@ -6,7 +6,23 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "lint": "eslint .",
+    "format": "prettier --write \"src/**/*.{ts,html,less}\"",
+    "prepare": "husky"
+  },
+  "engines": {
+    "node": ">=20.19.0",
+    "npm": ">=10.0.0"
+  },
+  "lint-staged": {
+    "*.{ts,html}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.less": [
+      "prettier --write"
+    ]
   },
   "private": true,
   "packageManager": "npm@11.19.1",
@@ -26,10 +42,18 @@
     "@angular/build": "^22.2.0",
     "@angular/cli": "^22.2.0",
     "@angular/compiler-cli": "^22.2.0",
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
+    "@eslint/js": "^10.0.1",
+    "angular-eslint": "^22.5.0",
+    "eslint": "^10.11.0",
+    "husky": "^9.1.7",
     "jsdom": "^30.0.0",
     "less": "^4.2.0",
+    "lint-staged": "^17.6.0",
     "prettier": "^3.8.1",
     "typescript": "~6.0.2",
+    "typescript-eslint": "^8.70.1",
     "vitest": "^5.0.0"
   }
 }

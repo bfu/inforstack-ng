@@ -80,6 +80,7 @@ git clone https://github.com/bfu/RuoYi-Angular.git
 | `pageSize` | 表格默认分页条数 |
 | `registerEnabled` | 是否开放注册入口（需后端 `sys.account.registerUser` 同时开启） |
 | `footerContent` | 页脚文案 |
+| `errorDsn` | 错误监控上报地址（Sentry DSN 等），为空表示未接入 |
 
 ## 目录结构
 

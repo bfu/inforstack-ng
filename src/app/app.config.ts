@@ -1,5 +1,6 @@
 import {
   ApplicationConfig,
+  ErrorHandler,
   importProvidersFrom,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
@@ -15,6 +16,7 @@ import zh from '@angular/common/locales/zh';
 import { provideNzDateFnsAdapter } from 'ng-zorro-antd/core/time';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
+import { GlobalErrorHandler } from './core/global-error-handler';
 import { RuoYiReuseStrategy } from './core/reuse-strategy';
 
 registerLocaleData(zh);
@@ -22,6 +24,8 @@ registerLocaleData(zh);
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
+    // 全局兜底错误处理（浏览器层异常由上面的 listeners 转发至此）
+    { provide: ErrorHandler, useClass: GlobalErrorHandler },
     provideRouter(routes),
     provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
     { provide: RouteReuseStrategy, useClass: RuoYiReuseStrategy },

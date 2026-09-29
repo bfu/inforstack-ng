@@ -30,7 +30,7 @@ import { NzFormatEmitEvent, NzTreeModule, NzTreeNodeOptions } from 'ng-zorro-ant
 import { NzTreeSelectModule } from 'ng-zorro-antd/tree-select';
 import { UserApi } from '@api/system/user';
 import { DownloadService } from '@core/download.service';
-import { PageQuery, TreeSelectNode } from '@core/models/result';
+import { PageQuery } from '@core/models/result';
 import { SysPost, SysRole, SysUser } from '@core/models/system';
 import { addDateRange, parseTime } from '@core/utils/ruoyi';
 import { DictStore } from '@store/dict.store';

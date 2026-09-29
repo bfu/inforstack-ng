@@ -5,7 +5,6 @@ import {
   ElementRef,
   OnDestroy,
   effect,
-  inject,
   input,
   viewChild,
 } from '@angular/core';

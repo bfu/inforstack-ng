@@ -83,6 +83,7 @@ import {
   ToolOutline,
   TrophyOutline,
   UnorderedListOutline,
+  UnlockOutline,
   UpOutline,
   UploadOutline,
   UserAddOutline,

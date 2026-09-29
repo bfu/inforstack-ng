@@ -14,4 +14,6 @@ export const environment = {
   registerEnabled: false,
   /** 页脚文案 */
   footerContent: 'Copyright © 2019-present RuoYi. All Rights Reserved.',
+  /** 错误监控上报地址（Sentry DSN 等），为空表示未接入 */
+  errorDsn: '',
 };

@@ -9,7 +9,7 @@ import { NzModalService } from 'ng-zorro-antd/modal';
 import { SessionService } from '@core/session.service';
 import { RESPONSE_BLOB } from '@core/http-context';
 import { ERROR_CODE } from '@core/utils/error-code';
-import { errorInterceptor, isRelogin } from './error.interceptor';
+import { errorInterceptor, isRelogin, SessionExpiredError } from './error.interceptor';
 
 describe('errorInterceptor 响应拦截器', () => {
   let http: HttpClient;
@@ -88,6 +88,7 @@ describe('errorInterceptor 响应拦截器', () => {
       expect(modalMock.confirm).toHaveBeenCalledTimes(1);
       expect(isRelogin.show).toBe(true);
       expect(errors).toHaveLength(1);
+      expect(errors[0]).toBeInstanceOf(SessionExpiredError);
       expect(errors[0].message).toBe('无效的会话，或者会话已过期，请重新登录。');
       expect(messageMock.error).not.toHaveBeenCalled();
     });

@@ -16,6 +16,19 @@ import { resolveErrorMessage } from '@core/utils/error-code';
 /** 是否显示重新登录弹窗（防止并发请求重复弹出） */
 export const isRelogin = { show: false };
 
+/**
+ * 会话过期错误
+ *
+ * 供 authGuard 等调用方类型化判定失败原因，避免用错误文案字符串比较。
+ * message 与 ruoyi-vue3 保持一致。
+ */
+export class SessionExpiredError extends Error {
+  constructor(message = '无效的会话，或者会话已过期，请重新登录。') {
+    super(message);
+    this.name = 'SessionExpiredError';
+  }
+}
+
 /** RxJS TimeoutError 的 message 为 'Timeout has occurred'，需忽略大小写匹配 */
 const TIMEOUT_MESSAGE = /timeout/i;
 
@@ -70,7 +83,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
             },
           });
         }
-        throw new Error('无效的会话，或者会话已过期，请重新登录。');
+        throw new SessionExpiredError();
       } else if (code === 500) {
         message.error(msg);
         throw new Error(msg);

@@ -11,6 +11,7 @@
       "@store/*": ["./src/app/store/*"],
       "@layout/*": ["./src/app/layout/*"],
       "@pages/*": ["./src/app/pages/*"],
+      "@testing/*": ["./src/testing/*"],
       "@env/*": ["./src/environments/*"]
     },
     "noImplicitOverride": true,

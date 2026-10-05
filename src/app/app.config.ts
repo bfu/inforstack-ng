@@ -18,6 +18,7 @@ import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
 import { GlobalErrorHandler } from './core/global-error-handler';
 import { RuoYiReuseStrategy } from './core/reuse-strategy';
+import { provideSessionRestore } from './core/session-restore';
 
 registerLocaleData(zh);
 
@@ -28,6 +29,9 @@ export const appConfig: ApplicationConfig = {
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
     provideRouter(routes),
     provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
+    // 刷新深链前恢复会话与动态路由，否则会被根级 ** 兜底重定向到 /404
+    // 必须在 provideRouter / provideHttpClient 之后注册
+    provideSessionRestore(),
     { provide: RouteReuseStrategy, useClass: RuoYiReuseStrategy },
     provideNzIcons(icons),
     provideNzI18n(zh_CN),

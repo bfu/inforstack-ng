@@ -11,6 +11,7 @@ Angular CLI 22.2 生成的独立组件（standalone）工程，UI 组件一律�
 - 会话清理统一走 `core/session.service.ts` 的 `SessionService.resetAll()`（401 拦截器与登出共用）。只清 Token 会残留角色/权限/动态路由/页签，导致重登后 `authGuard` 命中 `user.loaded()` 沿用旧账号菜单（越权）。
 - 权限指令选择器是 `appHasPermi` / `appHasRole`，用法 `*appHasPermi="['system:user:add']"`（不是 `hasPermi`）。
 - 列表页必须自己发起首查：ng-zorro `nz-table` 的 `(nzQueryParams)` 管道带 `skip(1)`，首次进入不会触发。
+- 刷新深链（如 `/system/user`）恢复靠 `core/session-restore.ts` 的 `provideSessionRestore()`，**不要删**。Angular 的 `canActivate` 在路由匹配之后执行，而根级 `{ path: '**', redirectTo: '404' }` 的重定向在匹配阶段就生效：`authGuard` 根本不会被调用，动态路由无从注入，页面直接落到 `/404`。故必须在初始导航之前（APP_INITIALIZER，早于 bootstrap）完成 `getInfo + generateRoutes`。这与 vue-router 的 `beforeEach`（匹配前执行）不同，不能照搬 `ruoyi-vue3/src/permission.js` 的写法。
 - 后端接口代理见 `proxy.conf.json`。
 
 ## NG-ZORRO 离线文档（写 UI 前务必查）

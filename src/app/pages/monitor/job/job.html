@@ -8,7 +8,12 @@
       </nz-form-item>
       <nz-form-item>
         <nz-form-control>
-          <nz-select formControlName="jobGroup" nzPlaceHolder="请选择任务组名" nzAllowClear class="field-md">
+          <nz-select
+            formControlName="jobGroup"
+            nzPlaceHolder="请选择任务组名"
+            nzAllowClear
+            class="field-md"
+          >
             @for (item of jobGroupOptions(); track item.value) {
               <nz-option [nzValue]="item.value" [nzLabel]="item.label"></nz-option>
             }
@@ -17,7 +22,12 @@
       </nz-form-item>
       <nz-form-item>
         <nz-form-control>
-          <nz-select formControlName="status" nzPlaceHolder="请选择任务状态" nzAllowClear class="field-md">
+          <nz-select
+            formControlName="status"
+            nzPlaceHolder="请选择任务状态"
+            nzAllowClear
+            class="field-md"
+          >
             @for (item of jobStatusOptions(); track item.value) {
               <nz-option [nzValue]="item.value" [nzLabel]="item.label"></nz-option>
             }
@@ -26,8 +36,12 @@
       </nz-form-item>
       <nz-form-item>
         <nz-form-control>
-          <button nz-button nzType="primary" (click)="getList()"><nz-icon nzType="search" />搜索</button>
-          <button nz-button class="gap-left" (click)="resetQuery()"><nz-icon nzType="reload" />重置</button>
+          <button nz-button nzType="primary" (click)="getList()">
+            <nz-icon nzType="search" />搜索
+          </button>
+          <button nz-button class="gap-left" (click)="resetQuery()">
+            <nz-icon nzType="reload" />重置
+          </button>
         </nz-form-control>
       </nz-form-item>
     </form>
@@ -47,13 +61,25 @@
       >
         <nz-icon nzType="edit" />修改
       </button>
-      <button nz-button nzDanger *appHasPermi="['monitor:job:remove']" [disabled]="!selection.multiple()" class="gap-left" (click)="delete()">
+      <button
+        nz-button
+        nzDanger
+        *appHasPermi="['monitor:job:remove']"
+        [disabled]="!selection.multiple()"
+        class="gap-left"
+        (click)="delete()"
+      >
         <nz-icon nzType="delete" />删除
       </button>
       <button nz-button *appHasPermi="['monitor:job:export']" class="gap-left" (click)="export()">
         <nz-icon nzType="download" />导出
       </button>
-      <button nz-button *appHasPermi="['monitor:job:query']" class="gap-left" (click)="openJobLog()">
+      <button
+        nz-button
+        *appHasPermi="['monitor:job:query']"
+        class="gap-left"
+        (click)="openJobLog()"
+      >
         <nz-icon nzType="profile" />日志
       </button>
     </div>
@@ -73,7 +99,12 @@
       <thead>
         <tr>
           <th nzWidth="50px">
-            <label nz-checkbox [ngModel]="selection.allChecked()" [nzIndeterminate]="selection.indeterminate()" (ngModelChange)="selection.onAllChecked($event, rows())"></label>
+            <label
+              nz-checkbox
+              [ngModel]="selection.allChecked()"
+              [nzIndeterminate]="selection.indeterminate()"
+              (ngModelChange)="selection.onAllChecked($event, rows())"
+            ></label>
           </th>
           <th nzWidth="80px">任务编号</th>
           <th nzWidth="140px">任务名称</th>
@@ -88,7 +119,11 @@
         @for (row of rows(); track row.jobId) {
           <tr>
             <td>
-              <label nz-checkbox [ngModel]="selection.isChecked(row)" (ngModelChange)="selection.onItemChecked(row.jobId, $event)"></label>
+              <label
+                nz-checkbox
+                [ngModel]="selection.isChecked(row)"
+                (ngModelChange)="selection.onItemChecked(row.jobId, $event)"
+              ></label>
             </td>
             <td>{{ row.jobId }}</td>
             <td>
@@ -98,19 +133,37 @@
             <td nzEllipsis>{{ row.invokeTarget }}</td>
             <td nzEllipsis>{{ row.cronExpression }}</td>
             <td>
-              <nz-switch [ngModel]="row.status === '0'" (ngModelChange)="statusChange(row, $event)"></nz-switch>
+              <nz-switch
+                [ngModel]="row.status === '0'"
+                (ngModelChange)="statusChange(row, $event)"
+              ></nz-switch>
             </td>
             <td nzRight>
               <a *appHasPermi="['monitor:job:edit']" nz-tooltip="修改" (click)="openEdit(row)">
                 <nz-icon nzType="edit" />
               </a>
-              <a *appHasPermi="['monitor:job:remove']" nz-tooltip="删除" class="gap-left" (click)="delete(row)">
+              <a
+                *appHasPermi="['monitor:job:remove']"
+                nz-tooltip="删除"
+                class="gap-left"
+                (click)="delete(row)"
+              >
                 <nz-icon nzType="delete" />
               </a>
-              <a *appHasPermi="['monitor:job:changeStatus']" nz-tooltip="执行一次" class="gap-left" (click)="run(row)">
+              <a
+                *appHasPermi="['monitor:job:changeStatus']"
+                nz-tooltip="执行一次"
+                class="gap-left"
+                (click)="run(row)"
+              >
                 <nz-icon nzType="caret-right" />
               </a>
-              <a *appHasPermi="['monitor:job:query']" nz-tooltip="调度日志" class="gap-left" (click)="openJobLog(row)">
+              <a
+                *appHasPermi="['monitor:job:query']"
+                nz-tooltip="调度日志"
+                class="gap-left"
+                (click)="openJobLog(row)"
+              >
                 <nz-icon nzType="profile" />
               </a>
             </td>
@@ -227,6 +280,7 @@
 <nz-modal
   [nzVisible]="detailVisible()"
   (nzVisibleChange)="detailVisible.set($event)"
+  (nzOnCancel)="detailVisible.set(false)"
   nzTitle="任务详细"
   nzWidth="780px"
   [nzFooter]="null"
@@ -240,15 +294,25 @@
           <app-dict-tag [value]="row.jobGroup" dictType="sys_job_group" />
         </nz-descriptions-item>
         <nz-descriptions-item nzTitle="任务状态">
-          <nz-tag [nzColor]="row.status === '0' ? 'green' : 'orange'">{{ row.status === '0' ? '正常' : '暂停' }}</nz-tag>
+          <nz-tag [nzColor]="row.status === '0' ? 'green' : 'orange'">{{
+            row.status === '0' ? '正常' : '暂停'
+          }}</nz-tag>
         </nz-descriptions-item>
-        <nz-descriptions-item nzTitle="cron执行表达式">{{ row.cronExpression }}</nz-descriptions-item>
-        <nz-descriptions-item nzTitle="下次执行时间">{{ row.nextValidTime ? parseTimeView(row.nextValidTime) : '' }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="cron执行表达式">{{
+          row.cronExpression
+        }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="下次执行时间">{{
+          row.nextValidTime ? parseTimeView(row.nextValidTime) : ''
+        }}</nz-descriptions-item>
         <nz-descriptions-item nzTitle="执行策略">{{ detailMisfireText() }}</nz-descriptions-item>
         <nz-descriptions-item nzTitle="是否并发">
-          <nz-tag [nzColor]="row.concurrent === '0' ? 'green' : 'red'">{{ row.concurrent === '0' ? '允许' : '禁止' }}</nz-tag>
+          <nz-tag [nzColor]="row.concurrent === '0' ? 'green' : 'red'">{{
+            row.concurrent === '0' ? '允许' : '禁止'
+          }}</nz-tag>
         </nz-descriptions-item>
-        <nz-descriptions-item nzTitle="调用目标方法" [nzSpan]="2">{{ row.invokeTarget }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="调用目标方法" [nzSpan]="2">{{
+          row.invokeTarget
+        }}</nz-descriptions-item>
         <nz-descriptions-item nzTitle="创建者">{{ row.createBy }}</nz-descriptions-item>
         <nz-descriptions-item nzTitle="创建时间">{{ row.createTime }}</nz-descriptions-item>
         <nz-descriptions-item nzTitle="更新者">{{ row.updateBy }}</nz-descriptions-item>

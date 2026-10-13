@@ -236,6 +236,7 @@
 <nz-modal
   [nzVisible]="contentVisible()"
   (nzVisibleChange)="contentVisible.set($event)"
+  (nzOnCancel)="contentVisible.set(false)"
   [nzTitle]="contentTitle()"
   nzWidth="720px"
   [nzFooter]="null"

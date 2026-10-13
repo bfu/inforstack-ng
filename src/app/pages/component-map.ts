@@ -32,6 +32,7 @@ export const COMPONENT_MAP: Record<string, ComponentLoader> = {
   'dsp/script/index': () => import('./dsp/script/script').then((m) => m.DspScriptPage),
   'dsp/datasource/index': () =>
     import('./dsp/datasource/datasource').then((m) => m.DspDataSourcePage),
+  'dsp/generator/index': () => import('./dsp/generator/generator').then((m) => m.DspGeneratorPage),
 };
 
 /** 根据后端 component 字符串解析懒加载函数 */

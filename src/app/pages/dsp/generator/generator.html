@@ -1,0 +1,246 @@
+<div class="dsp-page">
+  <!-- 选择数据源 → 实例 → 表 -->
+  <nz-card [nzBordered]="false" class="search-card">
+    <form nz-form nzLayout="inline">
+      <nz-form-item>
+        <nz-form-label>数据源</nz-form-label>
+        <nz-form-control>
+          <nz-select
+            class="field-md"
+            [ngModel]="dataSourceId()"
+            (ngModelChange)="onDataSourceChange($event)"
+            [ngModelOptions]="{ standalone: true }"
+            nzPlaceHolder="请选择数据源"
+          >
+            @for (item of dataSourceOptions(); track item.value) {
+              <nz-option [nzValue]="item.value" [nzLabel]="item.label"></nz-option>
+            }
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label>实例</nz-form-label>
+        <nz-form-control>
+          <nz-select
+            class="field-md"
+            [ngModel]="instanceKey()"
+            (ngModelChange)="onInstanceChange($event)"
+            [ngModelOptions]="{ standalone: true }"
+            [nzLoading]="instanceLoading()"
+            [nzDisabled]="noInstance() || !instances().length"
+            nzAllowClear
+            nzPlaceHolder="请选择实例"
+            nzNotFoundContent="未探测到实例"
+          >
+            @for (item of instances(); track instanceKeyOf(item)) {
+              <nz-option
+                [nzValue]="instanceKeyOf(item)"
+                [nzLabel]="instanceLabel(item)"
+              ></nz-option>
+            }
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label>数据表</nz-form-label>
+        <nz-form-control>
+          <nz-select
+            class="field-lg"
+            [ngModel]="tableName()"
+            (ngModelChange)="onTableChange($event)"
+            [ngModelOptions]="{ standalone: true }"
+            [nzLoading]="tableLoading()"
+            [nzDisabled]="!tableSelectable()"
+            nzShowSearch
+            nzServerSearch
+            nzAllowClear
+            (nzOnSearch)="onTableSearch($event)"
+            nzPlaceHolder="输入表名搜索"
+            nzNotFoundContent="未找到数据表"
+          >
+            @for (item of tables(); track item.tableName) {
+              <nz-option [nzValue]="item.tableName" [nzLabel]="tableLabel(item)"></nz-option>
+            }
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-control>
+          <button
+            nz-button
+            nzType="primary"
+            *appHasPermi="['dsp:generator:preview']"
+            [nzLoading]="previewLoading()"
+            [disabled]="!tableName()"
+            (click)="preview()"
+          >
+            <nz-icon nzType="experiment" />生成预览
+          </button>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+
+    <div class="flow-tip">
+      选择流程：数据源 → 实例（库/模式）→
+      数据表；选定数据表后按表结构自动生成「查询所有、翻页查询、批量添加、单条添加、修改、删除」6
+      条脚本。
+    </div>
+
+    @if (noInstance()) {
+      <nz-alert
+        class="flow-alert"
+        nzType="info"
+        nzShowIcon
+        nzMessage="该数据源未探测到实例，已直接进入数据表选择"
+      />
+    }
+  </nz-card>
+
+  <!-- 表结构 -->
+  <nz-card [nzBordered]="false" class="table-card">
+    <div class="card-head">
+      <span class="card-title">表结构</span>
+      <span class="card-extra">
+        @if (tableName()) {
+          <span class="mono-text">{{ tableName() }}</span>
+        }
+        @if (tableComment()) {
+          <span class="gap-left">（{{ tableComment() }}）</span>
+        }
+        @if (databaseProduct()) {
+          <span class="gap-left muted">数据库：{{ databaseProduct() }}</span>
+        }
+      </span>
+    </div>
+
+    <nz-table
+      nzSize="small"
+      [nzData]="columns()"
+      [nzLoading]="columnsLoading()"
+      [nzShowPagination]="false"
+      [nzScroll]="{ y: '260px' }"
+    >
+      <thead>
+        <tr>
+          <th nzWidth="70px">序号</th>
+          <th nzWidth="200px">字段名</th>
+          <th nzWidth="170px">字段类型</th>
+          <th nzWidth="220px">Java 属性</th>
+          <th nzWidth="90px">主键</th>
+          <th nzWidth="90px">必填</th>
+          <th nzWidth="90px">自增</th>
+          <th>字段说明</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of columns(); track row.columnName) {
+          <tr>
+            <td>{{ row.ordinal }}</td>
+            <td>
+              <code class="mono-text">{{ row.columnName }}</code>
+            </td>
+            <td>{{ row.columnType }}</td>
+            <td>
+              {{ row.javaField }}
+              <span class="muted">({{ row.javaType }})</span>
+            </td>
+            <td>
+              @if (row.primaryKey) {
+                <nz-tag nzColor="blue">主键</nz-tag>
+              }
+            </td>
+            <td>
+              @if (row.required) {
+                <nz-tag nzColor="orange">必填</nz-tag>
+              }
+            </td>
+            <td>
+              @if (row.autoIncrement) {
+                <nz-tag nzColor="green">自增</nz-tag>
+              }
+            </td>
+            <td>{{ row.columnComment || '-' }}</td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+  </nz-card>
+
+  <!-- 生成预览 -->
+  <nz-card [nzBordered]="false" class="table-card">
+    <div class="card-head">
+      <span class="card-title">生成预览</span>
+      <span class="card-extra muted">共 {{ scripts().length }} 条脚本（草稿）</span>
+    </div>
+
+    <div class="toolbar">
+      <button
+        nz-button
+        nzType="primary"
+        *appHasPermi="['dsp:generator:generate']"
+        [nzLoading]="generating()"
+        [disabled]="!scripts().length"
+        (click)="generate()"
+      >
+        <nz-icon nzType="build" />生成脚本（草稿）
+      </button>
+      <span class="gap-left muted"
+        >脚本名称与脚本标识已按所选表结构给出默认值，可直接修改后再生成。</span
+      >
+    </div>
+
+    <nz-table
+      nzSize="middle"
+      [nzData]="scripts()"
+      [nzLoading]="previewLoading()"
+      [nzShowPagination]="false"
+    >
+      <thead>
+        <tr>
+          <th nzWidth="70px">序号</th>
+          <th nzWidth="120px">操作</th>
+          <th nzWidth="260px">脚本名称</th>
+          <th nzWidth="260px">脚本标识</th>
+          <th>描述</th>
+          <th nzWidth="90px" nzRight>内容</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of scripts(); track row.action; let i = $index) {
+          <tr>
+            <td>{{ i + 1 }}</td>
+            <td>
+              <nz-tag [nzColor]="commandColor(row.sqlCommandType)">{{ row.actionName }}</nz-tag>
+            </td>
+            <td>
+              <input nz-input [(ngModel)]="row.name" placeholder="脚本名称" />
+            </td>
+            <td>
+              <input nz-input [(ngModel)]="row.slug" placeholder="脚本标识" />
+            </td>
+            <td class="muted">{{ row.description }}</td>
+            <td nzRight>
+              <a (click)="viewContent(row)">查看</a>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+  </nz-card>
+</div>
+
+<!-- 脚本内容 -->
+<nz-modal
+  [nzVisible]="contentVisible()"
+  (nzVisibleChange)="contentVisible.set($event)"
+  [nzTitle]="contentTitle()"
+  nzWidth="720px"
+  [nzFooter]="null"
+>
+  <ng-container *nzModalContent>
+    <pre class="code-block">{{ contentText() }}</pre>
+  </ng-container>
+</nz-modal>

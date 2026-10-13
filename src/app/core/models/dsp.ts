@@ -81,3 +81,81 @@ export interface DspExecutionResult {
   success?: boolean;
   message?: string;
 }
+
+/** 数据库实例（MySQL 库名 / PostgreSQL、Oracle 模式） */
+export interface DspInstanceInfo {
+  /** 展示名称 */
+  name?: string;
+  /** JDBC catalog（可为空） */
+  catalog?: string;
+  /** JDBC schema（可为空） */
+  schema?: string;
+  /** 实例类型：catalog / schema */
+  type?: string;
+  /** 是否为当前连接默认实例 */
+  current?: boolean;
+}
+
+/** 数据表信息 */
+export interface DspTableInfo {
+  tableName?: string;
+  tableComment?: string;
+  tableType?: string;
+}
+
+/** 数据表字段结构 */
+export interface DspColumnInfo {
+  columnName?: string;
+  columnComment?: string;
+  columnType?: string;
+  javaType?: string;
+  javaField?: string;
+  primaryKey?: boolean;
+  required?: boolean;
+  autoIncrement?: boolean;
+  ordinal?: number;
+}
+
+/** 元数据查询条件（数据源 → 实例 → 表） */
+export interface DspMetaQuery {
+  dataSourceId?: number;
+  catalog?: string;
+  schema?: string;
+  tableName?: string;
+}
+
+/** 脚本生成器产出的单条脚本（尚未落库） */
+export interface DspGeneratedScript {
+  /** 操作标识 selectAll/selectPage/insertBatch/insertOne/update/delete */
+  action?: string;
+  /** 操作中文名：查询所有/翻页查询/批量添加/单条添加/修改/删除 */
+  actionName?: string;
+  /** MyBatis 语句类型：SELECT/INSERT/UPDATE/DELETE */
+  sqlCommandType?: string;
+  /** 脚本名称（默认由表名与表注释推导，可修改） */
+  name?: string;
+  /** 脚本标识（默认由表名与操作推导，可修改） */
+  slug?: string;
+  description?: string;
+  /** 语句片段（单条语句，不写 id 与 namespace） */
+  content?: string;
+}
+
+/** 脚本生成预览结果 */
+export interface DspGeneratePreview {
+  dataSourceId?: number;
+  catalog?: string;
+  schema?: string;
+  tableName?: string;
+  tableComment?: string;
+  /** 数据库产品名（决定翻页方言） */
+  databaseProduct?: string;
+  columns?: DspColumnInfo[];
+  scripts?: DspGeneratedScript[];
+}
+
+/** 批量生成脚本请求 */
+export interface DspGenerateRequest {
+  dataSourceId?: number;
+  scripts?: DspGeneratedScript[];
+}

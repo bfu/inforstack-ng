@@ -186,7 +186,7 @@
           <nz-form-item>
             <nz-form-label nzFor="slug" nzRequired>脚本标识(slug)</nz-form-label>
             <nz-form-control nzErrorTip="字母开头，仅含字母、数字、下划线和中划线">
-              <input nz-input formControlName="slug" placeholder="唯一标识，同时作为 namespace" />
+              <input nz-input formControlName="slug" placeholder="唯一标识，用于统一执行入口定位" />
             </nz-form-control>
           </nz-form-item>
         </div>
@@ -202,7 +202,10 @@
     </form>
 
     <div class="editor-toolbar">
-      <span class="editor-label"><nz-icon nzType="code" /> Mapper XML</span>
+      <span class="editor-label"
+        ><nz-icon nzType="code" /> Mapper 语句（平台自动补全 xml 声明、DOCTYPE 与 mapper
+        标签，namespace 取脚本 ID）</span
+      >
       <span class="editor-actions">
         @if (validating()) {
           <nz-spin nzSize="small"></nz-spin>

@@ -7,11 +7,11 @@ import { BaseEntity } from '@core/models/system';
 /** 脚本定义 dsp_script */
 export interface DspScript extends BaseEntity {
   scriptId?: number;
-  /** 唯一标识，亦作为 MyBatis namespace */
+  /** 唯一标识，用于统一执行入口定位 */
   slug?: string;
   name?: string;
   description?: string;
-  /** 草稿 XML 内容 */
+  /** 草稿语句片段（xml 声明、DOCTYPE 与 mapper 标签由后端补全） */
   content?: string;
   /** 当前已发布版本号（0=未发布） */
   currentVersion?: number;
@@ -35,6 +35,7 @@ export interface DspScriptVersion extends BaseEntity {
 /** 脚本校验结果 */
 export interface DspValidationResult {
   valid?: boolean;
+  /** 运行时命名空间（由脚本 ID 生成） */
   namespace?: string;
   statements?: string[];
   errors?: string[];

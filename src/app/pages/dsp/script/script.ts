@@ -6,7 +6,6 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -133,13 +132,6 @@ export class DspScriptPage implements OnInit {
   readonly snapshotTitle = signal('');
   readonly snapshotXml = signal('');
 
-  constructor() {
-    // slug 变化时同步 XML 的 namespace，降低手写成本
-    this.editorForm.controls.slug.valueChanges
-      .pipe(takeUntilDestroyed())
-      .subscribe((slug) => this.syncNamespace(slug ?? ''));
-  }
-
   ngOnInit(): void {
     this.getList();
   }
@@ -197,38 +189,20 @@ export class DspScriptPage implements OnInit {
 
   /* ---------------- 编辑 ---------------- */
 
-  private defaultXml(slug: string): string {
-    const ns = slug || 'your_slug';
+  private defaultXml(): string {
     return [
-      '<?xml version="1.0" encoding="UTF-8"?>',
-      '<!DOCTYPE mapper',
-      'PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"',
-      '"http://mybatis.org/dtd/mybatis-3-mapper.dtd">',
-      `<mapper namespace="${ns}">`,
-      '  <!-- 仅需编写语句，namespace 必须与脚本标识一致 -->',
-      '  <select id="selectList" resultType="map">',
-      '    select 1 as id',
-      '  </select>',
-      '</mapper>',
+      '<!-- 仅编写语句片段：xml 声明、DOCTYPE 与 mapper 标签由平台自动补全，namespace 取脚本 ID -->',
+      '<select id="selectList" resultType="map">',
+      '  select 1 as id',
+      '</select>',
       '',
     ].join('\n');
-  }
-
-  private syncNamespace(slug: string): void {
-    const xml = this.editorXml();
-    if (!xml || !slug) {
-      return;
-    }
-    const next = xml.replace(/namespace\s*=\s*"[^"]*"/, `namespace="${slug}"`);
-    if (next !== xml) {
-      this.editorXml.set(next);
-    }
   }
 
   openAdd(): void {
     this.editorForm.reset({ scriptId: undefined, name: '', slug: '', description: '' });
     this.editorForm.controls.slug.enable();
-    this.editorXml.set(this.defaultXml(''));
+    this.editorXml.set(this.defaultXml());
     this.validation.set(null);
     this.editorTitle.set('新增脚本');
     this.editorVisible.set(true);
@@ -250,7 +224,7 @@ export class DspScriptPage implements OnInit {
           slug: data.slug ?? '',
           description: data.description ?? '',
         });
-        this.editorXml.set(data.content ?? this.defaultXml(data.slug ?? ''));
+        this.editorXml.set(data.content ?? this.defaultXml());
         this.validation.set(null);
         this.editorTitle.set('编辑脚本');
         this.editorVisible.set(true);

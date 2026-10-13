@@ -53,6 +53,8 @@ export interface DspScriptVersion extends BaseEntity {
   slug?: string;
   version?: number;
   content?: string;
+  /** 发布时绑定的数据源ID（0=默认主库），回滚时一并还原 */
+  dataSourceId?: number;
   /** 0历史版本 1当前版本 */
   status?: string;
   publishBy?: string;

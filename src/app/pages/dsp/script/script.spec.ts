@@ -28,6 +28,7 @@ describe('DspScriptPage 动态脚本管理', () => {
   let getVersion: Mock;
   let listOptions: Mock;
   let success: Mock;
+  let modal: ReturnType<typeof stubModalService> | undefined;
 
   const scripts: DspScript[] = [
     {
@@ -69,7 +70,16 @@ describe('DspScriptPage 动态脚本管理', () => {
       of({
         code: 200,
         msg: '',
-        data: [{ versionId: 10, scriptId: 1, version: 2, status: '1', publishBy: 'admin' }],
+        data: [
+          {
+            versionId: 10,
+            scriptId: 1,
+            version: 2,
+            status: '1',
+            publishBy: 'admin',
+            dataSourceId: 5,
+          },
+        ],
       }),
     );
     getVersion = vi.fn(() =>
@@ -118,7 +128,7 @@ describe('DspScriptPage 动态脚本管理', () => {
 
   function create(): DspScriptPage {
     const fixture = TestBed.createComponent(DspScriptPage);
-    stubModalService(fixture.debugElement);
+    modal = stubModalService(fixture.debugElement);
     fixture.detectChanges();
     return fixture.componentInstance;
   }
@@ -275,8 +285,23 @@ describe('DspScriptPage 动态脚本管理', () => {
     page.openVersions(scripts[0]);
     expect(listVersions).toHaveBeenCalledWith(1);
     expect(page.versions().length).toBe(1);
+    // 版本快照携带发布时绑定的数据源
+    expect(page.versions()[0].dataSourceId).toBe(5);
 
     page.rollbackVersion(page.versions()[0]);
     expect(rollback).toHaveBeenCalledWith(1, 10);
+    // 回滚提示需说明数据源将随版本一并切换
+    expect(modal?.lastConfig()?.nzContent).toContain('数据源将由「默认主库」切换为「报表库」');
+  });
+
+  it('回滚到同数据源的版本时不提示切换', () => {
+    const page = create();
+
+    page.openVersions(scripts[0]);
+    page.rollbackVersion({ ...page.versions()[0], dataSourceId: undefined });
+
+    expect(rollback).toHaveBeenCalledWith(1, 10);
+    expect(modal?.lastConfig()?.nzContent).toContain('内容与数据源');
+    expect(modal?.lastConfig()?.nzContent).not.toContain('数据源将由');
   });
 });

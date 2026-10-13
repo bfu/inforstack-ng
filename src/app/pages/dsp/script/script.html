@@ -385,6 +385,7 @@
                 <nz-tag nzColor="success">当前</nz-tag>
               }
               <span class="version-meta">{{ v.publishBy }} · {{ v.publishTime }}</span>
+              <span class="version-meta">数据源：{{ dataSourceLabel(v.dataSourceId) }}</span>
             </div>
             <div class="version-actions">
               <a (click)="viewVersion(v)">查看</a>

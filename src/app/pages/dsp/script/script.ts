@@ -498,9 +498,13 @@ export class DspScriptPage implements OnInit {
     if (script?.scriptId == null || version.versionId == null) {
       return;
     }
+    const targetLabel = this.dataSourceLabel(version.dataSourceId);
+    const currentLabel = this.dataSourceLabel(script.dataSourceId);
+    const switchTip =
+      targetLabel === currentLabel ? '' : `，数据源将由「${currentLabel}」切换为「${targetLabel}」`;
     this.modal.confirm({
       nzTitle: '回滚确认',
-      nzContent: `确认回滚到版本 v${version.version}？回滚后将立即热加载生效。`,
+      nzContent: `确认回滚到版本 v${version.version}？回滚将还原该版本的内容与数据源${switchTip}，立即热加载生效。`,
       nzOkText: '回滚',
       nzCancelText: '取消',
       nzOnOk: () =>

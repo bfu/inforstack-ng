@@ -312,13 +312,15 @@
     </div>
     <div class="drawer-field">
       <span class="drawer-label">参数（JSON，可为空）</span>
-      <textarea
-        nz-input
-        rows="5"
-        placeholder='例如：{ "id": 1 }'
-        [ngModel]="testParams()"
-        (ngModelChange)="testParams.set($event)"
-      ></textarea>
+      <app-monaco-editor
+        language="json"
+        height="240px"
+        [value]="testParams()"
+        (valueChange)="testParams.set($event)"
+      />
+      <p class="drawer-hint">
+        JSON 对象格式，例如 {{ '{' }} "id": 1 {{ '}' }}；留空表示无参数，编辑器会实时提示语法错误。
+      </p>
     </div>
     <button nz-button nzType="primary" [nzLoading]="testing()" (click)="runTest()">
       <nz-icon nzType="experiment" />执行测试

@@ -26,6 +26,7 @@ describe('DspScriptPage 动态脚本管理', () => {
   let reload: Mock;
   let listVersions: Mock;
   let getVersion: Mock;
+  let listOptions: Mock;
   let success: Mock;
 
   const scripts: DspScript[] = [
@@ -78,6 +79,9 @@ describe('DspScriptPage 动态脚本管理', () => {
         data: { versionId: 10, version: 2, content: '<select resultType="map">select 1</select>' },
       }),
     );
+    listOptions = vi.fn(() =>
+      of({ code: 200, msg: '', data: [{ dataSourceId: 5, name: '报表库', status: '0' }] }),
+    );
     success = vi.fn();
 
     TestBed.configureTestingModule({
@@ -101,14 +105,7 @@ describe('DspScriptPage 动态脚本管理', () => {
             exec: vi.fn(),
           },
         },
-        {
-          provide: DspDataSourceApi,
-          useValue: {
-            listOptions: vi.fn(() =>
-              of({ code: 200, msg: '', data: [{ dataSourceId: 5, name: '报表库', status: '0' }] }),
-            ),
-          },
-        },
+        { provide: DspDataSourceApi, useValue: { listOptions } },
         { provide: MonacoLoader, useValue: { load: vi.fn(() => new Promise(() => undefined)) } },
         { provide: NzModalService, useValue: {} },
         {
@@ -160,6 +157,18 @@ describe('DspScriptPage 动态脚本管理', () => {
     expect(page.dataSourceLabel(undefined)).toBe('默认主库');
     expect(page.dataSourceLabel(5)).toBe('报表库');
     expect(page.dataSourceLabel(9)).toBe('#9');
+  });
+
+  it('打开新增/编辑弹窗时刷新数据源下拉', () => {
+    const page = create();
+    // ngOnInit 首查一次
+    expect(listOptions).toHaveBeenCalledTimes(1);
+
+    page.openAdd();
+    expect(listOptions).toHaveBeenCalledTimes(2);
+
+    page.openEdit(scripts[0]);
+    expect(listOptions).toHaveBeenCalledTimes(3);
   });
 
   it('脚本保存携带绑定的 dataSourceId', () => {

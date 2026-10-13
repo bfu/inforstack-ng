@@ -232,6 +232,8 @@ export class DspScriptPage implements OnInit {
   }
 
   openAdd(): void {
+    // 页面可能被页签复用（不重新 ngOnInit），打开弹窗前刷新数据源，避免下拉遗漏新增项
+    this.loadDataSources();
     this.editorForm.reset({
       scriptId: undefined,
       name: '',
@@ -250,6 +252,7 @@ export class DspScriptPage implements OnInit {
     if (row.scriptId == null) {
       return;
     }
+    this.loadDataSources();
     this.api.getScript(row.scriptId).subscribe({
       next: (res) => {
         const data = res.data;

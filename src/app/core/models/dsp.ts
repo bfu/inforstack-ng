@@ -11,12 +11,39 @@ export interface DspScript extends BaseEntity {
   slug?: string;
   name?: string;
   description?: string;
+  /** 关联数据源ID（0=默认主库） */
+  dataSourceId?: number;
   /** 草稿内容：一条语句片段（不写 id，mapper 标签与 namespace 由后端补全） */
   content?: string;
   /** 当前已发布版本号（0=未发布） */
   currentVersion?: number;
   /** 状态 0草稿 1已发布 2已下线 */
   status?: string;
+}
+
+/** 数据源定义 dsp_data_source */
+export interface DspDataSource extends BaseEntity {
+  dataSourceId?: number;
+  /** 数据源名称（唯一） */
+  name?: string;
+  /** 数据库类型标识（仅展示，如 mysql/postgresql） */
+  dbType?: string;
+  /** 驱动类名 */
+  driverClassName?: string;
+  /** JDBC URL */
+  url?: string;
+  username?: string;
+  /** 密码（明文） */
+  password?: string;
+  /** 状态 0正常 1停用 */
+  status?: string;
+}
+
+/** 数据源连接测试结果 */
+export interface DspDataSourceTestResult {
+  success?: boolean;
+  message?: string;
+  costMillis?: number;
 }
 
 /** 脚本版本历史 dsp_script_version */

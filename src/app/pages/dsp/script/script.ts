@@ -26,11 +26,13 @@ import { NzTableModule, NzTableQueryParams } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzTooltipModule } from 'ng-zorro-antd/tooltip';
 import { DspScriptApi } from '@api/dsp/script';
+import { DspDataSourceApi } from '@api/dsp/datasource';
 import { MonacoEditorComponent } from '@shared/components/monaco-editor/monaco-editor';
 import { HasPermiDirective } from '@shared/directives/has-permi.directive';
 import { TableSelection } from '@shared/utils/table-selection';
 import { PageQuery } from '@core/models/result';
 import {
+  DspDataSource,
   DspExecutionResult,
   DspScript,
   DspScriptVersion,
@@ -70,6 +72,7 @@ import { environment } from '@env/environment';
 })
 export class DspScriptPage implements OnInit {
   private readonly api = inject(DspScriptApi);
+  private readonly dataSourceApi = inject(DspDataSourceApi);
   private readonly fb = inject(FormBuilder);
   private readonly modal = inject(NzModalService);
   private readonly message = inject(NzMessageService);
@@ -93,6 +96,16 @@ export class DspScriptPage implements OnInit {
     { value: '2', label: '已下线' },
   ];
 
+  /* ---------------- 数据源（脚本绑定） ---------------- */
+  readonly dataSources = signal<DspDataSource[]>([]);
+  readonly dataSourceOptions = computed(() => [
+    { value: 0, label: '默认主库' },
+    ...this.dataSources().map((item) => ({
+      value: item.dataSourceId as number,
+      label: item.name ?? '',
+    })),
+  ]);
+
   /* ---------------- 编辑弹窗 ---------------- */
   readonly editorVisible = signal(false);
   readonly editorTitle = signal('');
@@ -102,6 +115,7 @@ export class DspScriptPage implements OnInit {
     name: ['', [Validators.required]],
     slug: ['', [Validators.required, Validators.pattern(/^[a-zA-Z][a-zA-Z0-9_-]*$/)]],
     description: [''],
+    dataSourceId: [0 as number],
   });
   readonly editorXml = signal('');
   readonly isEdit = computed(() => this.editorForm.controls.scriptId.value != null);
@@ -134,6 +148,24 @@ export class DspScriptPage implements OnInit {
 
   ngOnInit(): void {
     this.getList();
+    this.loadDataSources();
+  }
+
+  private loadDataSources(): void {
+    this.dataSourceApi.listOptions().subscribe({
+      next: (res) => this.dataSources.set(res.data ?? []),
+    });
+  }
+
+  /** 数据源名称展示（0/空为默认主库） */
+  dataSourceLabel(dataSourceId?: number): string {
+    if (dataSourceId == null || dataSourceId === 0) {
+      return '默认主库';
+    }
+    return (
+      this.dataSources().find((item) => item.dataSourceId === dataSourceId)?.name ??
+      `#${dataSourceId}`
+    );
   }
 
   private buildQuery(): PageQuery {
@@ -200,7 +232,13 @@ export class DspScriptPage implements OnInit {
   }
 
   openAdd(): void {
-    this.editorForm.reset({ scriptId: undefined, name: '', slug: '', description: '' });
+    this.editorForm.reset({
+      scriptId: undefined,
+      name: '',
+      slug: '',
+      description: '',
+      dataSourceId: 0,
+    });
     this.editorForm.controls.slug.enable();
     this.editorXml.set(this.defaultXml());
     this.validation.set(null);
@@ -223,6 +261,7 @@ export class DspScriptPage implements OnInit {
           name: data.name ?? '',
           slug: data.slug ?? '',
           description: data.description ?? '',
+          dataSourceId: data.dataSourceId ?? 0,
         });
         this.editorXml.set(data.content ?? this.defaultXml());
         this.validation.set(null);
@@ -251,6 +290,7 @@ export class DspScriptPage implements OnInit {
       name: value.name ?? '',
       slug: value.slug ?? '',
       description: value.description ?? '',
+      dataSourceId: value.dataSourceId ?? 0,
       content: this.editorXml(),
     };
     const request$ = this.isEdit() ? this.api.updateScript(payload) : this.api.addScript(payload);

@@ -30,6 +30,8 @@ export const COMPONENT_MAP: Record<string, ComponentLoader> = {
   'tool/gen/index': () => import('./tool/gen/gen').then((m) => m.GenPage),
   'tool/swagger/index': () => import('./tool/swagger/swagger').then((m) => m.SwaggerPage),
   'dsp/script/index': () => import('./dsp/script/script').then((m) => m.DspScriptPage),
+  'dsp/datasource/index': () =>
+    import('./dsp/datasource/datasource').then((m) => m.DspDataSourcePage),
 };
 
 /** 根据后端 component 字符串解析懒加载函数 */

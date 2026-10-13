@@ -94,6 +94,7 @@
           <th nzWidth="180px">脚本名称</th>
           <th nzWidth="180px">脚本标识(slug)</th>
           <th nzWidth="100px">状态</th>
+          <th nzWidth="140px">数据源</th>
           <th nzWidth="100px">当前版本</th>
           <th nzWidth="180px">更新时间</th>
           <th nzWidth="320px" nzRight>操作</th>
@@ -120,6 +121,7 @@
                 statusMeta(row.status).label
               }}</nz-tag>
             </td>
+            <td>{{ dataSourceLabel(row.dataSourceId) }}</td>
             <td>
               {{ row.currentVersion && row.currentVersion > 0 ? 'v' + row.currentVersion : '-' }}
             </td>
@@ -174,7 +176,7 @@
   <ng-container *nzModalContent>
     <form nz-form [formGroup]="editorForm" nzLayout="vertical">
       <div nz-row [nzGutter]="16">
-        <div nz-col [nzSpan]="10">
+        <div nz-col [nzSpan]="9">
           <nz-form-item>
             <nz-form-label nzFor="name" nzRequired>脚本名称</nz-form-label>
             <nz-form-control nzErrorTip="请输入脚本名称">
@@ -182,7 +184,7 @@
             </nz-form-control>
           </nz-form-item>
         </div>
-        <div nz-col [nzSpan]="7">
+        <div nz-col [nzSpan]="8">
           <nz-form-item>
             <nz-form-label nzFor="slug" nzRequired>脚本标识(slug)</nz-form-label>
             <nz-form-control nzErrorTip="字母开头，仅含字母、数字、下划线和中划线">
@@ -195,6 +197,22 @@
           </nz-form-item>
         </div>
         <div nz-col [nzSpan]="7">
+          <nz-form-item>
+            <nz-form-label nzFor="dataSourceId" nzTooltipTitle="脚本发布后将在此数据源上执行"
+              >数据源</nz-form-label
+            >
+            <nz-form-control nzExtra="发布后在绑定数据源上执行">
+              <nz-select formControlName="dataSourceId">
+                @for (item of dataSourceOptions(); track item.value) {
+                  <nz-option [nzValue]="item.value" [nzLabel]="item.label"></nz-option>
+                }
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+      <div nz-row [nzGutter]="16">
+        <div nz-col [nzSpan]="24">
           <nz-form-item>
             <nz-form-label nzFor="description">描述</nz-form-label>
             <nz-form-control>

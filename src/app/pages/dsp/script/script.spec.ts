@@ -4,6 +4,7 @@ import { of } from 'rxjs';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { DspScriptApi } from '@api/dsp/script';
+import { DspDataSourceApi } from '@api/dsp/datasource';
 import { MonacoLoader } from '@core/monaco/monaco-loader';
 import { DspScript } from '@core/models/dsp';
 import { stubModalService } from '@testing/modal-mock';
@@ -100,6 +101,14 @@ describe('DspScriptPage 动态脚本管理', () => {
             exec: vi.fn(),
           },
         },
+        {
+          provide: DspDataSourceApi,
+          useValue: {
+            listOptions: vi.fn(() =>
+              of({ code: 200, msg: '', data: [{ dataSourceId: 5, name: '报表库', status: '0' }] }),
+            ),
+          },
+        },
         { provide: MonacoLoader, useValue: { load: vi.fn(() => new Promise(() => undefined)) } },
         { provide: NzModalService, useValue: {} },
         {
@@ -138,6 +147,29 @@ describe('DspScriptPage 动态脚本管理', () => {
     expect(page.statusMeta('2').label).toBe('已下线');
     expect(page.statusMeta('0').label).toBe('草稿');
     expect(page.statusMeta(undefined).label).toBe('草稿');
+  });
+
+  it('数据源下拉包含默认主库与已登记数据源', () => {
+    const page = create();
+
+    expect(page.dataSourceOptions()).toEqual([
+      { value: 0, label: '默认主库' },
+      { value: 5, label: '报表库' },
+    ]);
+    expect(page.dataSourceLabel(0)).toBe('默认主库');
+    expect(page.dataSourceLabel(undefined)).toBe('默认主库');
+    expect(page.dataSourceLabel(5)).toBe('报表库');
+    expect(page.dataSourceLabel(9)).toBe('#9');
+  });
+
+  it('脚本保存携带绑定的 dataSourceId', () => {
+    const page = create();
+
+    page.openAdd();
+    page.editorForm.patchValue({ name: '订单查询', slug: 'order_query', dataSourceId: 5 });
+    page.submitEditor();
+
+    expect(addScript).toHaveBeenCalledWith(expect.objectContaining({ dataSourceId: 5 }));
   });
 
   it('新增时生成单条语句片段，不写 id 与 mapper 包装', () => {

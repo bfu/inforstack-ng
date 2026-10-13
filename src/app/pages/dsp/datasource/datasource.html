@@ -1,0 +1,258 @@
+<div class="dsp-page">
+  <nz-card [nzBordered]="false" class="search-card">
+    <form nz-form nzLayout="inline" [formGroup]="searchForm">
+      <nz-form-item>
+        <nz-form-control>
+          <input nz-input formControlName="name" placeholder="数据源名称" class="field-md" />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <nz-select formControlName="status" nzPlaceHolder="状态" nzAllowClear class="field-md">
+            @for (item of statusOptions; track item.value) {
+              <nz-option [nzValue]="item.value" [nzLabel]="item.label"></nz-option>
+            }
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <button nz-button nzType="primary" (click)="getList()">
+            <nz-icon nzType="search" />搜索
+          </button>
+          <button nz-button class="gap-left" (click)="resetQuery()">
+            <nz-icon nzType="reload" />重置
+          </button>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </nz-card>
+
+  <nz-card [nzBordered]="false" class="table-card">
+    <div class="toolbar">
+      <button nz-button nzType="primary" *appHasPermi="['dsp:datasource:add']" (click)="openAdd()">
+        <nz-icon nzType="plus" />新增数据源
+      </button>
+      <button
+        nz-button
+        *appHasPermi="['dsp:datasource:edit']"
+        [disabled]="!selection.single()"
+        class="gap-left"
+        (click)="openEdit(selectedRows()[0])"
+      >
+        <nz-icon nzType="edit" />修改
+      </button>
+      <button
+        nz-button
+        nzDanger
+        *appHasPermi="['dsp:datasource:remove']"
+        [disabled]="!selection.multiple()"
+        class="gap-left"
+        (click)="deleteDataSource()"
+      >
+        <nz-icon nzType="delete" />删除
+      </button>
+    </div>
+
+    <nz-table
+      nzSize="middle"
+      [nzData]="rows()"
+      [nzLoading]="loading()"
+      [nzTotal]="total()"
+      [nzPageIndex]="pageNum()"
+      [nzPageSize]="pageSize()"
+      [nzFrontPagination]="false"
+      [nzShowSizeChanger]="true"
+      [nzShowTotal]="totalTpl"
+      (nzQueryParams)="onQueryParams($event)"
+    >
+      <thead>
+        <tr>
+          <th nzWidth="50px">
+            <label
+              nz-checkbox
+              [ngModel]="selection.allChecked()"
+              [nzIndeterminate]="selection.indeterminate()"
+              (ngModelChange)="selection.onAllChecked($event, rows())"
+            ></label>
+          </th>
+          <th nzWidth="160px">数据源名称</th>
+          <th nzWidth="110px">类型</th>
+          <th nzWidth="220px">驱动类名</th>
+          <th nzWidth="280px">JDBC URL</th>
+          <th nzWidth="110px">用户名</th>
+          <th nzWidth="90px">状态</th>
+          <th nzWidth="170px">更新时间</th>
+          <th nzWidth="220px" nzRight>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track row.dataSourceId) {
+          <tr>
+            <td>
+              <label
+                nz-checkbox
+                [ngModel]="selection.isChecked(row)"
+                (ngModelChange)="selection.onItemChecked(row.dataSourceId, $event)"
+              ></label>
+            </td>
+            <td>
+              <a (click)="openEdit(row)">{{ row.name }}</a>
+            </td>
+            <td>{{ row.dbType || '-' }}</td>
+            <td>
+              <code class="mono-text">{{ row.driverClassName }}</code>
+            </td>
+            <td>
+              <span class="url-text" nz-tooltip [nzTooltipTitle]="row.url">{{ row.url }}</span>
+            </td>
+            <td>{{ row.username || '-' }}</td>
+            <td>
+              <nz-tag [nzColor]="statusMeta(row.status).color">{{
+                statusMeta(row.status).label
+              }}</nz-tag>
+            </td>
+            <td>{{ row.updateTime || row.createTime }}</td>
+            <td nzRight>
+              <a *appHasPermi="['dsp:datasource:edit']" (click)="openEdit(row)">编辑</a>
+              <a class="gap-left" *appHasPermi="['dsp:datasource:test']" (click)="testRow(row)"
+                >测试连接</a
+              >
+              <a
+                class="gap-left danger-link"
+                *appHasPermi="['dsp:datasource:remove']"
+                (click)="deleteDataSource(row)"
+                >删除</a
+              >
+            </td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+  </nz-card>
+</div>
+
+<ng-template #totalTpl let-total>共 {{ total }} 条</ng-template>
+
+<!-- 数据源编辑 -->
+<nz-modal
+  [nzVisible]="editorVisible()"
+  (nzVisibleChange)="editorVisible.set($event)"
+  (nzOnCancel)="editorVisible.set(false)"
+  [nzTitle]="editorTitle()"
+  nzWidth="720px"
+  nzOkText="确定"
+  nzCancelText="取消"
+  [nzOkLoading]="editorSubmitting()"
+  (nzOnOk)="submitEditor()"
+>
+  <ng-container *nzModalContent>
+    <form nz-form [formGroup]="editorForm" nzLayout="vertical">
+      <div nz-row [nzGutter]="16">
+        <div nz-col [nzSpan]="8">
+          <nz-form-item>
+            <nz-form-label nzFor="name" nzRequired>数据源名称</nz-form-label>
+            <nz-form-control nzErrorTip="请输入数据源名称">
+              <input nz-input formControlName="name" placeholder="唯一名称" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="8">
+          <nz-form-item>
+            <nz-form-label nzFor="dbType">数据库类型</nz-form-label>
+            <nz-form-control>
+              <input
+                nz-input
+                formControlName="dbType"
+                placeholder="如 mysql/postgresql（仅展示）"
+              />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="8">
+          <nz-form-item>
+            <nz-form-label nzFor="status">状态</nz-form-label>
+            <nz-form-control>
+              <nz-select formControlName="status" class="full-width">
+                @for (item of statusOptions; track item.value) {
+                  <nz-option [nzValue]="item.value" [nzLabel]="item.label"></nz-option>
+                }
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+
+      <nz-form-item>
+        <nz-form-label nzFor="driverClassName" nzRequired>驱动类名</nz-form-label>
+        <nz-form-control nzErrorTip="请输入驱动类名">
+          <input
+            nz-input
+            formControlName="driverClassName"
+            placeholder="如 com.mysql.cj.jdbc.Driver"
+          />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label nzFor="url" nzRequired>JDBC URL</nz-form-label>
+        <nz-form-control nzErrorTip="请输入 JDBC URL">
+          <input nz-input formControlName="url" placeholder="jdbc:mysql://host:3306/db" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <div nz-row [nzGutter]="16">
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="username">用户名</nz-form-label>
+            <nz-form-control>
+              <input nz-input formControlName="username" placeholder="数据库用户名" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="password">密码</nz-form-label>
+            <nz-form-control>
+              <input
+                nz-input
+                type="password"
+                formControlName="password"
+                placeholder="数据库密码（明文保存）"
+              />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+
+      <nz-form-item>
+        <nz-form-label nzFor="remark">备注</nz-form-label>
+        <nz-form-control>
+          <input nz-input formControlName="remark" placeholder="用途说明" />
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+
+    <div class="test-bar">
+      <button
+        nz-button
+        nzSize="small"
+        *appHasPermi="['dsp:datasource:test']"
+        [nzLoading]="testing()"
+        (click)="testEditor()"
+      >
+        <nz-icon nzType="api" />测试连接
+      </button>
+    </div>
+
+    @if (testResult(); as r) {
+      <nz-alert
+        class="test-alert"
+        [nzType]="r.success ? 'success' : 'error'"
+        nzShowIcon
+        [nzMessage]="r.success ? '连接成功' : '连接失败'"
+        [nzDescription]="(r.message || '') + '（耗时 ' + (r.costMillis ?? 0) + ' ms）'"
+      />
+    }
+  </ng-container>
+</nz-modal>

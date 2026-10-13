@@ -91,15 +91,8 @@ export class DspScriptApi {
     return this.request.get<AjaxResult<DspScriptVersion>>(`/dsp/script/version/${versionId}`);
   }
 
-  /** 统一执行已发布脚本语句 */
-  exec(
-    slug: string,
-    statementId: string,
-    params?: Record<string, unknown>,
-  ): Observable<AjaxResult<DspExecutionResult>> {
-    return this.request.post<AjaxResult<DspExecutionResult>>(
-      `/dsp/exec/${slug}/${statementId}`,
-      params,
-    );
+  /** 统一执行已发布脚本的（唯一）语句 */
+  exec(slug: string, params?: Record<string, unknown>): Observable<AjaxResult<DspExecutionResult>> {
+    return this.request.post<AjaxResult<DspExecutionResult>>(`/dsp/exec/${slug}`, params);
   }
 }

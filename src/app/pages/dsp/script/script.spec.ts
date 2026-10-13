@@ -33,7 +33,7 @@ describe('DspScriptPage 动态脚本管理', () => {
       slug: 'order_query',
       name: '订单查询',
       description: 'demo',
-      content: '<select id="selectAll" resultType="map">select 1</select>',
+      content: '<select resultType="map">select 1</select>',
       currentVersion: 2,
       status: '1',
     },
@@ -74,11 +74,7 @@ describe('DspScriptPage 动态脚本管理', () => {
       of({
         code: 200,
         msg: '',
-        data: {
-          versionId: 10,
-          version: 2,
-          content: '<select id="selectAll" resultType="map">select 1</select>',
-        },
+        data: { versionId: 10, version: 2, content: '<select resultType="map">select 1</select>' },
       }),
     );
     success = vi.fn();
@@ -144,17 +140,18 @@ describe('DspScriptPage 动态脚本管理', () => {
     expect(page.statusMeta(undefined).label).toBe('草稿');
   });
 
-  it('新增时生成仅含语句片段的默认内容，不写 mapper 包装与 namespace', () => {
+  it('新增时生成单条语句片段，不写 id 与 mapper 包装', () => {
     const page = create();
 
     page.openAdd();
     expect(page.isEdit()).toBe(false);
-    expect(page.editorXml()).toContain('<select id="selectList"');
+    expect(page.editorXml()).toContain('<select resultType="map">');
+    expect(page.editorXml()).not.toContain('id="');
     expect(page.editorXml()).not.toContain('<mapper');
     expect(page.editorXml()).not.toContain('namespace=');
 
     page.editorForm.controls.slug.setValue('order_query');
-    expect(page.editorXml()).not.toContain('namespace=');
+    expect(page.editorXml()).not.toContain('id="');
   });
 
   it('新增提交调用 addScript', () => {
@@ -179,7 +176,7 @@ describe('DspScriptPage 动态脚本管理', () => {
     page.openEdit(scripts[0]);
     expect(getScript).toHaveBeenCalledWith(1);
     expect(page.editorForm.controls.slug.value).toBe('order_query');
-    expect(page.editorXml()).toContain('selectAll');
+    expect(page.editorXml()).toContain('select 1');
 
     page.submitEditor();
     expect(updateScript).toHaveBeenCalledWith(

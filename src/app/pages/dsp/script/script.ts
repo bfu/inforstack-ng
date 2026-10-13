@@ -191,9 +191,8 @@ export class DspScriptPage implements OnInit {
 
   private defaultXml(): string {
     return [
-      '<!-- 仅编写语句片段：xml 声明、DOCTYPE、mapper 标签与 namespace 由平台补全 -->',
-      '<!-- 语句 id 只写语句名（slug 前缀由平台拼接，完整语句 id 为 slug.语句名） -->',
-      '<select id="selectList" resultType="map">',
+      '<!-- 一条脚本只写一条语句，不用写 id：平台按脚本标识(slug)填充 id，并补 mapper 标签与 namespace -->',
+      '<select resultType="map">',
       '  select 1 as id',
       '</select>',
       '',

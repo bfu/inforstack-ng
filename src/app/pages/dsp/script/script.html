@@ -189,7 +189,7 @@
               <input
                 nz-input
                 formControlName="slug"
-                placeholder="唯一标识，同时作为语句 namespace"
+                placeholder="唯一标识，作为语句 id 与调用路径"
               />
             </nz-form-control>
           </nz-form-item>
@@ -207,8 +207,8 @@
 
     <div class="editor-toolbar">
       <span class="editor-label"
-        ><nz-icon nzType="code" /> Mapper 语句（只写语句名，xml 声明、DOCTYPE、mapper 标签与
-        namespace 由平台补全）</span
+        ><nz-icon nzType="code" /> Mapper 语句（一条脚本一条语句，不写 id；mapper 标签与 namespace
+        由平台补全）</span
       >
       <span class="editor-actions">
         @if (validating()) {

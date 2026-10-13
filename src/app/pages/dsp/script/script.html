@@ -1,0 +1,394 @@
+<div class="dsp-page">
+  <nz-card [nzBordered]="false" class="search-card">
+    <form nz-form nzLayout="inline" [formGroup]="searchForm">
+      <nz-form-item>
+        <nz-form-control>
+          <input nz-input formControlName="name" placeholder="脚本名称" class="field-md" />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <input nz-input formControlName="slug" placeholder="脚本标识(slug)" class="field-md" />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <nz-select formControlName="status" nzPlaceHolder="状态" nzAllowClear class="field-md">
+            @for (item of statusOptions; track item.value) {
+              <nz-option [nzValue]="item.value" [nzLabel]="item.label"></nz-option>
+            }
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <button nz-button nzType="primary" (click)="getList()">
+            <nz-icon nzType="search" />搜索
+          </button>
+          <button nz-button class="gap-left" (click)="resetQuery()">
+            <nz-icon nzType="reload" />重置
+          </button>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </nz-card>
+
+  <nz-card [nzBordered]="false" class="table-card">
+    <div class="toolbar">
+      <button nz-button nzType="primary" *appHasPermi="['dsp:script:add']" (click)="openAdd()">
+        <nz-icon nzType="plus" />新增脚本
+      </button>
+      <button
+        nz-button
+        *appHasPermi="['dsp:script:edit']"
+        [disabled]="!selection.single()"
+        class="gap-left"
+        (click)="openEdit(selectedRows()[0])"
+      >
+        <nz-icon nzType="edit" />修改
+      </button>
+      <button
+        nz-button
+        nzDanger
+        *appHasPermi="['dsp:script:remove']"
+        [disabled]="!selection.multiple()"
+        class="gap-left"
+        (click)="deleteScript()"
+      >
+        <nz-icon nzType="delete" />删除
+      </button>
+      <button
+        nz-button
+        class="gap-left"
+        nz-tooltip
+        nzTooltipTitle="重新加载全部已发布脚本（热加载）"
+        *appHasPermi="['dsp:script:publish']"
+        (click)="reload()"
+      >
+        <nz-icon nzType="sync" />重新加载
+      </button>
+    </div>
+
+    <nz-table
+      nzSize="middle"
+      [nzData]="rows()"
+      [nzLoading]="loading()"
+      [nzTotal]="total()"
+      [nzPageIndex]="pageNum()"
+      [nzPageSize]="pageSize()"
+      [nzFrontPagination]="false"
+      [nzShowSizeChanger]="true"
+      [nzShowTotal]="totalTpl"
+      (nzQueryParams)="onQueryParams($event)"
+    >
+      <thead>
+        <tr>
+          <th nzWidth="50px">
+            <label
+              nz-checkbox
+              [ngModel]="selection.allChecked()"
+              [nzIndeterminate]="selection.indeterminate()"
+              (ngModelChange)="selection.onAllChecked($event, rows())"
+            ></label>
+          </th>
+          <th nzWidth="180px">脚本名称</th>
+          <th nzWidth="180px">脚本标识(slug)</th>
+          <th nzWidth="100px">状态</th>
+          <th nzWidth="100px">当前版本</th>
+          <th nzWidth="180px">更新时间</th>
+          <th nzWidth="320px" nzRight>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track row.scriptId) {
+          <tr>
+            <td>
+              <label
+                nz-checkbox
+                [ngModel]="selection.isChecked(row)"
+                (ngModelChange)="selection.onItemChecked(row.scriptId, $event)"
+              ></label>
+            </td>
+            <td>
+              <a (click)="openEdit(row)">{{ row.name }}</a>
+            </td>
+            <td>
+              <code class="slug-text">{{ row.slug }}</code>
+            </td>
+            <td>
+              <nz-tag [nzColor]="statusMeta(row.status).color">{{
+                statusMeta(row.status).label
+              }}</nz-tag>
+            </td>
+            <td>
+              {{ row.currentVersion && row.currentVersion > 0 ? 'v' + row.currentVersion : '-' }}
+            </td>
+            <td>{{ row.updateTime || row.createTime }}</td>
+            <td nzRight>
+              <a *appHasPermi="['dsp:script:edit']" (click)="openEdit(row)">编辑</a>
+              <a class="gap-left" *appHasPermi="['dsp:script:test']" (click)="openTest(row)"
+                >测试</a
+              >
+              <a class="gap-left" *appHasPermi="['dsp:script:publish']" (click)="publishScript(row)"
+                >发布</a
+              >
+              <a class="gap-left" *appHasPermi="['dsp:script:query']" (click)="openVersions(row)"
+                >版本</a
+              >
+              @if (row.status === '1') {
+                <a
+                  class="gap-left"
+                  *appHasPermi="['dsp:script:publish']"
+                  (click)="offlineScript(row)"
+                  >下线</a
+                >
+              }
+              <a
+                class="gap-left danger-link"
+                *appHasPermi="['dsp:script:remove']"
+                (click)="deleteScript(row)"
+                >删除</a
+              >
+            </td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+  </nz-card>
+</div>
+
+<ng-template #totalTpl let-total>共 {{ total }} 条</ng-template>
+
+<!-- 脚本编辑 -->
+<nz-modal
+  [nzVisible]="editorVisible()"
+  (nzVisibleChange)="editorVisible.set($event)"
+  (nzOnCancel)="editorVisible.set(false)"
+  [nzTitle]="editorTitle()"
+  nzWidth="1080px"
+  nzOkText="保存草稿"
+  nzCancelText="关闭"
+  [nzOkLoading]="editorSubmitting()"
+  (nzOnOk)="submitEditor()"
+>
+  <ng-container *nzModalContent>
+    <form nz-form [formGroup]="editorForm" nzLayout="vertical">
+      <div nz-row [nzGutter]="16">
+        <div nz-col [nzSpan]="10">
+          <nz-form-item>
+            <nz-form-label nzFor="name" nzRequired>脚本名称</nz-form-label>
+            <nz-form-control nzErrorTip="请输入脚本名称">
+              <input nz-input formControlName="name" placeholder="请输入脚本名称" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="7">
+          <nz-form-item>
+            <nz-form-label nzFor="slug" nzRequired>脚本标识(slug)</nz-form-label>
+            <nz-form-control nzErrorTip="字母开头，仅含字母、数字、下划线和中划线">
+              <input nz-input formControlName="slug" placeholder="唯一标识，同时作为 namespace" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="7">
+          <nz-form-item>
+            <nz-form-label nzFor="description">描述</nz-form-label>
+            <nz-form-control>
+              <input nz-input formControlName="description" placeholder="脚本用途说明" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+    </form>
+
+    <div class="editor-toolbar">
+      <span class="editor-label"><nz-icon nzType="code" /> Mapper XML</span>
+      <span class="editor-actions">
+        @if (validating()) {
+          <nz-spin nzSize="small"></nz-spin>
+        }
+        <button
+          nz-button
+          nzSize="small"
+          *appHasPermi="['dsp:script:validate']"
+          (click)="validateEditor()"
+        >
+          校验
+        </button>
+      </span>
+    </div>
+
+    <app-monaco-editor
+      language="xml"
+      height="460px"
+      [value]="editorXml()"
+      (valueChange)="editorXml.set($event)"
+    />
+
+    @if (validation(); as v) {
+      <div class="validation-panel">
+        @if (v.errors?.length) {
+          <nz-alert
+            nzType="error"
+            nzShowIcon
+            [nzMessage]="'校验未通过（' + v.errors.length + ' 个错误）'"
+          />
+          <ul class="validation-list error">
+            @for (item of v.errors; track $index) {
+              <li>{{ item }}</li>
+            }
+          </ul>
+        }
+        @if (v.warnings?.length) {
+          <ul class="validation-list warning">
+            @for (item of v.warnings; track $index) {
+              <li>{{ item }}</li>
+            }
+          </ul>
+        }
+        @if (v.valid) {
+          <nz-alert
+            nzType="success"
+            nzShowIcon
+            [nzMessage]="'校验通过，共 ' + (v.statements?.length ?? 0) + ' 条语句'"
+          />
+        }
+      </div>
+    }
+  </ng-container>
+</nz-modal>
+
+<!-- 测试抽屉 -->
+<nz-drawer
+  [nzVisible]="testVisible()"
+  nzTitle="测试执行（事务回滚预览）"
+  nzWidth="760"
+  (nzOnClose)="testVisible.set(false)"
+>
+  <ng-container *nzDrawerContent>
+    <nz-alert
+      nzType="info"
+      nzShowIcon
+      nzMessage="测试在独立事务中执行后回滚：查询可预览结果，增删改仅返回影响行数且不落库。"
+    />
+    <nz-divider />
+    <div class="drawer-field">
+      <span class="drawer-label">语句 ID</span>
+      <nz-select
+        class="full-width"
+        nzPlaceHolder="请选择语句"
+        [ngModel]="testStatement()"
+        (ngModelChange)="testStatement.set($event)"
+      >
+        @for (item of testStatements(); track item) {
+          <nz-option [nzValue]="item" [nzLabel]="item"></nz-option>
+        }
+      </nz-select>
+    </div>
+    <div class="drawer-field">
+      <span class="drawer-label">参数（JSON，可为空）</span>
+      <textarea
+        nz-input
+        rows="5"
+        placeholder='例如：{ "id": 1 }'
+        [ngModel]="testParams()"
+        (ngModelChange)="testParams.set($event)"
+      ></textarea>
+    </div>
+    <button nz-button nzType="primary" [nzLoading]="testing()" (click)="runTest()">
+      <nz-icon nzType="play-circle" />执行测试
+    </button>
+
+    @if (testResult(); as r) {
+      <nz-divider />
+      <div class="result-head">
+        <nz-tag [nzColor]="'blue'">{{ r.sqlCommandType }}</nz-tag>
+        <span class="result-meta">耗时 {{ r.costMillis }} ms</span>
+        <nz-tag nzColor="orange">已回滚</nz-tag>
+      </div>
+      @if (r.affectedRows !== undefined && r.affectedRows !== null) {
+        <p class="result-meta">
+          影响行数：<strong>{{ r.affectedRows }}</strong>
+        </p>
+      }
+      @if (r.rows && r.rows.length > 0) {
+        <nz-table
+          nzSize="small"
+          [nzData]="r.rows"
+          [nzShowPagination]="false"
+          [nzScroll]="{ x: '100%' }"
+        >
+          <thead>
+            <tr>
+              @for (col of testColumns(); track col) {
+                <th>{{ col }}</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of r.rows; track $index) {
+              <tr>
+                @for (col of testColumns(); track col) {
+                  <td>{{ row[col] }}</td>
+                }
+              </tr>
+            }
+          </tbody>
+        </nz-table>
+      } @else if (r.rows) {
+        <nz-empty nzNotFoundContent="查询结果为空" />
+      }
+    }
+  </ng-container>
+</nz-drawer>
+
+<!-- 版本历史抽屉 -->
+<nz-drawer
+  [nzVisible]="versionVisible()"
+  nzTitle="版本历史"
+  nzWidth="640"
+  (nzOnClose)="versionVisible.set(false)"
+>
+  <ng-container *nzDrawerContent>
+    <nz-spin [nzSpinning]="versionsLoading()">
+      @if (versions().length > 0) {
+        @for (v of versions(); track v.versionId) {
+          <div class="version-item" [class.current]="v.status === '1'">
+            <div class="version-main">
+              <span class="version-no">v{{ v.version }}</span>
+              @if (v.status === '1') {
+                <nz-tag nzColor="success">当前</nz-tag>
+              }
+              <span class="version-meta">{{ v.publishBy }} · {{ v.publishTime }}</span>
+            </div>
+            <div class="version-actions">
+              <a (click)="viewVersion(v)">查看</a>
+              <a
+                class="gap-left"
+                *appHasPermi="['dsp:script:rollback']"
+                (click)="rollbackVersion(v)"
+                >回滚</a
+              >
+            </div>
+          </div>
+        }
+      } @else {
+        <nz-empty nzNotFoundContent="暂无已发布版本" />
+      }
+    </nz-spin>
+  </ng-container>
+</nz-drawer>
+
+<!-- 版本快照查看 -->
+<nz-modal
+  [nzVisible]="snapshotVisible()"
+  (nzVisibleChange)="snapshotVisible.set($event)"
+  [nzTitle]="snapshotTitle()"
+  nzWidth="900px"
+  [nzFooter]="null"
+  (nzOnCancel)="snapshotVisible.set(false)"
+>
+  <ng-container *nzModalContent>
+    <app-monaco-editor language="xml" height="480px" [readOnly]="true" [value]="snapshotXml()" />
+  </ng-container>
+</nz-modal>

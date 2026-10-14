@@ -439,3 +439,22 @@
     <app-monaco-editor language="xml" height="480px" [readOnly]="true" [value]="snapshotXml()" />
   </ng-container>
 </nz-modal>
+
+<!-- 发布确认内容：方言告警不会被发布环节拦截，必须在确认框里显式提示 -->
+<ng-template #publishTpl>
+  <p class="confirm-text">确认发布脚本「{{ publishTarget()?.name }}」？发布后将立即热加载生效。</p>
+  @if (publishWarnings().length) {
+    <nz-alert
+      nzType="warning"
+      nzShowIcon
+      nzBanner
+      [nzMessage]="'检测到 ' + publishWarnings().length + ' 条方言风险提示'"
+      nzDescription="发布只校验语法，不校验能否在目标数据源上执行成功；请先确认已在数据源上验证。"
+    />
+    <ul class="validation-list warning confirm-warn-list">
+      @for (item of publishWarnings(); track $index) {
+        <li>{{ item }}</li>
+      }
+    </ul>
+  }
+</ng-template>

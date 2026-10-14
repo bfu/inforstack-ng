@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { DspScriptApi } from '@api/dsp/script';
@@ -294,6 +294,43 @@ describe('DspScriptPage 动态脚本管理', () => {
 
     expect(publish).toHaveBeenCalledWith(1);
     expect(success).toHaveBeenCalledWith('发布成功，当前版本 v3');
+  });
+
+  it('发布前校验出的方言告警进入确认框，按钮改为「仍然发布」', () => {
+    const page = create();
+    listScript.mockClear();
+    validate.mockReturnValue(
+      of({
+        code: 200,
+        msg: '',
+        data: {
+          valid: true,
+          errors: [],
+          warnings: ['反引号是 MySQL 标识符写法，PostgreSQL 请改用双引号或不加引号'],
+        },
+      }),
+    );
+
+    page.publishScript(scripts[0]);
+
+    // 告警不阻断发布，但必须在确认框里露出，不能静默发布
+    expect(validate).toHaveBeenCalledWith(1);
+    expect(page.publishWarnings()).toEqual([
+      '反引号是 MySQL 标识符写法，PostgreSQL 请改用双引号或不加引号',
+    ]);
+    expect(modal?.lastConfig()?.nzOkText).toBe('仍然发布');
+    expect(publish).toHaveBeenCalledWith(1);
+  });
+
+  it('发布前校验接口异常不阻塞发布', () => {
+    const page = create();
+
+    validate.mockImplementation(() => throwError(() => new Error('validate failed')));
+    page.publishScript(scripts[0]);
+
+    expect(page.publishWarnings()).toEqual([]);
+    expect(modal?.lastConfig()?.nzOkText).toBe('发布');
+    expect(publish).toHaveBeenCalledWith(1);
   });
 
   it('打开测试抽屉加载语句并按 JSON 参数执行', () => {

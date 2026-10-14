@@ -9,6 +9,7 @@ export type Mock = ReturnType<typeof vi.fn>;
 export interface ModalConfirmConfig {
   nzTitle?: string;
   nzContent?: string;
+  nzOkText?: string;
   nzOnOk?: () => void;
   nzOnCancel?: () => void;
 }

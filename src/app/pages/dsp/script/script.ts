@@ -2,9 +2,11 @@ import {
   ChangeDetectionStrategy,
   Component,
   OnInit,
+  TemplateRef,
   computed,
   inject,
   signal,
+  viewChild,
 } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
@@ -343,14 +345,30 @@ export class DspScriptPage implements OnInit {
 
   /* ---------------- 发布 / 下线 / 删除 ---------------- */
 
+  /** 发布确认弹窗里要展示的方言告警（发布本身只拦错误，不拦告警，这里必须显式提示） */
+  readonly publishTarget = signal<DspScript | null>(null);
+  readonly publishWarnings = signal<string[]>([]);
+  readonly publishTpl = viewChild.required<TemplateRef<void>>('publishTpl');
+
   publishScript(row: DspScript): void {
     if (row.scriptId == null) {
       return;
     }
+    // 先跑一次校验，把方言告警带进确认框；校验失败不阻塞发布，按无告警处理
+    this.api.validate(row.scriptId).subscribe({
+      next: (res) => this.confirmPublish(row, res.data?.warnings ?? []),
+      error: () => this.confirmPublish(row, []),
+    });
+  }
+
+  private confirmPublish(row: DspScript, warnings: string[]): void {
+    this.publishTarget.set(row);
+    this.publishWarnings.set(warnings);
     this.modal.confirm({
       nzTitle: '发布确认',
-      nzContent: `确认发布脚本「${row.name}」？发布后将立即热加载生效。`,
-      nzOkText: '发布',
+      nzContent: this.publishTpl(),
+      nzWidth: warnings.length ? 560 : undefined,
+      nzOkText: warnings.length ? '仍然发布' : '发布',
       nzCancelText: '取消',
       nzOnOk: () =>
         new Promise<void>((resolve) => {

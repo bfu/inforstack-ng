@@ -157,6 +157,9 @@ export class DspGeneratorPage implements OnInit {
     this.tableName.set(tableName);
     this.columns.set([]);
     this.scripts.set([]);
+    // 表注释与数据库产品随表变化，清空选择时不能残留上一张表的信息
+    this.tableComment.set('');
+    this.databaseProduct.set('');
     if (!tableName) {
       return;
     }

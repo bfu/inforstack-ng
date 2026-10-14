@@ -186,7 +186,12 @@
         </div>
         <div nz-col [nzSpan]="8">
           <nz-form-item>
-            <nz-form-label nzFor="slug" nzRequired>脚本标识(slug)</nz-form-label>
+            <nz-form-label nzFor="slug" nzRequired>
+              脚本标识(slug)
+              @if (isEdit) {
+                <span class="form-hint">创建后不可修改</span>
+              }
+            </nz-form-label>
             <nz-form-control nzErrorTip="字母开头，仅含字母、数字、下划线和中划线">
               <input
                 nz-input
@@ -294,7 +299,7 @@
     <nz-alert
       nzType="info"
       nzShowIcon
-      nzMessage="测试在独立事务中执行后回滚：查询可预览结果，增删改仅返回影响行数且不落库。"
+      nzMessage="测试在独立事务中执行后回滚：查询可预览结果，增删改仅返回影响行数且不落库。执行的是已保存的草稿内容，编辑器里未保存的修改不会生效。"
     />
     <nz-divider />
     <div class="drawer-field">

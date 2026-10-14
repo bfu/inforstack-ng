@@ -174,6 +174,21 @@ describe('DspGeneratorPage 脚本生成', () => {
     expect(page.columns()).toEqual([]);
   });
 
+  it('清空已选数据表时同时重置表注释与数据库产品', () => {
+    const page = create();
+    page.onTableChange('sys_user');
+    expect(page.tableComment()).toBe('用户信息');
+    expect(page.databaseProduct()).toBe('mysql');
+
+    page.onTableChange(undefined);
+
+    expect(page.tableName()).toBeUndefined();
+    expect(page.scripts()).toEqual([]);
+    expect(page.columns()).toEqual([]);
+    expect(page.tableComment()).toBe('');
+    expect(page.databaseProduct()).toBe('');
+  });
+
   it('切换实例会清空已选表并重新加载数据表', () => {
     const page = create();
     page.onTableChange('sys_user');

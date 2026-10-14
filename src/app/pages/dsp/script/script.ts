@@ -269,6 +269,8 @@ export class DspScriptPage implements OnInit {
           description: data.description ?? '',
           dataSourceId: data.dataSourceId ?? 0,
         });
+        // 脚本标识创建后不可修改（后端会忽略变更），直接禁用避免误改
+        this.editorForm.controls.slug.disable();
         this.editorXml.set(data.content ?? this.defaultXml());
         this.validation.set(null);
         this.editorTitle.set('编辑脚本');

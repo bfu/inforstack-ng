@@ -267,6 +267,16 @@ describe('DspScriptPage 动态脚本管理', () => {
     expect(updateScript).toHaveBeenCalledTimes(1);
   });
 
+  it('编辑态禁用脚本标识，新增态恢复可编辑', () => {
+    const page = create();
+
+    page.openEdit(scripts[0]);
+    expect(page.editorForm.controls.slug.disabled).toBe(true);
+
+    page.openAdd();
+    expect(page.editorForm.controls.slug.enabled).toBe(true);
+  });
+
   it('删除走确认框并调用 delScript', () => {
     const page = create();
     listScript.mockClear();

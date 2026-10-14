@@ -218,7 +218,7 @@
                 nz-input
                 type="password"
                 formControlName="password"
-                placeholder="数据库密码（明文保存）"
+                [placeholder]="isEdit ? '留空表示不修改已保存的口令' : '数据库密码（明文保存）'"
               />
             </nz-form-control>
           </nz-form-item>

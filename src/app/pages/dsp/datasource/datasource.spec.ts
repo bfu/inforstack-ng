@@ -149,6 +149,47 @@ describe('DspDataSourcePage 数据源管理', () => {
     expect(addDataSource).toHaveBeenCalledTimes(1);
   });
 
+  it('编辑时不回填数据库口令（接口不回传，留空表示沿用）', () => {
+    getDataSource.mockReturnValue(
+      of({ code: 200, msg: '', data: { ...sources[0], password: 'secret' } }),
+    );
+    const page = create();
+
+    page.openEdit(sources[0]);
+
+    expect(page.editorForm.controls.password.value).toBe('');
+  });
+
+  it('编辑时口令留空不提交 password 字段', () => {
+    const page = create();
+
+    page.openEdit(sources[0]);
+    page.submitEditor();
+
+    expect(updateDataSource).toHaveBeenCalledTimes(1);
+    const payload = updateDataSource.mock.calls[0][0] as DspDataSource;
+    expect(payload.password).toBeUndefined();
+    expect(payload.username).toBe('report');
+  });
+
+  it('新增时填写口令会带上 password 字段', () => {
+    const page = create();
+
+    page.openAdd();
+    page.editorForm.patchValue({
+      name: '报表库',
+      driverClassName: 'com.mysql.cj.jdbc.Driver',
+      url: 'jdbc:mysql://127.0.0.1:3306/report',
+      username: 'report',
+      password: 'secret',
+    });
+    page.submitEditor();
+
+    expect(addDataSource).toHaveBeenCalledTimes(1);
+    const payload = addDataSource.mock.calls[0][0] as DspDataSource;
+    expect(payload.password).toBe('secret');
+  });
+
   it('列表行测试连接按ID发起', () => {
     const page = create();
 

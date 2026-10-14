@@ -178,7 +178,8 @@ export class DspDataSourcePage implements OnInit {
           driverClassName: data.driverClassName ?? '',
           url: data.url ?? '',
           username: data.username ?? '',
-          password: data.password ?? '',
+          // 详情接口不回传口令：留空即「沿用已保存口令」，提交时也不会带该字段
+          password: '',
           status: data.status ?? '0',
           remark: data.remark ?? '',
         });
@@ -206,10 +207,13 @@ export class DspDataSourcePage implements OnInit {
       driverClassName: value.driverClassName,
       url: value.url,
       username: value.username,
-      password: value.password,
       status: value.status,
       remark: value.remark,
     };
+    // 口令留空表示沿用已保存口令：不提交该字段，否则会被更新 SQL 当成新口令写空
+    if (value.password) {
+      payload.password = value.password;
+    }
     const request$ = this.isEdit
       ? this.api.updateDataSource(payload)
       : this.api.addDataSource(payload);

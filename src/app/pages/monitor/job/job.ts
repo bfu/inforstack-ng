@@ -122,7 +122,10 @@ export class JobPage implements OnInit {
   readonly misfireOptions = MISFIRE_OPTIONS;
   readonly concurrentOptions = CONCURRENT_OPTIONS;
 
-  readonly isEdit = computed(() => this.form.controls.jobId.value != null);
+  /** 是否编辑态：表单值不是 signal，必须用 getter 实时读取（computed 会缓存首次结果） */
+  get isEdit(): boolean {
+    return this.form.controls.jobId.value != null;
+  }
   readonly jobGroupOptions = computed(() => this.dictStore.getDict('sys_job_group') ?? []);
   readonly jobStatusOptions = computed(() => this.dictStore.getDict('sys_job_status') ?? []);
   readonly detailMisfireText = computed(
@@ -224,10 +227,10 @@ export class JobPage implements OnInit {
     }
     this.submitting.set(true);
     const payload = this.form.getRawValue() as SysJob;
-    const request$ = this.isEdit() ? this.api.updateJob(payload) : this.api.addJob(payload);
+    const request$ = this.isEdit ? this.api.updateJob(payload) : this.api.addJob(payload);
     request$.subscribe({
       next: () => {
-        this.message.success(this.isEdit() ? '修改成功' : '新增成功');
+        this.message.success(this.isEdit ? '修改成功' : '新增成功');
         this.submitting.set(false);
         this.dialogVisible.set(false);
         this.getList();

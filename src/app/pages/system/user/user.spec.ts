@@ -207,6 +207,22 @@ describe('UserPage 用户管理', () => {
     expect(success).toHaveBeenCalledWith('修改成功');
   });
 
+  it('同一会话内先新增后编辑，分别调用 addUser / updateUser', () => {
+    const page = create();
+
+    page.openAdd();
+    page.form.patchValue({ userName: 'newuser', nickName: '新用户', password: '123456' });
+    page.submitForm();
+    expect(api.addUser).toHaveBeenCalledTimes(1);
+
+    page.openEdit(users[0]);
+    expect(page.isEdit).toBe(true);
+    page.submitForm();
+
+    expect(api.updateUser).toHaveBeenCalledTimes(1);
+    expect(api.addUser).toHaveBeenCalledTimes(1);
+  });
+
   it('删除：确认后以逗号拼接 id 调 delUser', () => {
     const page = create();
     api.listUser.mockClear();

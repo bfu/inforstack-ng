@@ -116,7 +116,10 @@ export class DeptPage implements OnInit {
     status: ['0'],
   });
 
-  readonly isEdit = computed(() => this.form.controls.deptId.value != null);
+  /** 是否编辑态：表单值不是 signal，必须用 getter 实时读取（computed 会缓存首次结果） */
+  get isEdit(): boolean {
+    return this.form.controls.deptId.value != null;
+  }
   readonly statusOptions = computed(() => this.dictStore.getDict('sys_normal_disable') ?? []);
 
   ngOnInit(): void {
@@ -288,10 +291,10 @@ export class DeptPage implements OnInit {
     }
     this.submitting.set(true);
     const payload = this.form.getRawValue() as SysDept;
-    const request$ = this.isEdit() ? this.api.updateDept(payload) : this.api.addDept(payload);
+    const request$ = this.isEdit ? this.api.updateDept(payload) : this.api.addDept(payload);
     request$.subscribe({
       next: () => {
-        this.message.success(this.isEdit() ? '修改成功' : '新增成功');
+        this.message.success(this.isEdit ? '修改成功' : '新增成功');
         this.submitting.set(false);
         this.dialogVisible.set(false);
         this.getList();

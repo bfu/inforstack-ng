@@ -119,7 +119,10 @@ export class UserPage implements OnInit {
     remark: [''],
   });
 
-  readonly isEdit = computed(() => this.form.controls.userId.value != null);
+  /** 是否编辑态：表单值不是 signal，必须用 getter 实时读取（computed 会缓存首次结果） */
+  get isEdit(): boolean {
+    return this.form.controls.userId.value != null;
+  }
   readonly statusOptions = computed(() => this.dictStore.getDict('sys_normal_disable') ?? []);
   readonly sexOptions = computed(() => this.dictStore.getDict('sys_user_sex') ?? []);
 
@@ -279,12 +282,12 @@ export class UserPage implements OnInit {
     }
     this.submitting.set(true);
     const value = this.form.getRawValue();
-    const request$ = this.isEdit()
+    const request$ = this.isEdit
       ? this.api.updateUser(value as SysUser)
       : this.api.addUser(value as SysUser);
     request$.subscribe({
       next: () => {
-        this.message.success(this.isEdit() ? '修改成功' : '新增成功');
+        this.message.success(this.isEdit ? '修改成功' : '新增成功');
         this.submitting.set(false);
         this.dialogVisible.set(false);
         this.getList();

@@ -118,7 +118,10 @@ export class DspScriptPage implements OnInit {
     dataSourceId: [0 as number],
   });
   readonly editorXml = signal('');
-  readonly isEdit = computed(() => this.editorForm.controls.scriptId.value != null);
+  /** 是否编辑态：表单值不是 signal，必须用 getter 实时读取（computed 会缓存首次结果） */
+  get isEdit(): boolean {
+    return this.editorForm.controls.scriptId.value != null;
+  }
   readonly validating = signal(false);
   readonly validation = signal<DspValidationResult | null>(null);
 
@@ -296,10 +299,10 @@ export class DspScriptPage implements OnInit {
       dataSourceId: value.dataSourceId ?? 0,
       content: this.editorXml(),
     };
-    const request$ = this.isEdit() ? this.api.updateScript(payload) : this.api.addScript(payload);
+    const request$ = this.isEdit ? this.api.updateScript(payload) : this.api.addScript(payload);
     request$.subscribe({
       next: () => {
-        this.message.success(this.isEdit() ? '保存成功' : '新增成功');
+        this.message.success(this.isEdit ? '保存成功' : '新增成功');
         this.editorSubmitting.set(false);
         this.editorVisible.set(false);
         this.getList();

@@ -94,7 +94,10 @@ export class ConfigPage implements OnInit {
     remark: [''],
   });
 
-  readonly isEdit = computed(() => this.form.controls.configId.value != null);
+  /** 是否编辑态：表单值不是 signal，必须用 getter 实时读取（computed 会缓存首次结果） */
+  get isEdit(): boolean {
+    return this.form.controls.configId.value != null;
+  }
   readonly yesNoOptions = computed(() => this.dictStore.getDict('sys_yes_no') ?? []);
 
   ngOnInit(): void {
@@ -198,10 +201,10 @@ export class ConfigPage implements OnInit {
     }
     this.submitting.set(true);
     const payload = this.form.getRawValue() as SysConfig;
-    const request$ = this.isEdit() ? this.api.updateConfig(payload) : this.api.addConfig(payload);
+    const request$ = this.isEdit ? this.api.updateConfig(payload) : this.api.addConfig(payload);
     request$.subscribe({
       next: () => {
-        this.message.success(this.isEdit() ? '修改成功' : '新增成功');
+        this.message.success(this.isEdit ? '修改成功' : '新增成功');
         this.submitting.set(false);
         this.dialogVisible.set(false);
         this.getList();

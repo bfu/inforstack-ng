@@ -1,7 +1,12 @@
 <div class="user-page">
   <div class="page-layout">
     <nz-card class="dept-card" [nzBordered]="false" nzTitle="组织机构">
-      <nz-tree [nzData]="deptNodes()" (nzClick)="onDeptSelect($event)" nzDefaultExpandAll nzBlockNode></nz-tree>
+      <nz-tree
+        [nzData]="deptNodes()"
+        (nzClick)="onDeptSelect($event)"
+        nzDefaultExpandAll
+        nzBlockNode
+      ></nz-tree>
     </nz-card>
 
     <div class="page-main">
@@ -13,17 +18,32 @@
           <ng-container [formGroup]="searchForm">
             <nz-form-item>
               <nz-form-control>
-                <input nz-input formControlName="userName" placeholder="用户名称" class="field-md" />
+                <input
+                  nz-input
+                  formControlName="userName"
+                  placeholder="用户名称"
+                  class="field-md"
+                />
               </nz-form-control>
             </nz-form-item>
             <nz-form-item>
               <nz-form-control>
-                <input nz-input formControlName="phonenumber" placeholder="手机号码" class="field-md" />
+                <input
+                  nz-input
+                  formControlName="phonenumber"
+                  placeholder="手机号码"
+                  class="field-md"
+                />
               </nz-form-control>
             </nz-form-item>
             <nz-form-item>
               <nz-form-control>
-                <nz-select formControlName="status" nzPlaceHolder="用户状态" nzAllowClear class="field-md">
+                <nz-select
+                  formControlName="status"
+                  nzPlaceHolder="用户状态"
+                  nzAllowClear
+                  class="field-md"
+                >
                   @for (item of statusOptions(); track item.value) {
                     <nz-option [nzValue]="item.value" [nzLabel]="item.label"></nz-option>
                   }
@@ -34,7 +54,8 @@
           <nz-form-item>
             <nz-form-control>
               <nz-range-picker
-                [ngModel]="dateRange()" (ngModelChange)="dateRange.set($event)"
+                [ngModel]="dateRange()"
+                (ngModelChange)="dateRange.set($event)"
                 [ngModelOptions]="{ standalone: true }"
                 class="field-lg"
               ></nz-range-picker>
@@ -77,10 +98,20 @@
           >
             <nz-icon nzType="delete" />删除
           </button>
-          <button nz-button *appHasPermi="['system:user:import']" class="gap-left" (click)="importVisible.set(true)">
+          <button
+            nz-button
+            *appHasPermi="['system:user:import']"
+            class="gap-left"
+            (click)="importVisible.set(true)"
+          >
             <nz-icon nzType="import" />导入
           </button>
-          <button nz-button *appHasPermi="['system:user:export']" class="gap-left" (click)="export()">
+          <button
+            nz-button
+            *appHasPermi="['system:user:export']"
+            class="gap-left"
+            (click)="export()"
+          >
             <nz-icon nzType="download" />导出
           </button>
         </div>
@@ -196,7 +227,12 @@
           <nz-form-item>
             <nz-form-label nzFor="nickName" nzRequired>用户昵称</nz-form-label>
             <nz-form-control nzErrorTip="用户昵称不能为空">
-              <input nz-input formControlName="nickName" maxlength="30" placeholder="请输入用户昵称" />
+              <input
+                nz-input
+                formControlName="nickName"
+                maxlength="30"
+                placeholder="请输入用户昵称"
+              />
             </nz-form-control>
           </nz-form-item>
         </div>
@@ -217,7 +253,12 @@
           <nz-form-item>
             <nz-form-label nzFor="phonenumber">手机号码</nz-form-label>
             <nz-form-control nzErrorTip="请输入正确的手机号码">
-              <input nz-input formControlName="phonenumber" maxlength="11" placeholder="请输入手机号码" />
+              <input
+                nz-input
+                formControlName="phonenumber"
+                maxlength="11"
+                placeholder="请输入手机号码"
+              />
             </nz-form-control>
           </nz-form-item>
         </div>
@@ -229,12 +270,17 @@
             </nz-form-control>
           </nz-form-item>
         </div>
-        @if (!isEdit()) {
+        @if (!isEdit) {
           <div nz-col [nzSpan]="12">
             <nz-form-item>
               <nz-form-label nzFor="userName" nzRequired>用户名称</nz-form-label>
               <nz-form-control nzErrorTip="用户名称长度必须介于 2 和 20 之间">
-                <input nz-input formControlName="userName" maxlength="30" placeholder="请输入用户名称" />
+                <input
+                  nz-input
+                  formControlName="userName"
+                  maxlength="30"
+                  placeholder="请输入用户名称"
+                />
               </nz-form-control>
             </nz-form-item>
           </div>
@@ -313,7 +359,12 @@
           <nz-form-item>
             <nz-form-label nzFor="remark">备注</nz-form-label>
             <nz-form-control>
-              <textarea nz-input formControlName="remark" rows="2" placeholder="请输入备注"></textarea>
+              <textarea
+                nz-input
+                formControlName="remark"
+                rows="2"
+                placeholder="请输入备注"
+              ></textarea>
             </nz-form-control>
           </nz-form-item>
         </div>
@@ -347,6 +398,11 @@
 <ng-template #pwdTpl>
   <div class="pwd-tpl">
     <span class="pwd-label">新密码</span>
-    <input nz-input [ngModel]="newPassword()" (ngModelChange)="newPassword.set($event)" placeholder="请输入新密码（5-20 位）" />
+    <input
+      nz-input
+      [ngModel]="newPassword()"
+      (ngModelChange)="newPassword.set($event)"
+      placeholder="请输入新密码（5-20 位）"
+    />
   </div>
 </ng-template>

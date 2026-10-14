@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  OnInit,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -91,7 +84,10 @@ export class DspDataSourcePage implements OnInit {
     status: ['0'],
     remark: [''],
   });
-  readonly isEdit = computed(() => this.editorForm.controls.dataSourceId.value != null);
+  /** 是否编辑态：表单值不是 signal，必须用 getter 实时读取（computed 会缓存首次结果） */
+  get isEdit(): boolean {
+    return this.editorForm.controls.dataSourceId.value != null;
+  }
 
   /* ---------------- 连接测试 ---------------- */
   readonly testing = signal(false);
@@ -214,12 +210,12 @@ export class DspDataSourcePage implements OnInit {
       status: value.status,
       remark: value.remark,
     };
-    const request$ = this.isEdit()
+    const request$ = this.isEdit
       ? this.api.updateDataSource(payload)
       : this.api.addDataSource(payload);
     request$.subscribe({
       next: () => {
-        this.message.success(this.isEdit() ? '修改成功' : '新增成功');
+        this.message.success(this.isEdit ? '修改成功' : '新增成功');
         this.editorSubmitting.set(false);
         this.editorVisible.set(false);
         this.getList();

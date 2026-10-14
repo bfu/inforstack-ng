@@ -108,7 +108,10 @@ export class RolePage implements OnInit {
     remark: [''],
   });
 
-  readonly isEdit = computed(() => this.form.controls.roleId.value != null);
+  /** 是否编辑态：表单值不是 signal，必须用 getter 实时读取（computed 会缓存首次结果） */
+  get isEdit(): boolean {
+    return this.form.controls.roleId.value != null;
+  }
   readonly statusOptions = computed(() => this.dictStore.getDict('sys_normal_disable') ?? []);
   readonly dataScopeOptions = computed(() => this.dictStore.getDict('sys_data_scope') ?? []);
 
@@ -244,10 +247,10 @@ export class RolePage implements OnInit {
       ...value,
       menuIds: this.checkedMenuKeys().map(Number),
     } as SysRole;
-    const request$ = this.isEdit() ? this.api.updateRole(payload) : this.api.addRole(payload);
+    const request$ = this.isEdit ? this.api.updateRole(payload) : this.api.addRole(payload);
     request$.subscribe({
       next: () => {
-        this.message.success(this.isEdit() ? '修改成功' : '新增成功');
+        this.message.success(this.isEdit ? '修改成功' : '新增成功');
         this.submitting.set(false);
         this.dialogVisible.set(false);
         this.getList();

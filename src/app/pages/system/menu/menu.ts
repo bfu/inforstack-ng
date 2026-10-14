@@ -135,7 +135,10 @@ export class MenuPage implements OnInit {
     isCache: ['0'],
   });
 
-  readonly isEdit = computed(() => this.form.controls.menuId.value != null);
+  /** 是否编辑态：表单值不是 signal，必须用 getter 实时读取（computed 会缓存首次结果） */
+  get isEdit(): boolean {
+    return this.form.controls.menuId.value != null;
+  }
   readonly menuType = computed(() => this.form.controls.menuType.value ?? 'M');
   readonly statusOptions = computed(() => this.dictStore.getDict('sys_normal_disable') ?? []);
   readonly visibleOptions = computed(() => this.dictStore.getDict('sys_show_hide') ?? []);
@@ -314,10 +317,10 @@ export class MenuPage implements OnInit {
     }
     this.submitting.set(true);
     const payload = this.form.getRawValue() as SysMenu;
-    const request$ = this.isEdit() ? this.api.updateMenu(payload) : this.api.addMenu(payload);
+    const request$ = this.isEdit ? this.api.updateMenu(payload) : this.api.addMenu(payload);
     request$.subscribe({
       next: () => {
-        this.message.success(this.isEdit() ? '修改成功' : '新增成功');
+        this.message.success(this.isEdit ? '修改成功' : '新增成功');
         this.submitting.set(false);
         this.dialogVisible.set(false);
         this.getList();

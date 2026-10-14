@@ -195,7 +195,7 @@ describe('DspScriptPage 动态脚本管理', () => {
     const page = create();
 
     page.openAdd();
-    expect(page.isEdit()).toBe(false);
+    expect(page.isEdit).toBe(false);
     expect(page.editorXml()).toContain('<select resultType="map">');
     expect(page.editorXml()).not.toContain('id="');
     expect(page.editorXml()).not.toContain('<mapper');
@@ -233,6 +233,38 @@ describe('DspScriptPage 动态脚本管理', () => {
     expect(updateScript).toHaveBeenCalledWith(
       expect.objectContaining({ scriptId: 1, slug: 'order_query' }),
     );
+  });
+
+  it('同一会话内先新增后编辑，分别调用 addScript / updateScript', () => {
+    const page = create();
+
+    page.openAdd();
+    page.editorForm.patchValue({ name: '新脚本', slug: 'new_script' });
+    page.submitEditor();
+    expect(addScript).toHaveBeenCalledTimes(1);
+
+    page.openEdit(scripts[0]);
+    expect(page.isEdit).toBe(true);
+    page.submitEditor();
+
+    expect(updateScript).toHaveBeenCalledTimes(1);
+    expect(addScript).toHaveBeenCalledTimes(1);
+  });
+
+  it('同一会话内先编辑后新增，新增仍走 addScript', () => {
+    const page = create();
+
+    page.openEdit(scripts[0]);
+    page.submitEditor();
+    expect(updateScript).toHaveBeenCalledTimes(1);
+
+    page.openAdd();
+    expect(page.isEdit).toBe(false);
+    page.editorForm.patchValue({ name: '另一个脚本', slug: 'other_query' });
+    page.submitEditor();
+
+    expect(addScript).toHaveBeenCalledTimes(1);
+    expect(updateScript).toHaveBeenCalledTimes(1);
   });
 
   it('删除走确认框并调用 delScript', () => {

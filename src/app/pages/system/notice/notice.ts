@@ -89,7 +89,10 @@ export class NoticePage implements OnInit {
     noticeContent: [''],
   });
 
-  readonly isEdit = computed(() => this.form.controls.noticeId.value != null);
+  /** 是否编辑态：表单值不是 signal，必须用 getter 实时读取（computed 会缓存首次结果） */
+  get isEdit(): boolean {
+    return this.form.controls.noticeId.value != null;
+  }
   readonly noticeTypeOptions = computed(() => this.dictStore.getDict('sys_notice_type') ?? []);
   readonly statusOptions = computed(() => this.dictStore.getDict('sys_notice_status') ?? []);
 
@@ -182,10 +185,10 @@ export class NoticePage implements OnInit {
     }
     this.submitting.set(true);
     const payload = this.form.getRawValue() as SysNotice;
-    const request$ = this.isEdit() ? this.api.updateNotice(payload) : this.api.addNotice(payload);
+    const request$ = this.isEdit ? this.api.updateNotice(payload) : this.api.addNotice(payload);
     request$.subscribe({
       next: () => {
-        this.message.success(this.isEdit() ? '修改成功' : '新增成功');
+        this.message.success(this.isEdit ? '修改成功' : '新增成功');
         this.submitting.set(false);
         this.dialogVisible.set(false);
         this.getList();

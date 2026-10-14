@@ -98,7 +98,7 @@ describe('DspDataSourcePage 数据源管理', () => {
     listDataSource.mockClear();
 
     page.openAdd();
-    expect(page.isEdit()).toBe(false);
+    expect(page.isEdit).toBe(false);
     page.editorForm.patchValue({
       name: '报表库',
       driverClassName: 'com.mysql.cj.jdbc.Driver',
@@ -125,6 +125,28 @@ describe('DspDataSourcePage 数据源管理', () => {
 
     page.submitEditor();
     expect(updateDataSource).toHaveBeenCalledWith(expect.objectContaining({ dataSourceId: 5 }));
+  });
+
+  it('同一会话内先新增后编辑，分别调用 addDataSource / updateDataSource', () => {
+    const page = create();
+
+    page.openAdd();
+    page.editorForm.patchValue({
+      name: '报表库',
+      driverClassName: 'com.mysql.cj.jdbc.Driver',
+      url: 'jdbc:mysql://127.0.0.1:3306/report',
+      username: 'report',
+      password: 'secret',
+    });
+    page.submitEditor();
+    expect(addDataSource).toHaveBeenCalledTimes(1);
+
+    page.openEdit(sources[0]);
+    expect(page.isEdit).toBe(true);
+    page.submitEditor();
+
+    expect(updateDataSource).toHaveBeenCalledTimes(1);
+    expect(addDataSource).toHaveBeenCalledTimes(1);
   });
 
   it('列表行测试连接按ID发起', () => {

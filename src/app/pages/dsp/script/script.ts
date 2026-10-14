@@ -322,12 +322,19 @@ export class DspScriptPage implements OnInit {
     this.validating.set(true);
     this.api.validate(scriptId, this.editorXml()).subscribe({
       next: (res) => {
-        this.validation.set(res.data ?? null);
+        const data = res.data ?? null;
+        this.validation.set(data);
         this.validating.set(false);
-        if (res.data?.valid) {
-          this.message.success('校验通过');
+        const warningCount = data?.warnings?.length ?? 0;
+        if (!data?.valid) {
+          this.message.error(`校验未通过（${data?.errors?.length ?? 0} 个错误）`);
+        } else if (warningCount > 0) {
+          // 有方言提示时不能只弹绿色「校验通过」，否则告警会被忽略
+          this.message.warning(`校验通过，但存在 ${warningCount} 条方言提示，请确认`, {
+            nzDuration: 8000,
+          });
         } else {
-          this.message.error('校验未通过');
+          this.message.success('校验通过');
         }
       },
       error: () => this.validating.set(false),

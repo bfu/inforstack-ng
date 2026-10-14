@@ -234,6 +234,11 @@
         由平台补全）</span
       >
       <span class="editor-actions">
+        @if (validation()?.warnings?.length) {
+          <nz-tag nzColor="warning">
+            <nz-icon nzType="warning" /> {{ validation()!.warnings!.length }} 条方言提示
+          </nz-tag>
+        }
         @if (validating()) {
           <nz-spin nzSize="small"></nz-spin>
         }
@@ -270,6 +275,15 @@
           </ul>
         }
         @if (v.warnings?.length) {
+          <nz-alert
+            nzType="warning"
+            nzShowIcon
+            nzBanner
+            [nzMessage]="
+              '方言风险提示（' + v.warnings.length + ' 条）：当前写法可能无法在绑定的数据源上执行'
+            "
+            nzDescription="仅为关键字启发式提示，不阻断保存与发布；请在目标数据源上「测试」确认后再发布。"
+          />
           <ul class="validation-list warning">
             @for (item of v.warnings; track $index) {
               <li>{{ item }}</li>

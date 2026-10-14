@@ -65,11 +65,14 @@
 }
 
 .validation-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   margin-top: 12px;
 }
 
 .validation-list {
-  margin: 8px 0 0;
+  margin: 0;
   padding-left: 20px;
 
   li {
@@ -81,8 +84,16 @@
     color: #ff4d4f;
   }
 
-  &.warning li {
-    color: #faad14;
+  &.warning {
+    padding: 10px 12px 10px 32px;
+    border: 1px solid #ffe58f;
+    border-radius: 6px;
+    background: #fffbe6;
+
+    li {
+      color: #d48806;
+      font-weight: 500;
+    }
   }
 }
 

@@ -9,6 +9,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Observable, catchError, map, of, switchMap } from 'rxjs';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzCardModule } from 'ng-zorro-antd/card';
@@ -32,7 +33,7 @@ import { DspDataSourceApi } from '@api/dsp/datasource';
 import { MonacoEditorComponent } from '@shared/components/monaco-editor/monaco-editor';
 import { HasPermiDirective } from '@shared/directives/has-permi.directive';
 import { TableSelection } from '@shared/utils/table-selection';
-import { PageQuery } from '@core/models/result';
+import { AjaxResult, PageQuery } from '@core/models/result';
 import {
   DspDataSource,
   DspExecutionResult,
@@ -345,10 +346,33 @@ export class DspScriptPage implements OnInit {
 
   /* ---------------- 发布 / 下线 / 删除 ---------------- */
 
-  /** 发布确认弹窗里要展示的方言告警（发布本身只拦错误，不拦告警，这里必须显式提示） */
-  readonly publishTarget = signal<DspScript | null>(null);
-  readonly publishWarnings = signal<string[]>([]);
-  readonly publishTpl = viewChild.required<TemplateRef<void>>('publishTpl');
+  /**
+   * 确认框内容：发布与回滚都只拦语法错误、不拦方言告警，
+   * 告警必须在这里显式露出，否则会静默放行带风险的脚本
+   */
+  readonly confirmText = signal('');
+  readonly confirmWarnings = signal<string[]>([]);
+  readonly confirmTpl = viewChild.required<TemplateRef<void>>('confirmTpl');
+
+  /** 统一的确认框：有方言告警时加宽，并要求二次确认「仍然…」 */
+  private showConfirm(config: {
+    title: string;
+    text: string;
+    warnings: string[];
+    okText: string;
+    onOk: () => Promise<void>;
+  }): void {
+    this.confirmText.set(config.text);
+    this.confirmWarnings.set(config.warnings);
+    this.modal.confirm({
+      nzTitle: config.title,
+      nzContent: this.confirmTpl(),
+      nzWidth: config.warnings.length ? 560 : undefined,
+      nzOkText: config.okText,
+      nzCancelText: '取消',
+      nzOnOk: config.onOk,
+    });
+  }
 
   publishScript(row: DspScript): void {
     if (row.scriptId == null) {
@@ -362,15 +386,12 @@ export class DspScriptPage implements OnInit {
   }
 
   private confirmPublish(row: DspScript, warnings: string[]): void {
-    this.publishTarget.set(row);
-    this.publishWarnings.set(warnings);
-    this.modal.confirm({
-      nzTitle: '发布确认',
-      nzContent: this.publishTpl(),
-      nzWidth: warnings.length ? 560 : undefined,
-      nzOkText: warnings.length ? '仍然发布' : '发布',
-      nzCancelText: '取消',
-      nzOnOk: () =>
+    this.showConfirm({
+      title: warnings.length ? '发布确认（存在方言风险）' : '发布确认',
+      text: `确认发布脚本「${row.name}」？发布后将立即热加载生效。`,
+      warnings,
+      okText: warnings.length ? '仍然发布' : '发布',
+      onOk: () =>
         new Promise<void>((resolve) => {
           this.api.publish(row.scriptId as number).subscribe({
             next: (res) => {
@@ -528,18 +549,32 @@ export class DspScriptPage implements OnInit {
     if (script?.scriptId == null || version.versionId == null) {
       return;
     }
+    const scriptId = script.scriptId;
     const targetLabel = this.dataSourceLabel(version.dataSourceId);
     const currentLabel = this.dataSourceLabel(script.dataSourceId);
     const switchTip =
       targetLabel === currentLabel ? '' : `，数据源将由「${currentLabel}」切换为「${targetLabel}」`;
-    this.modal.confirm({
-      nzTitle: '回滚确认',
-      nzContent: `确认回滚到版本 v${version.version}？回滚将还原该版本的内容与数据源${switchTip}，立即热加载生效。`,
-      nzOkText: '回滚',
-      nzCancelText: '取消',
-      nzOnOk: () =>
+    const text = `确认回滚到版本 v${version.version}？回滚将还原该版本的内容与数据源${switchTip}，立即热加载生效。`;
+    // 回滚按版本内容 + 版本绑定的数据源校验，这里先预跑一次，把方言告警带进确认框
+    this.versionWarnings(scriptId, version).subscribe({
+      next: (warnings) => this.confirmRollback(scriptId, version, text, warnings),
+    });
+  }
+
+  private confirmRollback(
+    scriptId: number,
+    version: DspScriptVersion,
+    text: string,
+    warnings: string[],
+  ): void {
+    this.showConfirm({
+      title: warnings.length ? '回滚确认（存在方言风险）' : '回滚确认',
+      text,
+      warnings,
+      okText: warnings.length ? '仍然回滚' : '回滚',
+      onOk: () =>
         new Promise<void>((resolve) => {
-          this.api.rollback(script.scriptId as number, version.versionId as number).subscribe({
+          this.api.rollback(scriptId, version.versionId as number).subscribe({
             next: () => {
               this.message.success('回滚成功');
               this.versionVisible.set(false);
@@ -550,5 +585,25 @@ export class DspScriptPage implements OnInit {
           });
         }),
     });
+  }
+
+  /**
+   * 历史版本内容的方言告警：版本列表不带内容，需先取快照，再按版本绑定的数据源校验。
+   * 取快照或校验失败都降级为「无告警」，不阻塞回滚。
+   */
+  private versionWarnings(scriptId: number, version: DspScriptVersion): Observable<string[]> {
+    if (version.versionId == null) {
+      return of<string[]>([]);
+    }
+    return this.api.getVersion(version.versionId).pipe(
+      switchMap((res) => {
+        const content = res.data?.content;
+        return content
+          ? this.api.validate(scriptId, content, version.dataSourceId)
+          : of<AjaxResult<DspValidationResult>>({ code: 200, msg: '' });
+      }),
+      map((res) => res.data?.warnings ?? []),
+      catchError(() => of<string[]>([])),
+    );
   }
 }

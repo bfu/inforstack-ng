@@ -315,7 +315,7 @@ describe('DspScriptPage 动态脚本管理', () => {
 
     // 告警不阻断发布，但必须在确认框里露出，不能静默发布
     expect(validate).toHaveBeenCalledWith(1);
-    expect(page.publishWarnings()).toEqual([
+    expect(page.confirmWarnings()).toEqual([
       '反引号是 MySQL 标识符写法，PostgreSQL 请改用双引号或不加引号',
     ]);
     expect(modal?.lastConfig()?.nzOkText).toBe('仍然发布');
@@ -328,7 +328,7 @@ describe('DspScriptPage 动态脚本管理', () => {
     validate.mockImplementation(() => throwError(() => new Error('validate failed')));
     page.publishScript(scripts[0]);
 
-    expect(page.publishWarnings()).toEqual([]);
+    expect(page.confirmWarnings()).toEqual([]);
     expect(modal?.lastConfig()?.nzOkText).toBe('发布');
     expect(publish).toHaveBeenCalledWith(1);
   });
@@ -370,7 +370,7 @@ describe('DspScriptPage 动态脚本管理', () => {
     page.rollbackVersion(page.versions()[0]);
     expect(rollback).toHaveBeenCalledWith(1, 10);
     // 回滚提示需说明数据源将随版本一并切换
-    expect(modal?.lastConfig()?.nzContent).toContain('数据源将由「默认主库」切换为「报表库」');
+    expect(page.confirmText()).toContain('数据源将由「默认主库」切换为「报表库」');
   });
 
   it('回滚到同数据源的版本时不提示切换', () => {
@@ -380,7 +380,47 @@ describe('DspScriptPage 动态脚本管理', () => {
     page.rollbackVersion({ ...page.versions()[0], dataSourceId: undefined });
 
     expect(rollback).toHaveBeenCalledWith(1, 10);
-    expect(modal?.lastConfig()?.nzContent).toContain('内容与数据源');
-    expect(modal?.lastConfig()?.nzContent).not.toContain('数据源将由');
+    expect(page.confirmText()).toContain('内容与数据源');
+    expect(page.confirmText()).not.toContain('数据源将由');
+  });
+
+  it('回滚按版本内容与版本绑定的数据源预校验，告警进入确认框', () => {
+    const page = create();
+    listScript.mockClear();
+    validate.mockReturnValue(
+      of({
+        code: 200,
+        msg: '',
+        data: {
+          valid: true,
+          errors: [],
+          warnings: ['LIMIT 不是 Oracle 的语法，请改用 FETCH FIRST/OFFSET FETCH'],
+        },
+      }),
+    );
+
+    page.openVersions(scripts[0]);
+    page.rollbackVersion(page.versions()[0]);
+
+    // 版本列表不带内容，需先取快照；方言按版本绑定的数据源判定，而非脚本当前绑定值
+    expect(getVersion).toHaveBeenCalledWith(10);
+    expect(validate).toHaveBeenCalledWith(1, '<select resultType="map">select 1</select>', 5);
+    expect(page.confirmWarnings()).toEqual([
+      'LIMIT 不是 Oracle 的语法，请改用 FETCH FIRST/OFFSET FETCH',
+    ]);
+    expect(modal?.lastConfig()?.nzOkText).toBe('仍然回滚');
+    expect(rollback).toHaveBeenCalledWith(1, 10);
+  });
+
+  it('回滚前取版本快照失败不阻塞回滚', () => {
+    const page = create();
+
+    getVersion.mockImplementation(() => throwError(() => new Error('version failed')));
+    page.openVersions(scripts[0]);
+    page.rollbackVersion(page.versions()[0]);
+
+    expect(page.confirmWarnings()).toEqual([]);
+    expect(modal?.lastConfig()?.nzOkText).toBe('回滚');
+    expect(rollback).toHaveBeenCalledWith(1, 10);
   });
 });

@@ -40,11 +40,20 @@ export class DspScriptApi {
     return this.request.delete<AjaxResult>(`/dsp/script/${ids}`);
   }
 
-  /** 校验脚本（content 为空时校验库中草稿） */
-  validate(scriptId: number, content?: string): Observable<AjaxResult<DspValidationResult>> {
+  /**
+   * 校验脚本（content 为空时校验库中草稿）
+   *
+   * @param dataSourceId 用于判定方言的数据源 ID，缺省用脚本当前绑定值（回滚时需传版本绑定的数据源）
+   */
+  validate(
+    scriptId: number,
+    content?: string,
+    dataSourceId?: number,
+  ): Observable<AjaxResult<DspValidationResult>> {
     return this.request.post<AjaxResult<DspValidationResult>>('/dsp/script/validate', {
       scriptId,
       content,
+      dataSourceId,
     });
   }
 

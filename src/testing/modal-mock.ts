@@ -8,7 +8,8 @@ export type Mock = ReturnType<typeof vi.fn>;
 /** confirm 弹窗配置中与测试相关的字段 */
 export interface ModalConfirmConfig {
   nzTitle?: string;
-  nzContent?: string;
+  /** 字符串或 TemplateRef（需要展示告警列表的确认框用模板） */
+  nzContent?: unknown;
   nzOkText?: string;
   nzOnOk?: () => void;
   nzOnCancel?: () => void;

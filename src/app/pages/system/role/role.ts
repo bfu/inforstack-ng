@@ -33,7 +33,7 @@ import { SysRole } from '@core/models/system';
 import { parseTime } from '@core/utils/ruoyi';
 import { DictStore } from '@store/dict.store';
 import { HasPermiDirective } from '@shared/directives/has-permi.directive';
-import { toTreeNodes } from '@shared/utils/tree.util';
+import { toTreeNodes, expandCheckedKeys } from '@shared/utils/tree.util';
 import { TableSelection } from '@shared/utils/table-selection';
 import { environment } from '@env/environment';
 
@@ -245,7 +245,7 @@ export class RolePage implements OnInit {
     const value = this.form.getRawValue();
     const payload: SysRole = {
       ...value,
-      menuIds: this.checkedMenuKeys().map(Number),
+      menuIds: expandCheckedKeys(this.menuNodes(), this.checkedMenuKeys()),
     } as SysRole;
     const request$ = this.isEdit ? this.api.updateRole(payload) : this.api.addRole(payload);
     request$.subscribe({
@@ -347,7 +347,11 @@ export class RolePage implements OnInit {
     }
     this.scopeSubmitting.set(true);
     this.api
-      .dataScope(roleId, this.scopeDataScope(), this.checkedDeptKeys().map(Number))
+      .dataScope(
+        roleId,
+        this.scopeDataScope(),
+        expandCheckedKeys(this.deptNodes(), this.checkedDeptKeys()),
+      )
       .subscribe({
         next: () => {
           this.message.success('设置成功');

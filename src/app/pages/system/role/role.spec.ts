@@ -43,6 +43,19 @@ describe('RolePage 角色管理', () => {
     { roleId: 2, roleName: '普通角色', roleKey: 'common', roleSort: 2, status: '1' },
   ];
 
+  /** 三层菜单树：1 系统管理 → 2 用户管理 → 3 新增；4 角色管理；5 系统监控 */
+  const menuTree = [
+    {
+      id: 1,
+      label: '系统管理',
+      children: [
+        { id: 2, label: '用户管理', children: [{ id: 3, label: '新增' }] },
+        { id: 4, label: '角色管理' },
+      ],
+    },
+    { id: 5, label: '系统监控' },
+  ];
+
   beforeEach(() => {
     api = {
       listRole: vi.fn(() => of({ code: 200, msg: '', rows: roles, total: 2 })),
@@ -157,6 +170,35 @@ describe('RolePage 角色管理', () => {
     expect(success).toHaveBeenCalledWith('新增成功');
   });
 
+  it('新增提交：勾选叶子菜单时带上各级父节点（含半选父节点）', async () => {
+    menuApi.treeselect.mockReturnValue(of({ code: 200, msg: '', data: menuTree }));
+    const page = await create();
+
+    page.openAdd();
+    page.form.patchValue({ roleName: '新角色', roleKey: 'new', roleSort: 3 });
+    // ng-zorro 只回传最上层勾选节点，勾选叶子「新增」时父节点呈半选态，提交需一并带上
+    page.onMenuCheck({ keys: ['3'] } as never);
+    page.submitForm();
+
+    expect(api.addRole).toHaveBeenCalledWith(
+      expect.objectContaining({ roleName: '新角色', menuIds: [1, 2, 3] }),
+    );
+  });
+
+  it('新增提交：勾选父级菜单时带上全部子孙节点', async () => {
+    menuApi.treeselect.mockReturnValue(of({ code: 200, msg: '', data: menuTree }));
+    const page = await create();
+
+    page.openAdd();
+    page.form.patchValue({ roleName: '新角色', roleKey: 'new', roleSort: 3 });
+    page.onMenuCheck({ keys: ['1', '5'] } as never);
+    page.submitForm();
+
+    expect(api.addRole).toHaveBeenCalledWith(
+      expect.objectContaining({ roleName: '新角色', menuIds: [1, 2, 3, 4, 5] }),
+    );
+  });
+
   it('statusChange：确认后调 changeStatus', async () => {
     const page = await create();
 
@@ -196,11 +238,19 @@ describe('RolePage 角色管理', () => {
     expect(page.checkedDeptKeys()).toEqual(['100']);
   });
 
-  it('submitDataScope 提交数据权限', async () => {
+  it('submitDataScope 提交数据权限（勾选叶子带上父部门）', async () => {
+    api.deptTree.mockReturnValue(
+      of({
+        code: 200,
+        msg: '',
+        depts: [{ id: 100, label: '总部', children: [{ id: 101, label: '研发部' }] }],
+        checkedKeys: [100],
+      }),
+    );
     const page = await create();
 
     page.openDataScope(roles[1]);
-    page.onDeptCheck({ keys: ['100', '101'] } as never);
+    page.onDeptCheck({ keys: ['101'] } as never);
     page.submitDataScope();
 
     expect(api.dataScope).toHaveBeenCalledWith(2, '1', [100, 101]);

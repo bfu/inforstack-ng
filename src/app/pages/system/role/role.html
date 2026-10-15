@@ -230,13 +230,41 @@
           <nz-form-item>
             <nz-form-label nzFor="menuIds">菜单权限</nz-form-label>
             <nz-form-control>
+              <!-- 用 nzChecked + nzCheckedChange 而不是 ngModel：这里在 [formGroup] 作用域内，
+                   ngModel 会触发 NG01354（需额外加 [ngModelOptions]="{standalone:true}"） -->
+              <div class="tree-tools">
+                <label
+                  nz-checkbox
+                  [nzChecked]="menuExpand()"
+                  (nzCheckedChange)="toggleMenuExpand($event)"
+                  >展开/折叠</label
+                >
+                <label
+                  nz-checkbox
+                  [nzChecked]="menuNodeAll()"
+                  (nzCheckedChange)="toggleMenuNodes($event)"
+                  >全选/全不选</label
+                >
+                <label
+                  nz-checkbox
+                  [nzChecked]="menuCheckStrictly()"
+                  (nzCheckedChange)="setMenuCheckStrictly($event)"
+                  >父子联动</label
+                >
+              </div>
               <div class="tree-box">
+                <!-- 事件名必须与 ng-zorro 声明的 nzCheckboxChange 精确一致（小写 b）：Angular 输出绑定
+                     大小写敏感，写错不报错、只静默降级成同名 DOM 事件，回调永不触发。
+                     勾选与展开都写在 menuNodes 节点上：同时绑 nzCheckStrictly 时 nzCheckedKeys 会被
+                     ngOnChanges 里的 handleCheckedKeys(null) 清掉；而 conductExpandedKeys 里的
+                     `|| node.isExpanded` 让折叠无法通过 nzExpandedKeys 生效，故折叠靠重建 nzData。 -->
                 <nz-tree
                   [nzData]="menuNodes()"
                   [nzCheckable]="true"
-                  [nzCheckedKeys]="checkedMenuKeys()"
+                  [nzCheckStrictly]="!menuCheckStrictly()"
+                  [nzExpandedKeys]="menuExpandedKeys()"
                   (nzCheckboxChange)="onMenuCheck($any($event))"
-                  nzDefaultExpandAll
+                  (nzExpandChange)="onMenuExpandChange($any($event))"
                   nzBlockNode
                 ></nz-tree>
               </div>
@@ -287,13 +315,28 @@
         </nz-select>
       </div>
       @if (scopeDataScope() === '2') {
+        <div class="tree-tools">
+          <label nz-checkbox [nzChecked]="deptExpand()" (nzCheckedChange)="toggleDeptExpand($event)"
+            >展开/折叠</label
+          >
+          <label nz-checkbox [nzChecked]="deptNodeAll()" (nzCheckedChange)="toggleDeptNodes($event)"
+            >全选/全不选</label
+          >
+          <label
+            nz-checkbox
+            [nzChecked]="deptCheckStrictly()"
+            (nzCheckedChange)="setDeptCheckStrictly($event)"
+            >父子联动</label
+          >
+        </div>
         <div class="tree-box">
           <nz-tree
             [nzData]="deptNodes()"
             [nzCheckable]="true"
-            [nzCheckedKeys]="checkedDeptKeys()"
+            [nzCheckStrictly]="!deptCheckStrictly()"
+            [nzExpandedKeys]="deptExpandedKeys()"
             (nzCheckboxChange)="onDeptCheck($any($event))"
-            nzDefaultExpandAll
+            (nzExpandChange)="onDeptExpandChange($any($event))"
             nzBlockNode
           ></nz-tree>
         </div>

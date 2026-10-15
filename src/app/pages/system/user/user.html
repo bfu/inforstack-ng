@@ -1,10 +1,12 @@
 <div class="user-page">
   <div class="page-layout">
     <nz-card class="dept-card" [nzBordered]="false" nzTitle="组织机构">
+      <!-- nzDefaultExpandAll 在 ng-zorro 22 已不存在（旧名是空属性，树不会自动展开）；
+           部门树数据是异步到达的，而 nzExpandAll 只在首次变更生效，故用 nzExpandedKeys 传全量 key -->
       <nz-tree
         [nzData]="deptNodes()"
+        [nzExpandedKeys]="deptExpandedKeys()"
         (nzClick)="onDeptSelect($event)"
-        nzDefaultExpandAll
         nzBlockNode
       ></nz-tree>
     </nz-card>

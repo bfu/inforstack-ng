@@ -41,9 +41,24 @@ export class RoleApi {
     return this.request.put<AjaxResult>('/system/role', data);
   }
 
-  /** 修改角色数据权限 */
-  dataScope(roleId: number, dataScope: string, deptIds: number[]): Observable<AjaxResult> {
-    return this.request.put<AjaxResult>('/system/role/dataScope', { roleId, dataScope, deptIds });
+  /**
+   * 修改角色数据权限。
+   *
+   * `deptCheckStrictly` 必须一起提交：后端 `SysRoleMapper.updateRole` 会据此更新
+   * `sys_role.dept_check_strictly`，而该字段决定 `selectDeptListByRoleId` 是否过滤父部门。
+   */
+  dataScope(
+    roleId: number,
+    dataScope: string,
+    deptIds: number[],
+    deptCheckStrictly: boolean,
+  ): Observable<AjaxResult> {
+    return this.request.put<AjaxResult>('/system/role/dataScope', {
+      roleId,
+      dataScope,
+      deptIds,
+      deptCheckStrictly,
+    });
   }
 
   changeStatus(roleId: number, status: string): Observable<AjaxResult> {

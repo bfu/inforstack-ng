@@ -35,7 +35,7 @@ import { SysPost, SysRole, SysUser } from '@core/models/system';
 import { addDateRange, parseTime } from '@core/utils/ruoyi';
 import { DictStore } from '@store/dict.store';
 import { HasPermiDirective } from '@shared/directives/has-permi.directive';
-import { toTreeNodes } from '@shared/utils/tree.util';
+import { collectTreeKeys, toTreeNodes } from '@shared/utils/tree.util';
 import { TableSelection } from '@shared/utils/table-selection';
 import { environment } from '@env/environment';
 
@@ -92,6 +92,8 @@ export class UserPage implements OnInit {
   readonly pageSize = signal(environment.pageSize);
 
   readonly deptNodes = signal<NzTreeNodeOptions[]>([]);
+  /** 组织机构树展开全部节点用（nzExpandAll 只在首次变更生效，异步数据下不展开） */
+  readonly deptExpandedKeys = computed(() => collectTreeKeys(this.deptNodes()));
   readonly deptOptions = signal<NzTreeNodeOptions[]>([]);
   readonly deptId = signal<number | undefined>(undefined);
 

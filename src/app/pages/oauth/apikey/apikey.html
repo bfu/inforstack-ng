@@ -1,0 +1,266 @@
+<div class="oauth-page">
+  <nz-card [nzBordered]="false" class="search-card">
+    <form nz-form nzLayout="inline" [formGroup]="searchForm">
+      <nz-form-item>
+        <nz-form-control>
+          <input nz-input formControlName="name" placeholder="密钥名称" class="field-md" />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <nz-select formControlName="status" nzPlaceHolder="状态" nzAllowClear class="field-md">
+            @for (item of statusOptions; track item.value) {
+              <nz-option [nzValue]="item.value" [nzLabel]="item.label"></nz-option>
+            }
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control>
+          <button nz-button nzType="primary" (click)="getList()">
+            <nz-icon nzType="search" />搜索
+          </button>
+          <button nz-button class="gap-left" (click)="resetQuery()">
+            <nz-icon nzType="reload" />重置
+          </button>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </nz-card>
+
+  <nz-card [nzBordered]="false" class="table-card">
+    <div class="toolbar">
+      <button nz-button nzType="primary" *appHasPermi="['oauth:apikey:add']" (click)="openAdd()">
+        <nz-icon nzType="plus" />新增密钥
+      </button>
+      <button
+        nz-button
+        *appHasPermi="['oauth:apikey:edit']"
+        [disabled]="!selection.single()"
+        class="gap-left"
+        (click)="openEdit(selectedRows()[0])"
+      >
+        <nz-icon nzType="edit" />修改
+      </button>
+      <button
+        nz-button
+        nzDanger
+        *appHasPermi="['oauth:apikey:remove']"
+        [disabled]="!selection.multiple()"
+        class="gap-left"
+        (click)="deleteKey()"
+      >
+        <nz-icon nzType="delete" />删除
+      </button>
+    </div>
+
+    <nz-table
+      nzSize="middle"
+      [nzData]="rows()"
+      [nzLoading]="loading()"
+      [nzTotal]="total()"
+      [nzPageIndex]="pageNum()"
+      [nzPageSize]="pageSize()"
+      [nzFrontPagination]="false"
+      [nzShowSizeChanger]="true"
+      [nzShowTotal]="totalTpl"
+      (nzQueryParams)="onQueryParams($event)"
+    >
+      <thead>
+        <tr>
+          <th nzWidth="50px">
+            <label
+              nz-checkbox
+              [ngModel]="selection.allChecked()"
+              [nzIndeterminate]="selection.indeterminate()"
+              (ngModelChange)="selection.onAllChecked($event, rows())"
+            ></label>
+          </th>
+          <th nzWidth="200px">密钥名称</th>
+          <th nzWidth="200px">绑定用户</th>
+          <th nzWidth="100px">状态</th>
+          <th nzWidth="180px">过期时间</th>
+          <th nzWidth="180px">最近使用</th>
+          <th nzWidth="180px">更新时间</th>
+          <th nzWidth="240px" nzRight>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track row.keyId) {
+          <tr>
+            <td>
+              <label
+                nz-checkbox
+                [ngModel]="selection.isChecked(row)"
+                (ngModelChange)="selection.onItemChecked(row.keyId, $event)"
+              ></label>
+            </td>
+            <td>
+              <a (click)="openEdit(row)">{{ row.name }}</a>
+            </td>
+            <td>{{ row.userName || '#' + row.userId }}</td>
+            <td>
+              <nz-tag [nzColor]="statusMeta(row.status).color">{{
+                statusMeta(row.status).label
+              }}</nz-tag>
+            </td>
+            <td>{{ expiresLabel(row.expiresTime) }}</td>
+            <td>{{ row.lastUsedTime || '未使用' }}</td>
+            <td>{{ row.updateTime || row.createTime }}</td>
+            <td nzRight>
+              <a *appHasPermi="['oauth:apikey:edit']" (click)="openEdit(row)">编辑</a>
+              <a
+                class="gap-left"
+                *appHasPermi="['oauth:apikey:reset']"
+                nz-tooltip
+                nzTooltipTitle="重置后旧密钥立即失效"
+                (click)="resetKey(row)"
+                >重置</a
+              >
+              <a
+                class="gap-left danger-link"
+                *appHasPermi="['oauth:apikey:remove']"
+                (click)="deleteKey(row)"
+                >删除</a
+              >
+            </td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+  </nz-card>
+</div>
+
+<ng-template #totalTpl let-total>共 {{ total }} 条</ng-template>
+
+<!-- 密钥编辑 -->
+<nz-modal
+  [nzVisible]="editorVisible()"
+  (nzVisibleChange)="editorVisible.set($event)"
+  (nzOnCancel)="editorVisible.set(false)"
+  [nzTitle]="editorTitle()"
+  nzWidth="600px"
+  nzOkText="保存"
+  nzCancelText="关闭"
+  [nzOkLoading]="editorSubmitting()"
+  (nzOnOk)="submitEditor()"
+>
+  <ng-container *nzModalContent>
+    @if (isEdit) {
+      <nz-alert
+        nzType="info"
+        nzShowIcon
+        nzBanner
+        nzMessage="密钥明文不可查看，只能通过「重置」更换（旧密钥立即失效）"
+        class="editor-alert"
+      />
+    }
+    <form nz-form [formGroup]="editorForm" nzLayout="vertical">
+      <div nz-row [nzGutter]="16">
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="name" nzRequired>密钥名称</nz-form-label>
+            <nz-form-control nzErrorTip="请输入密钥名称">
+              <input nz-input formControlName="name" placeholder="调用方备注，如：第三方报表系统" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label
+              nzFor="userId"
+              nzRequired
+              nzTooltipTitle="免登录即代表该用户，权限与该用户登录时一致"
+            >
+              绑定用户
+            </nz-form-label>
+            <nz-form-control nzErrorTip="请选择绑定用户">
+              @if (userOptionsFailed()) {
+                <input
+                  nz-input
+                  nzType="number"
+                  formControlName="userId"
+                  placeholder="用户列表加载失败，请手动输入用户ID"
+                />
+              } @else {
+                <nz-select formControlName="userId" nzPlaceHolder="请选择绑定用户" nzShowSearch>
+                  @for (item of userOptions(); track item.value) {
+                    <nz-option [nzValue]="item.value" [nzLabel]="item.label"></nz-option>
+                  }
+                </nz-select>
+              }
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+      <div nz-row [nzGutter]="16">
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="status">状态</nz-form-label>
+            <nz-form-control nzExtra="停用后该密钥立即无法使用">
+              <nz-select formControlName="status">
+                @for (item of statusOptions; track item.value) {
+                  <nz-option [nzValue]="item.value" [nzLabel]="item.label"></nz-option>
+                }
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="expiresTime" nzTooltipTitle="留空表示永久有效"
+              >过期时间</nz-form-label
+            >
+            <nz-form-control nzExtra="留空表示永久有效">
+              <nz-date-picker
+                formControlName="expiresTime"
+                nzShowTime
+                nzFormat="yyyy-MM-dd HH:mm:ss"
+                nzPlaceHolder="选择过期时间"
+                class="full-width"
+              />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+      <div nz-row [nzGutter]="16">
+        <div nz-col [nzSpan]="24">
+          <nz-form-item>
+            <nz-form-label nzFor="remark">备注</nz-form-label>
+            <nz-form-control>
+              <input nz-input formControlName="remark" placeholder="用途说明" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+    </form>
+  </ng-container>
+</nz-modal>
+
+<!-- 明文密钥展示：关闭后无法再次查看 -->
+<nz-modal
+  [nzVisible]="keyVisible()"
+  (nzVisibleChange)="keyVisible.set($event)"
+  nzTitle="密钥已生成"
+  nzWidth="560px"
+  [nzFooter]="null"
+  (nzOnCancel)="keyVisible.set(false)"
+>
+  <ng-container *nzModalContent>
+    <nz-alert
+      nzType="warning"
+      nzShowIcon
+      nzBanner
+      nzMessage="密钥仅此一次展示，关闭后无法再查看，请立即复制并妥善保存"
+      nzDescription="库中只保存密钥摘要，泄露数据库也无法反查出可用密钥；如遗失请使用「重置」更换。"
+    />
+    <div class="key-display">
+      <code class="key-text">{{ keyText() }}</code>
+      <button nz-button nzType="primary" (click)="copyKey()"><nz-icon nzType="copy" />复制</button>
+    </div>
+    <p class="key-hint">
+      调用方式：请求头 <code>X-API-Key: {{ keyText() }}</code
+      >，无需登录即可访问接口（权限与绑定用户一致）。
+    </p>
+  </ng-container>
+</nz-modal>

@@ -18,6 +18,7 @@ export const MENU_ICON_MAP: Record<string, string> = {
   'redis-list': 'unordered-list',
   online: 'desktop',
   swagger: 'api',
+  api: 'api',
   guide: 'compass',
   build: 'build',
   tool: 'tool',

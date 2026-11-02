@@ -1,7 +1,7 @@
 <div class="sidebar-wrapper">
   @if (settings.sidebarLogo()) {
     <div class="sidebar-logo">
-      <div class="logo-mark">R</div>
+      <img class="logo-mark" src="logo.svg" [alt]="title" />
       <h1 [hidden]="collapsed()">{{ title }}</h1>
     </div>
   }
@@ -11,7 +11,13 @@
     嵌入视图的注入上下文取自「声明处」而不是「插入处」，声明在 ul 外面时
     拿不到 NzMenuDirective 提供的 MenuService / NzIsMenuInsideDropdownToken，会报 NG0201。
   -->
-  <ul nz-menu nzMode="inline" [nzTheme]="menuTheme()" class="sidebar-menu" [nzInlineCollapsed]="collapsed()">
+  <ul
+    nz-menu
+    nzMode="inline"
+    [nzTheme]="menuTheme()"
+    class="sidebar-menu"
+    [nzInlineCollapsed]="collapsed()"
+  >
     <ng-template #menuTpl let-nodes let-level="level">
       @for (node of asNodes(nodes); track node.path) {
         @if (node.children && node.children.length) {
@@ -55,6 +61,8 @@
       }
     </ng-template>
 
-    <ng-container *ngTemplateOutlet="menuTpl; context: { $implicit: menus(), level: 1 }"></ng-container>
+    <ng-container
+      *ngTemplateOutlet="menuTpl; context: { $implicit: menus(), level: 1 }"
+    ></ng-container>
   </ul>
 </div>

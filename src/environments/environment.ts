@@ -13,7 +13,7 @@ export const environment = {
   /** 是否开放注册入口（需后端 sys.account.registerUser 同时开启） */
   registerEnabled: false,
   /** 页脚文案 */
-  footerContent: 'Copyright © 2019-present RuoYi. All Rights Reserved.',
+  footerContent: 'Copyright © 2026-present Inforstack NG. All Rights Reserved.',
   /** 错误监控上报地址（Sentry DSN 等），为空表示未接入 */
   errorDsn: '',
 };

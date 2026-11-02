@@ -100,6 +100,6 @@ describe('SettingsStore', () => {
     flushEffects();
 
     const calls = setTitle.mock.calls.map((args: unknown[]) => args[0]);
-    expect(calls).toContain('用户管理 - 若依管理系统');
+    expect(calls).toContain('用户管理 - Inforstack NG');
   });
 });

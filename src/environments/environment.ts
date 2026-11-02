@@ -7,7 +7,7 @@ export const environment = {
   /** 后端接口前缀，由 proxy.conf.json 转发至 http://localhost:8080 */
   apiBaseUrl: '/dev-api',
   /** 系统标题 */
-  title: '若依管理系统',
+  title: 'Inforstack NG',
   /** 默认分页条数 */
   pageSize: 10,
   /** 是否开放注册入口（需后端 sys.account.registerUser 同时开启） */

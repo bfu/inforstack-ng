@@ -1,4 +1,4 @@
-<div class="sidebar-wrapper">
+<div class="sidebar-wrapper" [class.is-collapsed]="collapsed()">
   @if (settings.sidebarLogo()) {
     <div class="sidebar-logo">
       <img class="logo-mark" src="logo.svg" [alt]="title" />

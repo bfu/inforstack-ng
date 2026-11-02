@@ -24,11 +24,19 @@
 
   h1 {
     margin: 0 0 0 12px;
+    overflow: hidden;
     color: var(--sidebar-text, #fff);
     font-size: 15px;
     font-weight: 600;
     white-space: nowrap;
+    text-overflow: ellipsis;
   }
+}
+
+/* 折叠态只剩 logo，去掉左右留白让图标落在 64px 的正中 */
+.sidebar-wrapper.is-collapsed .sidebar-logo {
+  justify-content: center;
+  padding: 0;
 }
 
 .sidebar-menu {
@@ -36,4 +44,35 @@
   overflow-x: hidden;
   overflow-y: auto;
   border-right: 0;
+
+  /*
+   * NG-ZORRO 把折叠菜单宽度写死 80px，并用 padding: 0 calc(50% - 8px) 让图标水平居中。
+   * 侧栏折叠宽度只有 64px 时，菜单仍是 80px 宽、左右留白却按百分比落在 64px 上，
+   * 图标因此整体偏右。让菜单跟随容器宽度，居中算法才能对上。
+   */
+  &.ant-menu-inline-collapsed {
+    width: 100%;
+  }
+}
+
+/*
+ * 展开态：叶子菜单的图标要跟 nz-submenu 标题的图标对齐。
+ * nz-submenu 的图标是 flex 子项（垂直居中），而 nz-menu-item 的图标被包在 <a> 里走行内流，
+ * 会因 .anticon 的 vertical-align: -0.125em 往下掉约 2px。把 <a> 也做成 flex 行，
+ * 两类图标的垂直位置才一致；顺带让过长的菜单标题能正常省略。
+ */
+.sidebar-menu.ant-menu-inline a {
+  display: flex;
+  align-items: center;
+
+  > nz-icon {
+    flex: none;
+  }
+
+  > span {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
 }

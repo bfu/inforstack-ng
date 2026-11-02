@@ -1,0 +1,46 @@
+/**
+ * 全局滚动条样式
+ * 内容区、侧边栏、页签、表格滚动区以及弹窗/下拉等浮层都要生效，
+ * 而浮层挂在 body 上、组件样式命中不了，因此统一放到全局。
+ * 颜色由 --scrollbar-thumb 系列变量控制，深色容器可在自身作用域内覆写。
+ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+// 用 2px 透明边框把 8px 的滚动条收成 4px 的悬浮细条，视觉更轻
+::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background-color: var(--scrollbar-thumb);
+  background-clip: padding-box;
+
+  &:hover {
+    background-color: var(--scrollbar-thumb-hover);
+  }
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+// 部分平台会渲染滚动条两端的箭头按钮，去掉更干净
+::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+// Firefox 不支持 ::-webkit-scrollbar，用标准属性兜底（不覆盖 Chromium 的细条外观）
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) transparent;
+  }
+}

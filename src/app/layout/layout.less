@@ -32,6 +32,15 @@
   overflow: hidden;
   background: var(--sidebar-bg);
   transition: width 0.28s;
+  /* 深色底上用浅色滚动条，默认的黑色半透明条会看不清 */
+  --scrollbar-thumb: rgba(255, 255, 255, 0.24);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.42);
+}
+
+/* 浅色侧边栏主题下滚动条回到深色 */
+.sidebar-light .sidebar-container {
+  --scrollbar-thumb: rgba(0, 0, 0, 0.2);
+  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.35);
 }
 
 .main-container {

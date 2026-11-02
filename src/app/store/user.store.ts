@@ -51,10 +51,7 @@ export class UserStore {
     return this.api.getInfo().pipe(
       tap((res) => {
         const user = res.user ?? ({} as SysUser);
-        let avatar = user.avatar ?? '';
-        if (!isEmpty(avatar) && !isHttp(avatar)) {
-          avatar = environment.apiBaseUrl + avatar;
-        }
+        const avatar = this.normalizeAvatar(user.avatar ?? '');
         if (res.roles && res.roles.length > 0) {
           this._roles.set(res.roles);
           this._permissions.set(res.permissions ?? []);
@@ -75,6 +72,27 @@ export class UserStore {
         }
       }),
     );
+  }
+
+  /**
+   * 个人信息（昵称/头像）修改成功后同步本地用户态
+   * 对应 ruoyi-vue3 个人中心里直接改 userStore 的写法，保证顶栏即时生效
+   */
+  updateLocalUser(patch: { nickName?: string; avatar?: string }): void {
+    if (patch.nickName !== undefined) {
+      this._nickName.set(patch.nickName);
+    }
+    if (patch.avatar !== undefined) {
+      this._avatar.set(this.normalizeAvatar(patch.avatar));
+    }
+  }
+
+  /** 头像地址统一补接口前缀（后端返回相对路径） */
+  private normalizeAvatar(avatar: string): string {
+    if (isEmpty(avatar) || isHttp(avatar)) {
+      return avatar;
+    }
+    return environment.apiBaseUrl + avatar;
   }
 
   /** 退出系统 */

@@ -20,13 +20,18 @@
       </div>
     }
 
-    <a class="avatar-container right-menu-item hover-effect" nz-dropdown [nzDropdownMenu]="userMenu">
+    <a
+      class="avatar-container right-menu-item hover-effect"
+      nz-dropdown
+      [nzDropdownMenu]="userMenu"
+    >
       <nz-avatar [nzSrc]="store.avatar()" [nzText]="initial()" class="user-avatar" />
       <span class="user-nickname">{{ store.nickName() || store.name() }}</span>
     </a>
 
     <nz-dropdown-menu #userMenu="nzDropdownMenu">
       <ul nz-menu>
+        <li nz-menu-item (click)="goProfile()">个人中心</li>
         @if (settings.showSettings()) {
           <li nz-menu-item>布局设置</li>
         }

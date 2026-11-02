@@ -27,6 +27,12 @@ export interface MenuNode {
 
 const LAYOUT_COMPONENTS = new Set(['Layout', 'ParentView']);
 
+/**
+ * Layout 壳下由常量路由声明、重建 children 时必须保留的路径
+ * （applyRoutes 会用「常量 + 前端动态 + 后端菜单」整体覆盖 children，遗漏即丢失路由）
+ */
+const CONSTANT_LAYOUT_PATHS = new Set(['', 'index', 'user/profile', 'user/profile/:activeTab']);
+
 function stripLeadingSlash(path: string): string {
   return path.startsWith('/') ? path.slice(1) : path;
 }
@@ -200,8 +206,8 @@ export class PermissionStore {
       if (route.component !== Layout) {
         return route;
       }
-      const base = (route.children ?? []).filter(
-        (child) => child.path === '' || child.path === 'index',
+      const base = (route.children ?? []).filter((child) =>
+        CONSTANT_LAYOUT_PATHS.has(child.path ?? ''),
       );
       return {
         ...route,

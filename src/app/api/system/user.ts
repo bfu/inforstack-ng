@@ -16,6 +16,17 @@ export interface UserDetailResult {
   roleIds?: number[];
 }
 
+/** 个人信息结果（后端除 data 外另带角色/岗位分组） */
+export interface ProfileResult extends AjaxResult<SysUser> {
+  roleGroup?: string;
+  postGroup?: string;
+}
+
+/** 头像上传结果（后端返回字段为 imgUrl） */
+export interface AvatarResult extends AjaxResult {
+  imgUrl?: string;
+}
+
 /** 授权角色页面数据 */
 export interface AuthRoleResult {
   code: number;
@@ -64,8 +75,8 @@ export class UserApi {
     return this.request.post<AjaxResult>('/system/user/importData', formData, { timeout: 60000 });
   }
 
-  getUserProfile(): Observable<AjaxResult<SysUser>> {
-    return this.request.get<AjaxResult<SysUser>>('/system/user/profile');
+  getUserProfile(): Observable<ProfileResult> {
+    return this.request.get<ProfileResult>('/system/user/profile');
   }
 
   updateUserProfile(data: SysUser): Observable<AjaxResult> {
@@ -76,6 +87,15 @@ export class UserApi {
     return this.request.put<AjaxResult>('/system/user/profile/updatePwd', {
       oldPassword,
       newPassword,
+    });
+  }
+
+  /** 上传头像（后端接收字段名为 avatarfile，会同时更新 sys_user.avatar 并删除旧文件） */
+  uploadAvatar(file: File): Observable<AvatarResult> {
+    const formData = new FormData();
+    formData.append('avatarfile', file);
+    return this.request.post<AvatarResult>('/system/user/profile/avatar', formData, {
+      timeout: 60000,
     });
   }
 

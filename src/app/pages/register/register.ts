@@ -12,6 +12,7 @@ import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { LoginApi } from '@api/login';
+import { passwordValidator } from '@core/utils/password-rule';
 import { environment } from '@env/environment';
 
 /** 两次密码一致性校验 */
@@ -47,13 +48,22 @@ export class Register implements OnInit {
   readonly form = this.fb.nonNullable.group(
     {
       username: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(20)]],
-      password: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(20)]],
+      password: ['', [Validators.required, passwordValidator('用户密码')]],
       confirmPassword: ['', [Validators.required]],
       code: [''],
       uuid: [''],
     },
     { validators: equalToPassword },
   );
+
+  /** 密码校验提示：错误值本身即文案，空值时退化为必填提示 */
+  get passwordError(): string {
+    const errors = this.form.controls.password.errors;
+    if (!errors) {
+      return '';
+    }
+    return (errors['password'] as string | undefined) ?? '请输入您的密码';
+  }
 
   readonly codeUrl = signal('');
   readonly captchaEnabled = signal(true);

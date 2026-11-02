@@ -1,0 +1,101 @@
+.profile-layout {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.info-card {
+  flex: 0 0 320px;
+}
+
+.main-card {
+  flex: 1;
+  min-width: 0;
+}
+
+.avatar-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.avatar-box {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  border-radius: 50%;
+  overflow: hidden;
+
+  .avatar-mask {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 20px;
+    background: rgba(0, 0, 0, 0.45);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  &:hover .avatar-mask {
+    opacity: 1;
+  }
+}
+
+.info-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 0;
+    font-size: 14px;
+    border-bottom: 1px solid #f0f0f0;
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  .info-label {
+    flex: 0 0 auto;
+    color: #606266;
+    white-space: nowrap;
+
+    nz-icon {
+      margin-right: 6px;
+    }
+  }
+
+  .info-value {
+    color: #303133;
+    text-align: right;
+    word-break: break-all;
+  }
+}
+
+.tab-form {
+  max-width: 560px;
+  margin-top: 8px;
+}
+
+@media screen and (max-width: 991px) {
+  .profile-layout {
+    flex-direction: column;
+  }
+
+  .info-card {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+
+  .main-card {
+    width: 100%;
+  }
+}

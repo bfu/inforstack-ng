@@ -32,6 +32,7 @@ import { UserApi } from '@api/system/user';
 import { DownloadService } from '@core/download.service';
 import { PageQuery } from '@core/models/result';
 import { SysPost, SysRole, SysUser } from '@core/models/system';
+import { passwordValidator, validatePassword } from '@core/utils/password-rule';
 import { addDateRange, parseTime } from '@core/utils/ruoyi';
 import { DictStore } from '@store/dict.store';
 import { HasPermiDirective } from '@shared/directives/has-permi.directive';
@@ -124,6 +125,15 @@ export class UserPage implements OnInit {
   /** 是否编辑态：表单值不是 signal，必须用 getter 实时读取（computed 会缓存首次结果） */
   get isEdit(): boolean {
     return this.form.controls.userId.value != null;
+  }
+
+  /** 密码校验提示：错误值本身即文案，空值时退化为必填提示 */
+  get passwordError(): string {
+    const errors = this.form.controls.password.errors;
+    if (!errors) {
+      return '';
+    }
+    return (errors['password'] as string | undefined) ?? '密码不能为空';
   }
   readonly statusOptions = computed(() => this.dictStore.getDict('sys_normal_disable') ?? []);
   readonly sexOptions = computed(() => this.dictStore.getDict('sys_user_sex') ?? []);
@@ -220,6 +230,9 @@ export class UserPage implements OnInit {
 
   openAdd(): void {
     this.resetForm();
+    // 密码仅在新增时校验（字符范围取 sys.account.chrtype），编辑态不改密码
+    this.form.controls.password.setValidators([passwordValidator()]);
+    this.form.controls.password.updateValueAndValidity();
     this.api.getUser('').subscribe({
       next: (res) => {
         this.posts.set(res.posts ?? []);
@@ -232,6 +245,8 @@ export class UserPage implements OnInit {
 
   openEdit(row: SysUser): void {
     this.resetForm();
+    this.form.controls.password.clearValidators();
+    this.form.controls.password.updateValueAndValidity();
     this.api.getUser(row.userId).subscribe({
       next: (res) => {
         this.posts.set(res.posts ?? []);
@@ -332,8 +347,9 @@ export class UserPage implements OnInit {
       nzCancelText: '取消',
       nzOnOk: () => {
         const password = this.newPassword()?.trim();
-        if (!password || password.length < 5 || password.length > 20) {
-          this.message.warning('密码长度必须介于 5 和 20 之间');
+        const passwordError = validatePassword(password ?? '');
+        if (passwordError) {
+          this.message.warning(passwordError);
           return false;
         }
         this.api.resetUserPwd(row.userId!, password).subscribe({

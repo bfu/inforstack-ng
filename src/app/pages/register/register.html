@@ -5,13 +5,19 @@
       <nz-form-item>
         <nz-form-control nzErrorTip="用户账号长度必须介于 2 和 20 之间">
           <nz-input-group nzPrefixIcon="user">
-            <input type="text" nz-input formControlName="username" placeholder="账号" autocomplete="off" />
+            <input
+              type="text"
+              nz-input
+              formControlName="username"
+              placeholder="账号"
+              autocomplete="off"
+            />
           </nz-input-group>
         </nz-form-control>
       </nz-form-item>
 
       <nz-form-item>
-        <nz-form-control nzErrorTip="密码长度必须介于 5 和 20 之间">
+        <nz-form-control [nzErrorTip]="passwordError">
           <nz-input-group nzPrefixIcon="lock">
             <input
               type="password"
@@ -53,14 +59,27 @@
                   (keyup.enter)="submit()"
                 />
               </nz-input-group>
-              <img class="code-img" [src]="codeUrl()" alt="验证码" title="点击刷新" (click)="getCode()" />
+              <img
+                class="code-img"
+                [src]="codeUrl()"
+                alt="验证码"
+                title="点击刷新"
+                (click)="getCode()"
+              />
             </div>
           </nz-form-control>
         </nz-form-item>
       }
 
       <nz-form-item>
-        <button nz-button nzType="primary" nzSize="large" nzBlock type="submit" [nzLoading]="loading()">
+        <button
+          nz-button
+          nzType="primary"
+          nzSize="large"
+          nzBlock
+          type="submit"
+          [nzLoading]="loading()"
+        >
           {{ loading() ? '注 册 中...' : '注 册' }}
         </button>
       </nz-form-item>

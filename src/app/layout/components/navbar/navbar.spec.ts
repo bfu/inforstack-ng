@@ -109,6 +109,14 @@ describe('Navbar 顶栏', () => {
     });
   });
 
+  it('个人中心入口跳转 /user/profile', () => {
+    const navbar = create();
+
+    navbar.goProfile();
+
+    expect(navigate).toHaveBeenCalledWith(['/user/profile']);
+  });
+
   it('退出登录：确认后清理会话并跳登录页', () => {
     const navbar = create();
 

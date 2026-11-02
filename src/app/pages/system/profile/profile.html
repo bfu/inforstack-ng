@@ -1,0 +1,168 @@
+<div class="profile-page">
+  <div class="profile-layout">
+    <nz-card class="info-card" [nzBordered]="false" nzTitle="个人信息">
+      <div class="avatar-wrap">
+        <nz-upload
+          nzAccept="image/*"
+          [nzShowUploadList]="false"
+          [nzBeforeUpload]="beforeAvatarUpload"
+          [nzCustomRequest]="customAvatarRequest"
+        >
+          <div class="avatar-box" title="点击上传头像">
+            <nz-avatar [nzSize]="96" [nzSrc]="store.avatar()" [nzText]="initial()" />
+            <span class="avatar-mask"><nz-icon nzType="plus" /></span>
+          </div>
+        </nz-upload>
+      </div>
+
+      <ul class="info-list">
+        <li>
+          <span class="info-label"><nz-icon nzType="user" />用户名称</span>
+          <span class="info-value">{{ user().userName }}</span>
+        </li>
+        <li>
+          <span class="info-label"><nz-icon nzType="phone" />手机号码</span>
+          <span class="info-value">{{ user().phonenumber }}</span>
+        </li>
+        <li>
+          <span class="info-label"><nz-icon nzType="mail" />用户邮箱</span>
+          <span class="info-value">{{ user().email }}</span>
+        </li>
+        <li>
+          <span class="info-label"><nz-icon nzType="apartment" />所属部门</span>
+          <span class="info-value">
+            {{ user().dept?.deptName || '—' }} / {{ postGroup() || '—' }}
+          </span>
+        </li>
+        <li>
+          <span class="info-label"><nz-icon nzType="team" />所属角色</span>
+          <span class="info-value">{{ roleGroup() || '—' }}</span>
+        </li>
+        <li>
+          <span class="info-label"><nz-icon nzType="calendar" />创建日期</span>
+          <span class="info-value">{{ user().createTime || '—' }}</span>
+        </li>
+      </ul>
+    </nz-card>
+
+    <nz-card class="main-card" [nzBordered]="false" nzTitle="基本资料">
+      <nz-tabs [nzSelectedIndex]="activeTab()" (nzSelectedIndexChange)="activeTab.set($event)">
+        <nz-tab nzTitle="基本资料">
+          <form nz-form nzLayout="horizontal" [formGroup]="infoForm" class="tab-form">
+            <nz-form-item>
+              <nz-form-label [nzSpan]="5" nzFor="nickName" nzRequired>用户昵称</nz-form-label>
+              <nz-form-control [nzSpan]="18" nzErrorTip="用户昵称不能为空">
+                <input
+                  nz-input
+                  formControlName="nickName"
+                  maxlength="30"
+                  placeholder="请输入用户昵称"
+                />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label [nzSpan]="5" nzFor="phonenumber" nzRequired>手机号码</nz-form-label>
+              <nz-form-control [nzSpan]="18" nzErrorTip="请输入正确的手机号码">
+                <input
+                  nz-input
+                  formControlName="phonenumber"
+                  maxlength="11"
+                  placeholder="请输入手机号码"
+                />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label [nzSpan]="5" nzFor="email" nzRequired>用户邮箱</nz-form-label>
+              <nz-form-control [nzSpan]="18" nzErrorTip="请输入正确的邮箱地址">
+                <input
+                  nz-input
+                  formControlName="email"
+                  maxlength="50"
+                  placeholder="请输入用户邮箱"
+                />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label [nzSpan]="5">性别</nz-form-label>
+              <nz-form-control [nzSpan]="18">
+                <nz-radio-group formControlName="sex">
+                  <label nz-radio nzValue="0">男</label>
+                  <label nz-radio nzValue="1">女</label>
+                </nz-radio-group>
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label [nzSpan]="5"></nz-form-label>
+              <nz-form-control [nzSpan]="18">
+                <button
+                  nz-button
+                  nzType="primary"
+                  [nzLoading]="savingInfo()"
+                  (click)="submitInfo()"
+                >
+                  保存
+                </button>
+                <button nz-button nzDanger class="gap-left" (click)="close()">关闭</button>
+              </nz-form-control>
+            </nz-form-item>
+          </form>
+        </nz-tab>
+
+        <nz-tab nzTitle="修改密码">
+          <form nz-form nzLayout="horizontal" [formGroup]="pwdForm" class="tab-form">
+            <nz-form-item>
+              <nz-form-label [nzSpan]="5" nzFor="oldPassword" nzRequired>旧密码</nz-form-label>
+              <nz-form-control [nzSpan]="18" nzErrorTip="旧密码不能为空">
+                <input
+                  nz-input
+                  type="password"
+                  formControlName="oldPassword"
+                  maxlength="20"
+                  placeholder="请输入旧密码"
+                  autocomplete="off"
+                />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label [nzSpan]="5" nzFor="newPassword" nzRequired>新密码</nz-form-label>
+              <nz-form-control [nzSpan]="18" [nzErrorTip]="newPasswordError">
+                <input
+                  nz-input
+                  type="password"
+                  formControlName="newPassword"
+                  maxlength="20"
+                  placeholder="请输入新密码"
+                  autocomplete="off"
+                />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label [nzSpan]="5" nzFor="confirmPassword" nzRequired
+                >确认密码</nz-form-label
+              >
+              <nz-form-control [nzSpan]="18" nzErrorTip="确认密码不能为空">
+                <input
+                  nz-input
+                  type="password"
+                  formControlName="confirmPassword"
+                  maxlength="20"
+                  placeholder="请确认新密码"
+                  autocomplete="off"
+                />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label [nzSpan]="5"></nz-form-label>
+              <nz-form-control [nzSpan]="18">
+                <button nz-button nzType="primary" [nzLoading]="savingPwd()" (click)="submitPwd()">
+                  保存
+                </button>
+                <button nz-button nzDanger class="gap-left" (click)="close()">关闭</button>
+              </nz-form-control>
+            </nz-form-item>
+          </form>
+        </nz-tab>
+      </nz-tabs>
+    </nz-card>
+  </div>
+</div>

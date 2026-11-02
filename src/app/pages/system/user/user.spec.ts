@@ -252,7 +252,7 @@ describe('UserPage 用户管理', () => {
       page.newPassword.set('123');
       const result = modal.createConfig()?.nzOnOk?.();
 
-      expect(warning).toHaveBeenCalledWith('密码长度必须介于 5 和 20 之间');
+      expect(warning).toHaveBeenCalledWith('密码长度必须介于 6 和 20 之间');
       expect(api.resetUserPwd).not.toHaveBeenCalled();
       expect(result).toBe(false);
     });

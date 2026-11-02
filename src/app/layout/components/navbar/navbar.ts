@@ -62,6 +62,11 @@ export class Navbar {
     return titles;
   }
 
+  /** 打开个人中心（对应 ruoyi-vue3 顶栏下拉的 router-link to="/user/profile"） */
+  goProfile(): void {
+    void this.router.navigate(['/user/profile']);
+  }
+
   toggleFullscreen(): void {
     if (document.fullscreenElement) {
       void document.exitFullscreen();

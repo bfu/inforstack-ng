@@ -289,7 +289,7 @@
           <div nz-col [nzSpan]="12">
             <nz-form-item>
               <nz-form-label nzFor="password" nzRequired>用户密码</nz-form-label>
-              <nz-form-control nzErrorTip="密码长度必须介于 5 和 20 之间">
+              <nz-form-control [nzErrorTip]="passwordError">
                 <input
                   nz-input
                   type="password"

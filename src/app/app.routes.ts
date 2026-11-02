@@ -29,6 +29,17 @@ export const constantRoutes: Routes = [
         loadComponent: () => import('./pages/index/index').then((m) => m.Index),
         data: { title: '首页' },
       },
+      // 个人中心：对应 ruoyi-vue3 的 /user/profile/:activeTab?（隐藏路由，不进侧边栏）
+      {
+        path: 'user/profile',
+        loadComponent: () => import('./pages/system/profile/profile').then((m) => m.ProfilePage),
+        data: { title: '个人中心' },
+      },
+      {
+        path: 'user/profile/:activeTab',
+        loadComponent: () => import('./pages/system/profile/profile').then((m) => m.ProfilePage),
+        data: { title: '个人中心' },
+      },
     ],
   },
   {

@@ -83,11 +83,23 @@ describe('DictPage 字典管理', () => {
     return fixture.componentInstance;
   }
 
+  /** 类型列表首查由 nz-table 的 (nzQueryParams) 触发，测试里手动模拟一次以拿到数据 */
+  function createTypeLoaded(): DictPage {
+    const page = create();
+    page.onTypeParams({ pageIndex: 1, pageSize: 10 } as never);
+    return page;
+  }
+
   describe('字典类型', () => {
-    it('ngOnInit 首查类型列表并按需加载两个字典', () => {
+    it('ngOnInit 只加载两个字典，类型列表首查交给表格 nzQueryParams', () => {
       getDict.mockReturnValue(null);
       const page = create();
 
+      expect(typeApi.listType).not.toHaveBeenCalled();
+
+      page.onTypeParams({ pageIndex: 1, pageSize: 10 } as never);
+
+      expect(typeApi.listType).toHaveBeenCalledTimes(1);
       expect(typeApi.listType).toHaveBeenCalledWith({
         pageNum: 1,
         pageSize: 10,
@@ -190,7 +202,7 @@ describe('DictPage 字典管理', () => {
     });
 
     it('批量删除使用勾选行', () => {
-      const page = create();
+      const page = createTypeLoaded();
 
       page.onTypeChecked(1, true);
       page.onTypeChecked(2, true);

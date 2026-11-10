@@ -131,10 +131,25 @@ describe('RolePage 角色管理', () => {
     return fixture.componentInstance;
   }
 
-  it('ngOnInit 首查并加载两个字典', async () => {
+  /** 首查由 nz-table 的 (nzQueryParams) 触发，测试里手动模拟一次以拿到列表数据 */
+  async function createLoaded(): Promise<RolePage> {
+    const page = await create();
+    page.onQueryParams({ pageIndex: 1, pageSize: 10 } as never);
+    return page;
+  }
+
+  it('ngOnInit 只加载两个字典，首查交给表格 nzQueryParams', async () => {
     getDict.mockReturnValue(null);
     const page = await create();
 
+    expect(loadDict).toHaveBeenCalledWith('sys_normal_disable');
+    expect(loadDict).toHaveBeenCalledWith('sys_data_scope');
+    // ngOnInit 不发列表请求，避免与表格初始化的 (nzQueryParams) 重复
+    expect(api.listRole).not.toHaveBeenCalled();
+
+    page.onQueryParams({ pageIndex: 1, pageSize: 10 } as never);
+
+    expect(api.listRole).toHaveBeenCalledTimes(1);
     expect(api.listRole).toHaveBeenCalledWith({
       pageNum: 1,
       pageSize: 10,
@@ -142,8 +157,6 @@ describe('RolePage 角色管理', () => {
       roleKey: undefined,
       status: undefined,
     });
-    expect(loadDict).toHaveBeenCalledWith('sys_normal_disable');
-    expect(loadDict).toHaveBeenCalledWith('sys_data_scope');
     expect(page.rows()).toEqual(roles);
   });
 
@@ -360,7 +373,7 @@ describe('RolePage 角色管理', () => {
   });
 
   it('statusChange：确认后调 changeStatus', async () => {
-    const page = await create();
+    const page = await createLoaded();
 
     page.statusChange(roles[1], true);
 
@@ -371,7 +384,7 @@ describe('RolePage 角色管理', () => {
 
   it('statusChange：失败时回滚行状态', async () => {
     api.changeStatus.mockReturnValue(throwError(() => new Error('boom')));
-    const page = await create();
+    const page = await createLoaded();
 
     page.statusChange(roles[0], false);
 
@@ -379,7 +392,7 @@ describe('RolePage 角色管理', () => {
   });
 
   it('statusChange：取消时回滚行状态且不调接口', async () => {
-    const page = await create();
+    const page = await createLoaded();
     modal.setMode('cancel');
 
     page.statusChange(roles[0], false);

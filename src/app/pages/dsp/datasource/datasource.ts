@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -46,7 +46,7 @@ import { environment } from '@env/environment';
   templateUrl: './datasource.html',
   styleUrl: './datasource.less',
 })
-export class DspDataSourcePage implements OnInit {
+export class DspDataSourcePage {
   private readonly api = inject(DspDataSourceApi);
   private readonly fb = inject(FormBuilder);
   private readonly modal = inject(NzModalService);
@@ -93,10 +93,6 @@ export class DspDataSourcePage implements OnInit {
   readonly testing = signal(false);
   readonly testResult = signal<DspDataSourceTestResult | null>(null);
 
-  ngOnInit(): void {
-    this.getList();
-  }
-
   private buildQuery(): PageQuery {
     const value = this.searchForm.getRawValue();
     return {
@@ -120,6 +116,7 @@ export class DspDataSourcePage implements OnInit {
     });
   }
 
+  /** 首查也走这里：nz-table 初始化后会主动发出一次查询参数，ngOnInit 不再重复发起请求 */
   onQueryParams(params: NzTableQueryParams): void {
     this.pageNum.set(params.pageIndex);
     this.pageSize.set(params.pageSize);

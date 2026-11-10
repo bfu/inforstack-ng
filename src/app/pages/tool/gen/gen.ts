@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -55,7 +55,7 @@ interface PreviewFile {
   templateUrl: './gen.html',
   styleUrl: './gen.less',
 })
-export class GenPage implements OnInit {
+export class GenPage {
   private readonly api = inject(GenApi);
   private readonly fb = inject(FormBuilder);
   private readonly modal = inject(NzModalService);
@@ -109,10 +109,6 @@ export class GenPage implements OnInit {
   /** 请求序号，用于丢弃过期响应（避免重复快速打开时旧结果覆盖新结果） */
   private previewSeq = 0;
 
-  ngOnInit(): void {
-    this.getList();
-  }
-
   private buildQuery(): PageQuery {
     const value = this.searchForm.getRawValue();
     const query: PageQuery = {
@@ -145,6 +141,7 @@ export class GenPage implements OnInit {
     });
   }
 
+  /** 首查也走这里：nz-table 初始化后会主动发出一次查询参数，ngOnInit 不再重复发起请求 */
   onQueryParams(params: NzTableQueryParams): void {
     this.pageNum.set(params.pageIndex);
     this.pageSize.set(params.pageSize);

@@ -104,8 +104,7 @@ export class ConfigPage implements OnInit {
     if (!this.dictStore.getDict('sys_yes_no')) {
       this.dictStore.loadDict('sys_yes_no').subscribe();
     }
-    // nz-table 的 (nzQueryParams) 带 skip(1)，首次进入不会触发，需显式发起首查
-    this.getList();
+    // 首查由 nz-table 的 (nzQueryParams) 在初始化后触发，这里不再调用 getList，避免重复请求
   }
 
   private buildQuery(): PageQuery {

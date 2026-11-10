@@ -96,7 +96,14 @@ describe('UserPage 用户管理', () => {
     return fixture.componentInstance;
   }
 
-  it('ngOnInit 首查、加载部门树与两个字典', () => {
+  /** 首查由 nz-table 的 (nzQueryParams) 触发，测试里手动模拟一次以拿到列表数据 */
+  function createLoaded(): UserPage {
+    const page = create();
+    page.onQueryParams({ pageIndex: 1, pageSize: 10 } as never);
+    return page;
+  }
+
+  it('ngOnInit 加载部门树与两个字典，首查交给表格 nzQueryParams', () => {
     getDict.mockReturnValue(null);
     const page = create();
 
@@ -105,6 +112,12 @@ describe('UserPage 用户管理', () => {
     expect(page.deptNodes()[0].key).toBe('100');
     expect(loadDict).toHaveBeenCalledWith('sys_normal_disable');
     expect(loadDict).toHaveBeenCalledWith('sys_user_sex');
+    // ngOnInit 不发列表请求，避免与表格初始化的 (nzQueryParams) 重复
+    expect(api.listUser).not.toHaveBeenCalled();
+
+    page.onQueryParams({ pageIndex: 1, pageSize: 10 } as never);
+
+    expect(api.listUser).toHaveBeenCalledTimes(1);
     expect(api.listUser).toHaveBeenCalledWith(
       expect.objectContaining({ pageNum: 1, pageSize: 10, deptId: undefined }),
     );
@@ -235,7 +248,7 @@ describe('UserPage 用户管理', () => {
   });
 
   it('批量删除使用勾选行', () => {
-    const page = create();
+    const page = createLoaded();
 
     page.selection.onItemChecked(1, true);
     page.selection.onItemChecked(2, true);
@@ -272,7 +285,7 @@ describe('UserPage 用户管理', () => {
 
   describe('statusChange', () => {
     it('确认后调 changeUserStatus', () => {
-      const page = create();
+      const page = createLoaded();
 
       page.statusChange(users[1], true);
 
@@ -282,7 +295,7 @@ describe('UserPage 用户管理', () => {
     });
 
     it('取消时回滚行状态且不调接口', () => {
-      const page = create();
+      const page = createLoaded();
       modal.setMode('cancel');
 
       page.statusChange(users[0], false);
@@ -293,7 +306,7 @@ describe('UserPage 用户管理', () => {
 
     it('失败时回滚行状态', () => {
       api.changeUserStatus.mockReturnValue(throwError(() => new Error('boom')));
-      const page = create();
+      const page = createLoaded();
 
       page.statusChange(users[0], false);
 

@@ -88,7 +88,7 @@ export class LogininforPage implements OnInit {
     if (!this.dictStore.getDict('sys_common_status')) {
       this.dictStore.loadDict('sys_common_status').subscribe();
     }
-    this.getList();
+    // 首查由 nz-table 的 (nzQueryParams) 在初始化后触发，这里不再调用 getList，避免重复请求
   }
 
   private dateRangeParams(): string[] {

@@ -70,9 +70,22 @@ describe('PostPage 岗位管理', () => {
     return fixture.componentInstance;
   }
 
-  it('ngOnInit 发起首查并写入列表状态', async () => {
+  /** 首查由 nz-table 的 (nzQueryParams) 触发，测试里手动模拟一次以拿到列表数据 */
+  function createLoaded(): PostPage {
+    const page = create();
+    page.onQueryParams({ pageIndex: 1, pageSize: 10 } as never);
+    return page;
+  }
+
+  it('首查由表格 nzQueryParams 触发，ngOnInit 不重复请求', async () => {
     const page = await create();
 
+    // ngOnInit 只加载字典，列表请求交给表格初始化的 (nzQueryParams)
+    expect(listPost).not.toHaveBeenCalled();
+
+    page.onQueryParams({ pageIndex: 1, pageSize: 10 } as never);
+
+    expect(listPost).toHaveBeenCalledTimes(1);
     expect(listPost).toHaveBeenCalledWith({
       pageNum: 1,
       pageSize: 10,
@@ -83,6 +96,21 @@ describe('PostPage 岗位管理', () => {
     expect(page.rows()).toEqual(posts);
     expect(page.total()).toBe(2);
     expect(page.loading()).toBe(false);
+  });
+
+  it('真实表格初始化后会自动发出 nzQueryParams，从而只触发一次首查', async () => {
+    const fixture = TestBed.createComponent(PostPage);
+    stubModalService(fixture.debugElement);
+    fixture.detectChanges();
+
+    // nz-table 在内容初始化后异步发出首轮查询参数（delay(0) + debounceTime(0)），
+    // 用轮询代替固定等待，避免并行跑测试时偶发超时
+    const deadline = Date.now() + 2000;
+    while (!listPost.mock.calls.length && Date.now() < deadline) {
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+
+    expect(listPost).toHaveBeenCalledTimes(1);
   });
 
   it('字典未缓存时加载', async () => {
@@ -181,7 +209,7 @@ describe('PostPage 岗位管理', () => {
   });
 
   it('批量删除使用已勾选行，无勾选不弹窗', async () => {
-    const page = await create();
+    const page = createLoaded();
 
     page.delete();
     expect(confirm).not.toHaveBeenCalled();

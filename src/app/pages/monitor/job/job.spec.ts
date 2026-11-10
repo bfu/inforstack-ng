@@ -95,12 +95,24 @@ describe('JobPage 定时任务', () => {
     return fixture.componentInstance;
   }
 
-  it('ngOnInit 首查并加载两个字典', () => {
+  /** 首查由 nz-table 的 (nzQueryParams) 触发，测试里手动模拟一次以拿到列表数据 */
+  function createLoaded(): JobPage {
+    const page = create();
+    page.onQueryParams({ pageIndex: 1, pageSize: 10 } as never);
+    return page;
+  }
+
+  it('ngOnInit 只加载两个字典，首查交给表格 nzQueryParams', () => {
     getDict.mockReturnValue(null);
     const page = create();
 
     expect(loadDict).toHaveBeenCalledWith('sys_job_group');
     expect(loadDict).toHaveBeenCalledWith('sys_job_status');
+    expect(api.listJob).not.toHaveBeenCalled();
+
+    page.onQueryParams({ pageIndex: 1, pageSize: 10 } as never);
+
+    expect(api.listJob).toHaveBeenCalledTimes(1);
     expect(api.listJob).toHaveBeenCalledWith({
       pageNum: 1,
       pageSize: 10,
@@ -214,7 +226,7 @@ describe('JobPage 定时任务', () => {
   });
 
   it('批量删除使用勾选行', () => {
-    const page = create();
+    const page = createLoaded();
     page.selection.onItemChecked(1, true);
     page.selection.onItemChecked(2, true);
 

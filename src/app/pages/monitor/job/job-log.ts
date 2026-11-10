@@ -109,6 +109,8 @@ export class JobLogPage implements OnInit {
   });
 
   private jobId = 0;
+  /** 带 jobId 进入时，首查要等任务信息回填搜索条件后再发，避免先发一次无过滤条件的请求 */
+  private jobInfoReady = true;
 
   ngOnInit(): void {
     for (const type of ['sys_job_group', 'sys_common_status']) {
@@ -119,20 +121,25 @@ export class JobLogPage implements OnInit {
     const jobId = Number(this.route.snapshot.paramMap.get('jobId') ?? 0);
     this.jobId = Number.isNaN(jobId) ? 0 : jobId;
     if (this.jobId) {
-      // 由任务明细进入时，先回填任务名称与分组
+      // 由任务明细进入时，先回填任务名称与分组，回填后再首查
+      this.jobInfoReady = false;
       this.jobApi.getJob(this.jobId).subscribe({
         next: (res) => {
           this.searchForm.patchValue({
             jobName: res.data?.jobName ?? '',
             jobGroup: res.data?.jobGroup ?? '',
           });
+          this.jobInfoReady = true;
           this.getList();
         },
-        error: () => this.getList(),
+        error: () => {
+          this.jobInfoReady = true;
+          this.getList();
+        },
       });
       return;
     }
-    this.getList();
+    // 无 jobId 时首查由 nz-table 的 (nzQueryParams) 在初始化后触发，这里不再调用 getList
   }
 
   private dateRangeParams(): string[] {
@@ -174,6 +181,10 @@ export class JobLogPage implements OnInit {
   onQueryParams(params: NzTableQueryParams): void {
     this.pageNum.set(params.pageIndex);
     this.pageSize.set(params.pageSize);
+    if (!this.jobInfoReady) {
+      // 任务信息尚未回填，等回填完成后再查询，否则会多出一次无过滤条件的请求
+      return;
+    }
     this.getList();
   }
 

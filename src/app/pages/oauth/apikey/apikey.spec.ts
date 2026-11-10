@@ -73,9 +73,14 @@ describe('ApikeyPage API Key 授权管理', () => {
     return fixture.componentInstance;
   }
 
-  it('ngOnInit 发起首查', () => {
+  it('首查由表格 nzQueryParams 触发，ngOnInit 不重复请求', () => {
     const page = create();
 
+    expect(listKey).not.toHaveBeenCalled();
+
+    page.onQueryParams({ pageIndex: 1, pageSize: 10 } as never);
+
+    expect(listKey).toHaveBeenCalledTimes(1);
     expect(listKey).toHaveBeenCalledWith({
       pageNum: 1,
       pageSize: 10,

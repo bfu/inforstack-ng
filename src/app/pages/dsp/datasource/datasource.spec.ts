@@ -72,9 +72,14 @@ describe('DspDataSourcePage 数据源管理', () => {
     return fixture.componentInstance;
   }
 
-  it('ngOnInit 发起首查', () => {
+  it('首查由表格 nzQueryParams 触发，ngOnInit 不重复请求', () => {
     const page = create();
 
+    expect(listDataSource).not.toHaveBeenCalled();
+
+    page.onQueryParams({ pageIndex: 1, pageSize: 10 } as never);
+
+    expect(listDataSource).toHaveBeenCalledTimes(1);
     expect(listDataSource).toHaveBeenCalledWith({
       pageNum: 1,
       pageSize: 10,

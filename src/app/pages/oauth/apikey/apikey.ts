@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -50,7 +50,7 @@ import { environment } from '@env/environment';
   templateUrl: './apikey.html',
   styleUrl: './apikey.less',
 })
-export class ApikeyPage implements OnInit {
+export class ApikeyPage {
   private readonly api = inject(OauthApiKeyApi);
   private readonly userApi = inject(UserApi);
   private readonly fb = inject(FormBuilder);
@@ -101,10 +101,6 @@ export class ApikeyPage implements OnInit {
   readonly keyVisible = signal(false);
   readonly keyText = signal('');
 
-  ngOnInit(): void {
-    this.getList();
-  }
-
   private buildQuery(): PageQuery {
     const value = this.searchForm.getRawValue();
     return {
@@ -128,6 +124,7 @@ export class ApikeyPage implements OnInit {
     });
   }
 
+  /** 首查也走这里：nz-table 初始化后会主动发出一次查询参数，ngOnInit 不再重复发起请求 */
   onQueryParams(params: NzTableQueryParams): void {
     this.pageNum.set(params.pageIndex);
     this.pageSize.set(params.pageSize);

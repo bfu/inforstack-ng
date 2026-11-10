@@ -153,8 +153,8 @@ export class DspScriptPage implements OnInit {
   readonly snapshotXml = signal('');
 
   ngOnInit(): void {
-    this.getList();
     this.loadDataSources();
+    // 列表首查由 nz-table 的 (nzQueryParams) 在初始化后触发，这里不再调用 getList，避免重复请求
   }
 
   private loadDataSources(): void {

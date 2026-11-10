@@ -68,11 +68,26 @@ describe('RoleAuthUser 角色分配用户', () => {
     return fixture.componentInstance;
   }
 
-  it('ngOnInit 加载角色与两张表', () => {
+  /** 两张表的首查由各自的 (nzQueryParams) 触发，测试里手动模拟一次以拿到列表数据 */
+  function createLoaded(): RoleAuthUser {
+    const page = create();
+    page.onAllocatedParams({ pageIndex: 1, pageSize: 10 } as never);
+    page.onUnallocatedParams({ pageIndex: 1, pageSize: 10 } as never);
+    return page;
+  }
+
+  it('ngOnInit 只加载角色，两张表首查交给各自的 nzQueryParams', () => {
     const page = create();
 
     expect(api.getRole).toHaveBeenCalledWith(5);
     expect(page.role().roleName).toBe('普通角色');
+    // ngOnInit 不发列表请求，避免与两张表初始化的 (nzQueryParams) 重复
+    expect(api.allocatedList).not.toHaveBeenCalled();
+    expect(api.unallocatedList).not.toHaveBeenCalled();
+
+    page.onAllocatedParams({ pageIndex: 1, pageSize: 10 } as never);
+    page.onUnallocatedParams({ pageIndex: 1, pageSize: 10 } as never);
+
     expect(api.allocatedList).toHaveBeenCalledWith(
       expect.objectContaining({ roleId: 5, pageNum: 1, pageSize: 10 }),
     );
@@ -90,7 +105,7 @@ describe('RoleAuthUser 角色分配用户', () => {
   });
 
   it('search 同时刷新两张表并回到第一页', () => {
-    const page = create();
+    const page = createLoaded();
     page.searchForm.patchValue({ userName: 'ry' });
 
     page.search();
@@ -103,7 +118,7 @@ describe('RoleAuthUser 角色分配用户', () => {
   });
 
   it('selectOne 授权单个用户后刷新', () => {
-    const page = create();
+    const page = createLoaded();
 
     page.selectOne(unallocated[0]);
 

@@ -91,11 +91,16 @@ describe('JobLogPage 调度日志', () => {
     expect(api.listJobLog).toHaveBeenCalledTimes(1);
   });
 
-  it('无 jobId 时不拉任务，直接首查', () => {
+  it('无 jobId 时不拉任务，首查交给表格 nzQueryParams', () => {
     params = {};
     const page = create();
 
     expect(getJob).not.toHaveBeenCalled();
+    expect(api.listJobLog).not.toHaveBeenCalled();
+
+    page.onQueryParams({ pageIndex: 1, pageSize: 10 } as never);
+
+    expect(api.listJobLog).toHaveBeenCalledTimes(1);
     expect(page.rows()).toEqual(logs);
   });
 

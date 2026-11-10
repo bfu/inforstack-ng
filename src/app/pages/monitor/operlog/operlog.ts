@@ -100,7 +100,7 @@ export class OperlogPage implements OnInit {
         this.dictStore.loadDict(type).subscribe();
       }
     }
-    this.getList();
+    // 首查由 nz-table 的 (nzQueryParams) 在初始化后触发，这里不再调用 getList，避免重复请求
   }
 
   private dateRangeParams(): string[] {

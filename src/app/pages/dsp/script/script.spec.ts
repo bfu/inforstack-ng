@@ -133,9 +133,14 @@ describe('DspScriptPage 动态脚本管理', () => {
     return fixture.componentInstance;
   }
 
-  it('ngOnInit 发起首查', () => {
+  it('首查由表格 nzQueryParams 触发，ngOnInit 不重复请求', () => {
     const page = create();
 
+    expect(listScript).not.toHaveBeenCalled();
+
+    page.onQueryParams({ pageIndex: 1, pageSize: 10 } as never);
+
+    expect(listScript).toHaveBeenCalledTimes(1);
     expect(listScript).toHaveBeenCalledWith({
       pageNum: 1,
       pageSize: 10,
@@ -171,7 +176,7 @@ describe('DspScriptPage 动态脚本管理', () => {
 
   it('打开新增/编辑弹窗时刷新数据源下拉', () => {
     const page = create();
-    // ngOnInit 首查一次
+    // ngOnInit 加载一次
     expect(listOptions).toHaveBeenCalledTimes(1);
 
     page.openAdd();

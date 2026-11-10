@@ -73,11 +73,23 @@ describe('LogininforPage 登录日志', () => {
     return fixture.componentInstance;
   }
 
-  it('ngOnInit 首查并加载字典', () => {
+  /** 首查由 nz-table 的 (nzQueryParams) 触发，测试里手动模拟一次以拿到列表数据 */
+  function createLoaded(): LogininforPage {
+    const page = create();
+    page.onQueryParams({ pageIndex: 1, pageSize: 10 } as never);
+    return page;
+  }
+
+  it('ngOnInit 只加载字典，首查交给表格 nzQueryParams', () => {
     getDict.mockReturnValue(null);
     const page = create();
 
     expect(loadDict).toHaveBeenCalledWith('sys_common_status');
+    expect(api.listLogininfor).not.toHaveBeenCalled();
+
+    page.onQueryParams({ pageIndex: 1, pageSize: 10 } as never);
+
+    expect(api.listLogininfor).toHaveBeenCalledTimes(1);
     expect(api.listLogininfor).toHaveBeenCalledWith(
       expect.objectContaining({ pageNum: 1, pageSize: 10, ipaddr: undefined, status: undefined }),
     );
@@ -137,7 +149,7 @@ describe('LogininforPage 登录日志', () => {
   });
 
   it('解锁：选中后按用户名解锁', () => {
-    const page = create();
+    const page = createLoaded();
     page.selection.onItemChecked(2, true);
 
     page.unlock();

@@ -72,8 +72,7 @@ export class RoleAuthUser implements OnInit {
       this.api.getRole(this.roleId).subscribe({
         next: (res) => this.role.set(res.data ?? {}),
       });
-      this.loadAllocated();
-      this.loadUnallocated();
+      // 两张表的首查由各自的 (nzQueryParams) 在初始化后触发，这里不再显式加载，避免重复请求
     }
   }
 

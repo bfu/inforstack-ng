@@ -140,9 +140,8 @@ export class DictPage implements OnInit {
         this.dictStore.loadDict(type).subscribe();
       }
     }
-    // nz-table 的 (nzQueryParams) 带 skip(1)，首次进入不会触发，需显式发起首查
-    // 字典数据列表依赖选中的字典类型，只需首查类型列表
-    this.getTypeList();
+    // 类型列表首查由 nz-table 的 (nzQueryParams) 在初始化后触发，这里不再调用；
+    // 字典数据列表依赖选中的字典类型，选中后才查询
   }
 
   // ---------- 字典类型 ----------

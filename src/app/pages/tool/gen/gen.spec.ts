@@ -80,9 +80,21 @@ describe('GenPage 代码生成', () => {
     return fixture.componentInstance;
   }
 
-  it('ngOnInit 首查按创建时间倒序', () => {
+  /** 首查由 nz-table 的 (nzQueryParams) 触发，测试里手动模拟一次以拿到列表数据 */
+  function createLoaded(): GenPage {
+    const page = create();
+    page.onQueryParams({ pageIndex: 1, pageSize: 10, sort: [] } as never);
+    return page;
+  }
+
+  it('首查由表格 nzQueryParams 触发，默认按创建时间倒序', () => {
     const page = create();
 
+    expect(api.listTable).not.toHaveBeenCalled();
+
+    page.onQueryParams({ pageIndex: 1, pageSize: 10, sort: [] } as never);
+
+    expect(api.listTable).toHaveBeenCalledTimes(1);
     expect(api.listTable).toHaveBeenCalledWith(
       expect.objectContaining({
         pageNum: 1,
@@ -147,7 +159,7 @@ describe('GenPage 代码生成', () => {
   });
 
   it('生成代码（zip 打包下载）', () => {
-    const page = create();
+    const page = createLoaded();
     page.selection.onItemChecked(1, true);
 
     page.handleGenTable();

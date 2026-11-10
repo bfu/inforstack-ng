@@ -69,9 +69,14 @@ describe('NoticePage 通知公告', () => {
     return fixture.componentInstance;
   }
 
-  it('ngOnInit 发起首查', async () => {
+  it('首查由表格 nzQueryParams 触发，ngOnInit 不重复请求', async () => {
     const page = await create();
 
+    expect(listNotice).not.toHaveBeenCalled();
+
+    page.onQueryParams({ pageIndex: 1, pageSize: 10 } as never);
+
+    expect(listNotice).toHaveBeenCalledTimes(1);
     expect(listNotice).toHaveBeenCalledWith({
       pageNum: 1,
       pageSize: 10,

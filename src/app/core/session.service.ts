@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { NzModalService } from 'ng-zorro-antd/modal';
 import { RuoYiReuseStrategy } from '@core/reuse-strategy';
 import { removeToken } from '@core/utils/auth';
 import { PermissionStore } from '@store/permission.store';
@@ -22,13 +23,17 @@ export class SessionService {
   private readonly permission = inject(PermissionStore);
   private readonly tags = inject(TagsViewStore);
   private readonly reuse = inject(RuoYiReuseStrategy);
+  private readonly modal = inject(NzModalService);
 
-  /** 清理全部会话态：Token、用户信息与权限、动态路由、页签、页面缓存 */
+  /** 清理全部会话态：Token、用户信息与权限、动态路由、页签、页面缓存、弹窗 */
   resetAll(): void {
     removeToken();
     this.user.clearSession();
     this.permission.reset();
     this.tags.reset();
     this.reuse.clearAll();
+    // 会话失效后会离开当前页（跳登录页/首页）。弹窗挂在 body 上、页面组件又被路由复用，
+    // 不主动关闭会残留到下一个页面（包括 401 的「重新登录」确认框本身）
+    this.modal.closeAll();
   }
 }
